@@ -1,5 +1,4 @@
 import type { Commit, Head, RepoState, Worktree } from '../../engine/types';
-import { BASE_TIMESTAMP } from '../../engine/hashes';
 import { reachableCommits } from '../../engine/ops/diff';
 import { branchColor, ORPHAN_COLOR } from '../../lib/colors';
 
@@ -111,7 +110,7 @@ export function layoutGraph(state: RepoState): GraphLayout {
   const laneByKey = new Map<string, number>();
   let laneCount = 0;
 
-  const nodes: GraphNode[] = commits.map((commit) => {
+  const nodes: GraphNode[] = commits.map((commit, creationIndex) => {
     const key = commit.branch === undefined ? `detached:${commit.hash}` : `branch:${commit.branch}`;
     let lane = laneByKey.get(key);
     if (lane === undefined) {
@@ -124,7 +123,8 @@ export function layoutGraph(state: RepoState): GraphLayout {
       hash: commit.hash,
       shortHash: commit.hash.slice(0, 7),
       message: commit.message,
-      x: PADDING_X + (commit.timestamp - BASE_TIMESTAMP) * X_SPACING,
+      // Index d'ordre de création : les commandes non-commit ne créent aucun espace.
+      x: PADDING_X + creationIndex * X_SPACING,
       y: PADDING_Y + lane * ROW_HEIGHT,
       lane,
       orphan: !connected.has(commit.hash),

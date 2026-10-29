@@ -249,7 +249,7 @@ bisect, comptes utilisateurs, backend, partage de progression.
 `src/components/graph/layout.ts` : `layoutGraph(state) -> { nodes, edges, lanes,
 branchLabels, headMarkers }`, sans React.
 
-- **x** dépend uniquement du `timestamp` logique du commit.
+- **x** = index d’ordre de création du commit (0, 1, 2…) : les commandes non-commit ne créent aucun espace.
 - **lane** = lignée de la branche de création (`Commit.branch`, métadonnée figée
   au commit) ; les commits détachés ont chacun leur lane. Ajouter un commit, une
   branche ou un merge ne déplace donc jamais un commit existant (testé).

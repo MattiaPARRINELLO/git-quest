@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { layoutGraph } from './layout';
+import { layoutGraph, X_SPACING } from './layout';
 import { scenario } from '../../engine/scenario';
 import { execute } from '../../engine/execute';
 import type { RepoState } from '../../engine/types';
@@ -55,6 +55,29 @@ describe('layoutGraph', () => {
     const after = run(base, 'edit README.md "v2"');
     const committed = run(after, 'git commit -am "v2"');
     expectStable(base, committed);
+  });
+
+  it('garde des colonnes consécutives malgré 5 edits entre deux commits', () => {
+    let repo = base;
+    for (let index = 0; index < 5; index += 1) {
+      repo = run(repo, `edit README.md "brouillon ${index}"`);
+    }
+    const first = run(repo, 'git commit -am "docs: premier"');
+    const second = run(first, 'edit README.md "encore"');
+    const third = run(second, 'git commit -am "docs: second"');
+
+    const layout = layoutGraph(third);
+    const firstTip = third.branches.main;
+    if (!firstTip) throw new Error('main attendue');
+    const previous = Object.values(third.commits)
+      .filter((commit) => commit.hash !== firstTip)
+      .sort((left, right) => left.timestamp - right.timestamp);
+    const before = previous[previous.length - 1];
+    if (!before) throw new Error('commit précédent attendu');
+
+    const beforeNode = layout.nodes.find((node) => node.hash === before.hash);
+    const tipNode = layout.nodes.find((node) => node.hash === firstTip);
+    expect(tipNode?.x).toBe((beforeNode?.x ?? 0) + X_SPACING);
   });
 
   it('ne déplace aucun commit existant quand on crée une branche', () => {
