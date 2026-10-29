@@ -222,3 +222,62 @@ bisect, comptes utilisateurs, backend, partage de progression.
 - `tsc --noEmit` en mode strict, zéro `any`.
 - Un fichier de test par commande + tests de scénarios et de worktrees.
 - On commit à chaque unité de travail vérifiée.
+
+## 11. Phase 2 — bac à sable (`#/sandbox`)
+
+### Écran et layout
+
+- `src/screens/SandboxScreen.tsx` : desktop = `SplitPane` 40/60 redimensionnable
+  (poignée clavier + pointeur) ; mobile (< 768 px) = onglets Terminal / Graphe /
+  Fichiers, avec badge sur Graphe quand des events arrivent hors de l'onglet.
+- Colonne droite : `WorktreeStrip` (si plusieurs worktrees), `CommitGraph`,
+  `StagingPipeline` (worktree actif uniquement).
+- Aucune notion de mission, cours ou XP : ces éléments arrivent en Phase 3/4.
+
+### Store et persistance
+
+- `useRepoStore` : `state`, pile d'undo (50), `lastEvents`, transcript, historique
+  de commandes. Tout passe par `routeCommand` (`src/app/commands.ts`).
+- Persistance : clé `gitquest.sandbox.v1` via `StorageAdapter` (IndexedDB, fallback
+  mémoire). Le dépôt, le transcript et l'historique sont restaurés au chargement.
+- `resetSandbox()` restaure un dépôt vierge initialisé ; `loadDemo()` charge un
+  scénario main + 2 branches + 1 merge + 1 worktree.
+- `useUiStore` : thème (sombre par défaut), explications, onglet mobile, badge.
+
+### Layout du graphe (pur, testé)
+
+`src/components/graph/layout.ts` : `layoutGraph(state) -> { nodes, edges, lanes,
+branchLabels, headMarkers }`, sans React.
+
+- **x** dépend uniquement du `timestamp` logique du commit.
+- **lane** = lignée de la branche de création (`Commit.branch`, métadonnée figée
+  au commit) ; les commits détachés ont chacun leur lane. Ajouter un commit, une
+  branche ou un merge ne déplace donc jamais un commit existant (testé).
+- Les commits non atteignables depuis une branche ou un HEAD sont marqués
+  `orphan`, affichés à 35 % d'opacité (jamais masqués).
+- Couleurs de branches dérivées du nom (`src/lib/colors.ts`), stables.
+- Un marqueur HEAD par worktree ; pointillés + « détaché » pour un HEAD détaché.
+
+### Animations et events
+
+- Le graphe ne différencie pas deux états : il consomme `lastEvents` et calcule des
+  délais séquentiels par event (commit, branche, HEAD).
+- Durées 300–450 ms (`0.36 s`), `AnimatePresence` pour les nœuds/étiquettes/cartes.
+- Une nouvelle commande remplace les animations en cours (nouveaux events).
+- `prefers-reduced-motion` et case « sans animation » forcent des transitions nulles.
+
+### Terminal
+
+- Prompt `<chemin> (<branche|hash détaché>) $`.
+- Historique ↑/↓, Ctrl+L (effacer), Ctrl+C (annuler), Tab (complétion commandes,
+  sous-commandes, branches, fichiers, worktrees).
+- Sorties colorées par `OutputTone` ; après une commande mutante, une ligne muted
+  par event peut être ajoutée (bascule « Explications »).
+- Zone `role="log"` + `aria-live="polite"`, focus automatique, accessible clavier.
+
+### PWA
+
+`vite-plugin-pwa` (generateSW) précache le bundle, les polices et les icônes.
+Manifest `standalone`, thème sombre, icônes 192/512 + maskable. Vérifié en
+production (`npm run build && npm run preview`) avec service worker actif puis
+rechargement hors ligne.

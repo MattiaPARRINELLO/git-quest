@@ -1,57 +1,59 @@
 # GitQuest
 
-PWA pédagogique pour apprendre Git visuellement : cours court, bac à sable et missions
-scénarisées. Le moteur Git simulé est un module TypeScript **pur**, testé indépendamment
-de l'interface.
+PWA pédagogique pour apprendre Git visuellement : un terminal simulé et un graphe de
+commits animé, branchés sur un moteur Git **pur TypeScript**.
 
-> État : **Phase 1 terminée** — moteur + tests. L'interface arrive en Phase 2.
+> État : **Phases 0–2 livrées** — moteur, terminal, visualisation et PWA.
+> Les cours, missions, XP et l'écran d'accueil arrivent en Phases 3–4.
 
 ## Démarrer
 
 ```bash
 npm install
+npm run dev         # bac à sable en développement
 npm run typecheck   # tsc --noEmit, strict
-npm test            # Vitest (moteur + commandes applicatives)
-npm run coverage    # rapport de couverture
+npm test            # Vitest : moteur, layout, composants
+npm run coverage    # couverture du moteur
+npm run build       # typecheck + build PWA
+npm run preview     # sert dist/ (vérifier le mode hors ligne)
 ```
 
-Aucun navigateur n'est nécessaire pour cette phase.
+Route unique : `#/sandbox`. Thème sombre par défaut, thème clair disponible.
+En local, servir via Portless : `portless gitquest npm run dev` puis
+`https://gitquest.localhost`.
 
-## Utiliser le moteur
+## Le bac à sable
 
-```ts
-import { execute, scenario } from './src/engine';
-
-const repo = scenario()
-  .init()
-  .commit('Initial commit', { 'README.md': '# Projet' })
-  .branch('feature')
-  .checkout('feature')
-  .build();
-
-const result = execute(repo, 'git commit -am "feat: login"');
-// result.newState, result.output, result.events, result.error?
-```
-
-- En cas d'erreur, `newState === state` (aucune mutation partielle) et `error` porte un
-  code + un message fidèle à Git.
-- Chaque commande réussie renvoie un nouvel état : undo et animations avant/après sont
-  gratuits.
-- Les `events` (`commit-created`, `branch-moved`, `head-detached`, …) sont traduits en
-  français par `src/explanations/fr.ts`.
-
-Les commandes applicatives (`explain`, `undo`, `hint`, `reset-mission`) ne sont **pas**
-dans le moteur : `src/app/commands.ts` les intercepte avant `execute`.
+- **Terminal** : prompt `<worktree> (<branche|hash détaché>) $`, historique ↑/↓,
+  Tab (commandes, sous-commandes, branches, fichiers, worktrees), Ctrl+L, Ctrl+C,
+  `explain <commande>` (dry-run), `undo`, explications en français activables.
+- **Graphe SVG** : temps de gauche à droite, une lane par branche, couleurs stables,
+  étiquettes de branches, un marqueur HEAD par worktree, commits orphelins estompés,
+  pan/zoom, recentrage, infobulle (hash, message, parents, snapshot).
+- **Pipeline** : Working dir → Staging → Dernier commit, puces colorées par statut.
+- **Worktrees** : cartes cliquables (exécutent `cd <chemin>`, visible dans
+  l'historique), branche/HEAD, nombre de modifications.
+- **Persistance** : état, transcript et historique dans IndexedDB
+  (`gitquest.sandbox.v1`), restaurés au chargement. Boutons « Démo » et
+  « Réinitialiser ».
+- **PWA** : manifest, icônes, service worker, fonctionnement hors ligne.
 
 ## Architecture
 
 ```
-src/engine/     moteur pur : types, parsing, commandes, worktrees, validations
-src/app/        explain / undo / hint / reset-mission + score
+src/engine/        moteur pur : types, parsing, commandes, worktrees, validations
+src/app/           explain / undo / hint / reset-mission + score
 src/explanations/  event -> phrase française
-src/content/    chapitres et missions (données, Phase 3+)
-docs/ARCHITECTURE.md  décisions et contrat détaillé
-docs/VERIFY.md        5 scénarios à comparer avec un vrai Git
+src/components/
+  graph/           layoutGraph (pur, testé) + CommitGraph (SVG/Framer Motion)
+  terminal/        terminal, complétion
+  pipeline/        working dir / index / commit
+  worktrees/       cartes de worktrees
+src/store/         useRepoStore (état, undo, events), useUiStore (thème, onglets)
+src/storage/       StorageAdapter + IndexedDB + mémoire
+src/content/       scénario de démo (missions en Phase 3)
+docs/ARCHITECTURE.md  contrat détaillé, stabilité du layout, persistance
+docs/VERIFY.md        scénarios à comparer avec un vrai Git
 ```
 
 ## Ajouter une commande au moteur
