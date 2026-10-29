@@ -82,6 +82,7 @@ export function gitCommit(state: RepoState, command: CommitCommand): ExecuteResu
         snapshot: worktree.index,
         author: DEFAULT_AUTHOR,
         timestamp: timestampFor(baseState.clock + 1),
+        ...(branch === undefined ? {} : { branch }),
       },
     },
     clock: baseState.clock + 1,

@@ -57,11 +57,26 @@ describe('parseCommand', () => {
       name: 'vieille',
       force: true,
     });
+    expect(parsed('git branch rescue abc1234')).toEqual({
+      kind: 'git-branch',
+      action: 'create',
+      name: 'rescue',
+      start: 'abc1234',
+      force: false,
+    });
     expect(parsed('git switch -c feature')).toEqual({
       kind: 'git-switch',
       branch: 'feature',
       create: true,
     });
+    expect(parsed('git switch -c feature main')).toEqual({
+      kind: 'git-switch',
+      branch: 'feature',
+      create: true,
+      start: 'main',
+    });
+    expect(parsed('git rm vieux.txt')).toEqual({ kind: 'git-rm', path: 'vieux.txt' });
+    expect(parsed('rm vieux.txt')).toEqual({ kind: 'shell-rm', path: 'vieux.txt' });
     expect(parsed('git checkout abc1234')).toEqual({
       kind: 'git-checkout',
       target: 'abc1234',

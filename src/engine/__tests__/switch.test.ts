@@ -94,6 +94,37 @@ describe('git switch', () => {
     expectError(withContent, 'git switch feature', 'untracked-files-would-be-overwritten');
   });
 
+  it('avertit quand on quitte des commits orphelins', () => {
+    const repo = basicRepo();
+    const base = repo.branches.main;
+    if (!base) throw new Error('main attendue');
+    const committed = runAll(repo, [
+      `git checkout ${base}`,
+      'edit README.md "expérience"',
+      'git add README.md',
+      'git commit -m "expérience"',
+    ]);
+
+    const result = run(committed, 'git switch main');
+    const text = result.output.map((line) => line.text).join('\n');
+    expect(text).toContain('Warning: you are leaving 1 commit behind');
+    expect(text).toContain('git branch <new-branch-name>');
+    expect(result.output[result.output.length - 1]?.text).toBe("Switched to branch 'main'");
+  });
+
+  it('switch -c <nom> <start> part d’un autre commit', () => {
+    const repo = featureWithNotes();
+    const mainTip = repo.branches.main;
+    if (!mainTip) throw new Error('main attendue');
+    const result = run(repo, 'git switch -c depuis-main main');
+    expect(result.newState.branches['depuis-main']).toBe(mainTip);
+    expect(result.newState.worktrees.main?.head).toEqual({
+      kind: 'branch',
+      branch: 'depuis-main',
+    });
+    expect(result.newState.worktrees.main?.workingDir['notes.txt']).toBeUndefined();
+  });
+
   it('switch -c conserve les modifications locales', () => {
     const repo = run(basicRepo(), 'edit README.md "wip"').newState;
     const result = run(repo, 'git switch -c wip');

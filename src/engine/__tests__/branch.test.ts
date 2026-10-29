@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { basicRepo, emptyRepo, expectError, run } from './helpers';
+import { basicRepo, emptyRepo, expectError, run, runAll } from './helpers';
 
 function createFeature() {
   return run(basicRepo(), 'git branch feature');
@@ -52,6 +52,26 @@ describe('git branch', () => {
     expectError(back, 'git branch -d feature', 'branch-not-fully-merged');
     const forced = run(back, 'git branch -D feature');
     expect(forced.newState.branches.feature).toBeUndefined();
+  });
+
+  it('git branch <nom> <hash> référence de nouveau un commit détaché', () => {
+    const repo = basicRepo();
+    const base = repo.branches.main;
+    if (!base) throw new Error('main attendue');
+
+    const committed = runAll(repo, [
+      `git checkout ${base}`,
+      'edit README.md "expérience"',
+      'git add README.md',
+      'git commit -m "expérience"',
+    ]);
+    const orphanHead = committed.worktrees.main?.head;
+    if (orphanHead?.kind !== 'detached') throw new Error('HEAD détaché attendu');
+    const back = run(committed, 'git switch main').newState;
+    expect(Object.values(back.branches)).not.toContain(orphanHead.commit);
+
+    const rescued = run(back, `git branch rescue ${orphanHead.commit}`).newState;
+    expect(rescued.branches.rescue).toBe(orphanHead.commit);
   });
 
   it('refuse de supprimer la branche checkout, y compris dans un autre worktree', () => {

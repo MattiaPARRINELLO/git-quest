@@ -27,6 +27,8 @@ export function explainEvent(event: GitEvent): string {
       return `Le fichier « ${event.path} » est créé dans le working directory (pas encore suivi).`;
     case 'working-file-edited':
       return `Le fichier « ${event.path} » est modifié dans le working directory.`;
+    case 'working-file-removed':
+      return `Le fichier « ${event.path} » est supprimé du working directory.`;
     case 'merge-fast-forward': {
       const target = event.branch === null ? 'HEAD' : `« ${event.branch} »`;
       return `Avance rapide : ${target} rejoint ${event.to} sans créer de commit.`;
@@ -78,6 +80,10 @@ export function explainError(error: GitError): string {
       return 'Les modifications existent mais ne sont pas indexées : ajoute-les avec « git add ».';
     case 'pathspec-no-match':
       return 'Aucun fichier ou commit ne correspond à ce nom.';
+    case 'commit-message-not-quoted':
+      return 'Mets ton message entre guillemets : git commit -m "ton message".';
+    case 'file-not-found':
+      return 'Ce fichier n’existe pas dans le working directory.';
     case 'directory-not-found':
       return 'Ce chemin ne correspond à aucun worktree connu.';
     case 'no-commits':

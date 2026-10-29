@@ -4,7 +4,7 @@ import type {
   RepoState,
   Worktree,
 } from '../types';
-import { noSuchPath } from '../errors';
+import { gitError, noSuchPath } from '../errors';
 import { activeWorktree, replaceWorktree } from '../ops/refs';
 import { resolveWorktreePath } from './worktree';
 import {
@@ -16,6 +16,7 @@ import {
 
 type TouchCommand = Extract<ParsedCommand, { kind: 'shell-touch' }>;
 type EditCommand = Extract<ParsedCommand, { kind: 'shell-edit' }>;
+type RmCommand = Extract<ParsedCommand, { kind: 'shell-rm' }>;
 type CdCommand = Extract<ParsedCommand, { kind: 'shell-cd' }>;
 
 export function shellTouch(state: RepoState, command: TouchCommand): ExecuteResult {
@@ -66,6 +67,32 @@ export function shellEdit(state: RepoState, command: EditCommand): ExecuteResult
         ? { type: 'working-file-edited', path: command.path }
         : { type: 'working-file-created', path: command.path },
     ],
+  );
+}
+
+/** `rm <fichier>` : supprime uniquement du working dir, l'index reste intact. */
+export function shellRm(state: RepoState, command: RmCommand): ExecuteResult {
+  const repoError = requireRepository(state);
+  if (repoError) return failure(state, repoError);
+
+  const worktree = activeWorktree(state);
+  if (worktree.workingDir[command.path] === undefined) {
+    return failure(
+      state,
+      gitError(
+        'file-not-found',
+        `rm: cannot remove '${command.path}': No such file or directory`,
+      ),
+    );
+  }
+
+  const workingDir = { ...worktree.workingDir };
+  delete workingDir[command.path];
+
+  return success(
+    replaceWorktree(state, { ...worktree, workingDir }),
+    [],
+    [{ type: 'working-file-removed', path: command.path }],
   );
 }
 

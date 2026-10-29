@@ -4,6 +4,7 @@ import {
   activeHeadCommit,
   activeWorktree,
   isAncestor,
+  resolveCommit,
   shortHash,
   worktreesWithBranch,
 } from '../ops/refs';
@@ -51,11 +52,19 @@ export function gitBranch(state: RepoState, command: BranchCommand): ExecuteResu
         gitError('branch-already-exists', `fatal: a branch named '${name}' already exists`),
       );
     }
-    const head = activeHeadCommit(state);
+    const head =
+      command.start === undefined
+        ? activeHeadCommit(state)
+        : resolveCommit(state, command.start);
     if (head === undefined) {
       return failure(
         state,
-        gitError('invalid-reference', `fatal: not a valid object name: '${name}'`),
+        gitError(
+          'invalid-reference',
+          command.start === undefined
+            ? `fatal: not a valid object name: '${name}'`
+            : `fatal: not a valid object name: '${command.start}'`,
+        ),
       );
     }
     const newState: RepoState = {

@@ -152,6 +152,7 @@ export function gitMerge(state: RepoState, command: MergeCommand): ExecuteResult
         snapshot: merged.tree,
         author: DEFAULT_AUTHOR,
         timestamp: timestampFor(state.clock + 1),
+        ...(currentBranch === null ? {} : { branch: currentBranch }),
       },
     },
     clock: state.clock + 1,

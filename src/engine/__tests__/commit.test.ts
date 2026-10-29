@@ -14,6 +14,18 @@ describe('git commit', () => {
     expect(commit?.snapshot['README.md']).toBe('# Projet');
   });
 
+  it('refuse un message non quoté comme Git (pathspec)', () => {
+    const repo = basicRepo();
+    const error = expectError(
+      repo,
+      'git commit -m feat: login',
+      'commit-message-not-quoted',
+    );
+    expect(error.message).toBe(
+      "error: pathspec 'login' did not match any file(s) known to git",
+    );
+  });
+
   it('refuse un commit sans rien d’indexé', () => {
     expectError(basicRepo(), 'git commit -m vide', 'nothing-to-commit');
 

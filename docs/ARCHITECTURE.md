@@ -109,10 +109,11 @@ Un commit en HEAD détaché produit `commit-created` + `head-moved`.
 | --- | --- |
 | Dépôt | `git init`, `git status` |
 | Index / commits | `git add`, `git commit -m`, `git commit -am`, `git log --oneline --graph` |
-| Branches | `git branch`, `-d`, `-D`, `git switch`, `git switch -c`, `git checkout` |
+| Branches | `git branch [<nom> [<start>]]`, `-d`, `-D`, `git switch`, `git switch -c [<nom> [<start>]]`, `git checkout` |
 | Fusion | `git merge` (fast-forward et merge commit) |
+| Fichiers | `git rm` (working dir + index) |
 | Worktrees | `git worktree add` (+ `-b`), `git worktree list`, `git worktree remove` |
-| Shell simulé | `touch`, `edit`, `ls`, `cd` |
+| Shell simulé | `touch`, `edit`, `rm` (working dir seul), `ls`, `cd` |
 | Applicatif | `explain`, `undo`, `hint`, `reset-mission` (hors moteur) |
 
 ### Worktrees

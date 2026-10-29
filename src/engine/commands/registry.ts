@@ -9,7 +9,8 @@ import { gitSwitch } from './switch';
 import { gitCheckout } from './checkout';
 import { gitMerge } from './merge';
 import { gitWorktree } from './worktree';
-import { shellCd, shellEdit, shellLs, shellTouch } from './shell';
+import { gitRm } from './rm';
+import { shellCd, shellEdit, shellLs, shellRm, shellTouch } from './shell';
 
 type Handlers = {
   [K in ParsedCommand['kind']]: (
@@ -29,8 +30,10 @@ const handlers: Handlers = {
   'git-checkout': gitCheckout,
   'git-merge': gitMerge,
   'git-worktree': gitWorktree,
+  'git-rm': gitRm,
   'shell-touch': shellTouch,
   'shell-edit': shellEdit,
+  'shell-rm': shellRm,
   'shell-ls': (state) => shellLs(state),
   'shell-cd': shellCd,
 };

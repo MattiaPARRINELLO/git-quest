@@ -27,6 +27,11 @@ export interface Commit {
   readonly author: Author;
   /** Horloge logique (jamais Date.now), pour un rendu déterministe. */
   readonly timestamp: number;
+  /**
+   * Branche sur laquelle HEAD était attaché à la création (métadonnée stable,
+   * utile au layout du graphe). Absente pour un commit créé en HEAD détaché.
+   */
+  readonly branch?: BranchName;
 }
 
 export type Head =
@@ -75,6 +80,8 @@ export type GitErrorCode =
   | 'invalid-branch-name'
   | 'invalid-reference'
   | 'pathspec-no-match'
+  | 'commit-message-not-quoted'
+  | 'file-not-found'
   | 'no-commits'
   | 'nothing-to-commit'
   | 'no-changes-added'
@@ -133,6 +140,7 @@ export type GitEvent =
   | { readonly type: 'file-staged'; readonly path: FilePath }
   | { readonly type: 'working-file-created'; readonly path: FilePath }
   | { readonly type: 'working-file-edited'; readonly path: FilePath }
+  | { readonly type: 'working-file-removed'; readonly path: FilePath }
   | {
       readonly type: 'merge-fast-forward';
       readonly branch: BranchName | null;
@@ -180,9 +188,17 @@ export type ParsedCommand =
       readonly kind: 'git-branch';
       readonly action: 'list' | 'create' | 'delete';
       readonly name?: string;
+      /** Point de départ optionnel : `git branch <nom> <start>`. */
+      readonly start?: string;
       readonly force: boolean;
     }
-  | { readonly kind: 'git-switch'; readonly branch: string; readonly create: boolean }
+  | {
+      readonly kind: 'git-switch';
+      readonly branch: string;
+      readonly create: boolean;
+      /** Point de départ optionnel : `git switch -c <nom> <start>`. */
+      readonly start?: string;
+    }
   | { readonly kind: 'git-checkout'; readonly target: string }
   | { readonly kind: 'git-merge'; readonly branch: string }
   | {
@@ -193,7 +209,9 @@ export type ParsedCommand =
       readonly createBranch?: string;
       readonly force: boolean;
     }
+  | { readonly kind: 'git-rm'; readonly path: string }
   | { readonly kind: 'shell-touch'; readonly path: string }
   | { readonly kind: 'shell-edit'; readonly path: string; readonly content?: string }
+  | { readonly kind: 'shell-rm'; readonly path: string }
   | { readonly kind: 'shell-ls' }
   | { readonly kind: 'shell-cd'; readonly target: string };

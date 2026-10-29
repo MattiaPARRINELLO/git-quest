@@ -24,6 +24,7 @@ function unknownGitCommand(name: string): ParseResult {
 function parseCommit(args: readonly string[]): ParseResult {
   let message: string | undefined;
   let stageAllTracked = false;
+  const pathspecs: string[] = [];
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -70,8 +71,16 @@ function parseCommit(args: readonly string[]): ParseResult {
       return fail('invalid-option', `error: unknown option \`${arg}'`);
     }
 
-    // Tolérance : un message non quoté est concaténé plutôt que rejeté.
-    message = message === undefined ? arg : `${message} ${arg}`;
+    // Git traite les mots non quotés après -m comme des pathspecs.
+    pathspecs.push(arg);
+  }
+
+  const [firstPathspec] = pathspecs;
+  if (firstPathspec !== undefined) {
+    return fail(
+      'commit-message-not-quoted',
+      `error: pathspec '${firstPathspec}' did not match any file(s) known to git`,
+    );
   }
 
   if (message === undefined || message.trim() === '') {
@@ -85,6 +94,7 @@ function parseBranch(args: readonly string[]): ParseResult {
   let action: 'list' | 'create' | 'delete' = 'list';
   let force = false;
   let name: string | undefined;
+  let start: string | undefined;
 
   for (const arg of args) {
     if (arg === '-d' || arg === '--delete') {
@@ -99,25 +109,29 @@ function parseBranch(args: readonly string[]): ParseResult {
     if (arg.startsWith('-')) {
       return fail('invalid-option', `error: unknown option \`${arg}'`);
     }
-    if (name !== undefined) {
+    if (name === undefined) {
+      name = arg;
+    } else if (start === undefined) {
+      start = arg;
+    } else {
       return fail('invalid-option', 'fatal: too many arguments for a branch name');
     }
-    name = arg;
   }
 
   if (action === 'delete' && name === undefined) {
     return fail('invalid-option', 'fatal: branch name required');
   }
+  if (action === 'delete' && start !== undefined) {
+    return fail('invalid-option', 'fatal: too many arguments for a branch name');
+  }
   if (action === 'list' && name !== undefined) {
     action = 'create';
   }
 
-  return {
-    ok: true,
-    command: name === undefined
-      ? { kind: 'git-branch', action, force }
-      : { kind: 'git-branch', action, name, force },
-  };
+  const base = { kind: 'git-branch' as const, action, force };
+  if (name === undefined) return { ok: true, command: base };
+  if (start === undefined) return { ok: true, command: { ...base, name } };
+  return { ok: true, command: { ...base, name, start } };
 }
 
 function parseWorktree(args: readonly string[]): ParseResult {
@@ -268,6 +282,7 @@ function parseGit(args: readonly string[]): ParseResult {
     case 'switch': {
       let create = false;
       let branch: string | undefined;
+      let start: string | undefined;
       for (const arg of rest) {
         if (arg === '-c' || arg === '--create') {
           create = true;
@@ -276,15 +291,25 @@ function parseGit(args: readonly string[]): ParseResult {
         if (arg.startsWith('-')) {
           return fail('invalid-option', `error: unknown option \`${arg}'`);
         }
-        if (branch !== undefined) {
+        if (branch === undefined) {
+          branch = arg;
+        } else if (start === undefined) {
+          start = arg;
+        } else {
           return fail('invalid-option', 'fatal: too many arguments');
         }
-        branch = arg;
       }
       if (branch === undefined) {
         return fail('invalid-option', 'fatal: missing branch name');
       }
-      return { ok: true, command: { kind: 'git-switch', branch, create } };
+      if (!create && start !== undefined) {
+        return fail('invalid-option', 'fatal: too many arguments');
+      }
+      const base = { kind: 'git-switch' as const, branch, create };
+      return {
+        ok: true,
+        command: start === undefined ? base : { ...base, start },
+      };
     }
 
     case 'checkout': {
@@ -311,6 +336,17 @@ function parseGit(args: readonly string[]): ParseResult {
 
     case 'worktree':
       return parseWorktree(rest);
+
+    case 'rm': {
+      const path = rest[0];
+      if (path === undefined) {
+        return fail('invalid-option', 'fatal: No pathspec was given. Which files should I remove?');
+      }
+      if (rest.length > 1) {
+        return fail('invalid-option', 'fatal: too many arguments');
+      }
+      return { ok: true, command: { kind: 'git-rm', path } };
+    }
 
     default:
       return unknownGitCommand(subcommand);
@@ -349,6 +385,14 @@ export function parseCommand(input: string): ParseResult {
             ? { kind: 'shell-edit', path }
             : { kind: 'shell-edit', path, content },
       };
+    }
+
+    case 'rm': {
+      const path = args[0];
+      if (path === undefined) {
+        return fail('invalid-option', 'rm: missing operand');
+      }
+      return { ok: true, command: { kind: 'shell-rm', path } };
     }
 
     case 'ls':

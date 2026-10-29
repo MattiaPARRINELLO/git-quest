@@ -98,10 +98,11 @@ Chaque mission doit avoir un test qui rejoue `solution` et vérifie
 
 ## Commandes du MVP
 
-`git init`, `status`, `add`, `commit -m` / `-am`, `log --oneline --graph`, `branch`
-(créer / lister / `-d` / `-D`), `switch`, `switch -c`, `checkout` (branche ou commit),
+`git init`, `status`, `add`, `commit -m` / `-am`, `log --oneline --graph`,
+`branch [<nom> [<start>]]` (créer / lister / `-d` / `-D`),
+`switch`, `switch -c [<nom> [<start>]]`, `checkout` (branche ou commit),
 `merge` (fast-forward, merge commit, merge 3-way fichiers), `worktree add` (+ `-b`),
-`worktree list`, `worktree remove`, `touch`, `edit`, `ls`, `cd`.
+`worktree list`, `worktree remove`, `git rm`, `touch`, `edit`, `rm`, `ls`, `cd`.
 
 Hors périmètre MVP : conflits, rebase, cherry-pick, reset/revert, stash, remotes,
 reflog, bisect, comptes, backend.

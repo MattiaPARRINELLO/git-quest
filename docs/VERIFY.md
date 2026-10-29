@@ -208,7 +208,6 @@ branche `feature` survit dans les deux cas.
 | Conflits | résolus à la main | refus explicite (hors MVP) |
 | `git worktree remove` du worktree courant | message dépend de la plateforme | `fatal: '…' is the working tree you are in` |
 | `git init` sur dépôt existant | réinitialise les réglages | succès sans changement |
-| Message non quoté après `-m` | rejeté comme pathspec | toléré et concaténé |
 
 Si un scénario diverge **ailleurs**, c'est un bug du moteur : ouvrir une issue avec les
 commandes rejouées et la sortie des deux côtés.
