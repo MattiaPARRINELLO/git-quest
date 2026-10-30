@@ -1,0 +1,76 @@
+# AGENTS.md — GitQuest
+
+PWA pédagogique pour apprendre Git par la visualisation. Vite + React + TypeScript
+strict, Zustand, Tailwind v4, Framer Motion, SVG maison, Vitest, IndexedDB via
+`StorageAdapter`.
+
+## Commandes
+
+- `npm run dev` — bac à sable en développement (Vite).
+- `npm run typecheck` — `tsc --noEmit`, obligatoire avant commit.
+- `npm test` — Vitest (moteur, contenu, layout, composants).
+- `npm run coverage` — couverture du moteur.
+- `npm run build` — typecheck + build PWA (génère `dist/sw.js`).
+- `npm run preview` — sert le build (vérifier le mode hors ligne).
+
+## Règles d'architecture
+
+- `src/engine/` est **pur** : aucune dépendance React, DOM, stockage, `Date.now()`
+  ou `Math.random()`. Horloge et compteur sont dans `RepoState`.
+- Toute commande renvoie un nouvel état immuable :
+  `execute(state, command) => { newState, output, events, error? }`.
+  En cas d'erreur, `newState === state`.
+- Les commandes applicatives (`explain`, `undo`, `hint`, `reset-mission`) sont
+  interceptées dans `src/app/commands.ts`, jamais dans le moteur. Le moteur ne gère
+  que `git *`, `touch`, `edit`, `rm`, `ls`, `cd`.
+- `explain` est un dry-run via `execute`.
+- Le contenu est data-driven : aucune leçon ou mission codée en dur dans un composant.
+- Pas de `any`. Unions discriminées, `readonly`, `exactOptionalPropertyTypes`.
+- Les messages d'erreur Git sont fidèles ; les écarts assumés sont documentés dans
+  `docs/ARCHITECTURE.md` et `docs/VERIFY.md`.
+- Ajouter une commande = parseur + handler + registry + test dédié + event/explanation.
+- Ajouter une mission = fichier dans `src/content/chapters/<chapitre>/missions/` +
+  une ligne dans le `index.ts` du chapitre. Champs requis : `situation`, `steps`
+  (2-4, fausses au départ, vraies à la fin), `takeaway` ; story ≤ 3 phrases,
+  `par === solution.length`. `suggestedCommands` : 3-5 commandes pré-remplies.
+- Les cours précèdent toujours le concept utilisé par une mission. Un slide `demo`
+  rejoue de vraies commandes avec `scenario()`/`execute`, jamais une simulation UI.
+- `validateAttempt(commands)` sert aux missions dont la réussite dépend d'un essai
+  préalable (ex. `-d` refusé avant `-D`) ; il s'ajoute à `validate(state)`.
+- Prédictions : `trigger(parsed, state)` doit être structurel (pas une égalité de
+  chaîne), `correctOptionId` doit pointer une option, et l'écran doit rester
+  franchissable (« Passer »). Une prédiction ne se déclenche qu'une fois par
+  tentative ; switch et checkout d'une même branche partagent le déclencheur.
+
+## UI (Phases 2-3)
+
+- Routes : `#/` (carte des chapitres), `#/chapter/:id/lesson`, `#/mission/:id`,
+  `#/sandbox`. Routeur maison par hash, pas de dépendance externe.
+- `src/screens/SandboxScreen.tsx` reste le bac à sable libre ; `MissionScreen`
+  réutilise `SandboxLayout` et isole son dépôt du sandbox (backup/restore).
+- Progression : `useProgressStore`, clé `gitquest.progress.v1` (missions + étoiles
+  + slide de cours). Pas encore d'XP, niveaux ou badges (Phase 4).
+- La carte verrouille les missions linéairement ; le bac à sable reste accessible.
+- Les prédictions suspendent l'exécution, acceptent un clic sur le graphe ou un
+  bouton, et ne bloquent jamais.
+- `layoutGraph(state)` dans `src/components/graph/layout.ts` reste **pur et testé**.
+  Ne jamais recalculer une position à partir de la liste des branches courantes :
+  la stabilité des positions existantes est un contrat (x = timestamp, lane =
+  `Commit.branch`).
+- Le graphe joue les `GitEvent` de `lastEvents`, il ne diffe jamais deux états.
+- Tout service web local doit passer par Portless (`https://<nom>.localhost`).
+- UI en français, commandes Git en anglais. Thème sombre par défaut, tokens CSS
+  dans `src/styles/index.css`, pas de couleurs codées en dur dans les composants.
+- Le terminal reste utilisable clavier : focus auto, `aria-live`, Tab/↑/↓/Ctrl+L/C.
+
+## Conventions
+
+- Code et noms en anglais, UI en français, commandes Git en anglais.
+- Fichiers en kebab-case pour les modules, composants en PascalCase.
+- Un commit par unité de travail vérifiée (typecheck + tests + build si UI).
+- Ne jamais logger de secret ; aucun secret n'est nécessaire au projet.
+
+## Méthode
+
+Travail par phases (0 à 4), avec arrêt et validation à la fin de chaque phase.
+Ne pas démarrer la phase suivante sans accord explicite. Phases 0 à 3 livrées.
