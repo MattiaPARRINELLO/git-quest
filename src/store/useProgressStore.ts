@@ -158,12 +158,23 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
           },
         };
       } else {
+        const createdWorktrees = Object.keys(finalState.worktrees).filter(
+          (worktreeId) => story.nova?.worktrees[worktreeId] === undefined,
+        );
         story = {
           ...story,
           nova: finalState,
           missionId: null,
           activeMission: null,
-          journal: [...story.journal, { kind: 'mission-complete', missionId: id, stars: best }],
+          journal: [
+            ...story.journal,
+            { kind: 'mission-complete', missionId: id, stars: best },
+            ...createdWorktrees.map((worktreeId) => ({
+              kind: 'worktree' as const,
+              missionId: id,
+              path: finalState.worktrees[worktreeId]?.path ?? worktreeId,
+            })),
+          ],
         };
       }
     } else {

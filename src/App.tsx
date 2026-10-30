@@ -5,6 +5,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { LessonScreen } from './screens/LessonScreen';
 import { MissionScreen } from './screens/MissionScreen';
 import { SandboxScreen } from './screens/SandboxScreen';
+import { NovaScreen } from './screens/NovaScreen';
 import { useUiStore } from './store/useUiStore';
 
 export default function App() {
@@ -27,6 +28,9 @@ export default function App() {
   switch (route.name) {
     case 'sandbox':
       screen = <SandboxScreen />;
+      break;
+    case 'nova':
+      screen = <NovaScreen />;
       break;
     case 'lesson':
       screen = <LessonScreen key={route.chapterId} chapterId={route.chapterId} />;

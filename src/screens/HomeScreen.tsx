@@ -52,6 +52,12 @@ export function HomeScreen() {
               <Icon name="terminal" size={14} />
               Ouvrir le bac à sable
             </a>
+            {completed['menage-worktree'] !== undefined && (
+              <a href={routePaths.nova} className="btn px-3 py-2 text-sm">
+                <Icon name="branch" size={14} />
+                Ton arbre Nova
+              </a>
+            )}
           </div>
 
           <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border/70 pt-4 text-xs text-muted">

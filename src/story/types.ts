@@ -101,6 +101,7 @@ export type JournalEntry =
     }
   | { readonly kind: 'hors-chaine'; readonly missionId: string; readonly details: string }
   | { readonly kind: 'prelude'; readonly stepId: string }
+  | { readonly kind: 'worktree'; readonly missionId: string; readonly path: string }
   | { readonly kind: 'migration'; readonly from: 1 };
 
 export interface IsolatedRun {
