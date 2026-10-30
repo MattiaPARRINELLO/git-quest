@@ -5,6 +5,8 @@ import { CommitGraph } from '../components/graph/CommitGraph';
 import { missionSequence } from '../content';
 import { routePaths } from '../router/useHashRoute';
 import { useProgressStore } from '../store/useProgressStore';
+import { teammateForAuthor } from '../story/actor';
+import { findMission } from '../content';
 import { unreferencedHashes } from '../story/display';
 import { downloadSvgAsPng } from '../lib/export-graph';
 
@@ -54,6 +56,8 @@ export function NovaScreen() {
   const origin = selected === null
     ? undefined
     : Object.values(story.slots).find((record) => record.commitHash === selected);
+  const author = commit === undefined ? undefined : teammateForAuthor(commit.author);
+  const originMission = origin === undefined ? undefined : findMission(origin.missionId);
 
   const timeline = missionSequence
     .filter((mission) => completed[mission.id] !== undefined)
@@ -167,8 +171,11 @@ export function NovaScreen() {
                 <p className="font-mono text-[11px] text-accent-2">{commit.hash.slice(0, 7)}</p>
                 <p className="font-medium text-text">{commit.message}</p>
                 <p className="text-muted">
-                  {commit.author.name} · {commit.parents.length} parent(s)
+                  {author === undefined
+                    ? 'Toi · commit de ton parcours'
+                    : `${author.name} · ${author.role}`}
                 </p>
+                <p className="text-muted">{commit.parents.length} parent(s)</p>
                 <p className="text-muted">
                   Branche : {commit.branch ?? 'HEAD détaché'}
                 </p>
@@ -179,7 +186,12 @@ export function NovaScreen() {
                   Orphelin : {unreferencedHashes(nova).includes(commit.hash) ? 'oui' : 'non'}
                 </p>
                 {origin !== undefined && (
-                  <p className="text-[11px] text-muted">Mission d’origine : {origin.missionId}</p>
+                  <p className="text-[11px] text-muted">
+                    Mission d’origine :{' '}
+                    {originMission === undefined
+                      ? origin.missionId
+                      : `${originMission.number} — ${originMission.title}`}
+                  </p>
                 )}
               </div>
             ) : (

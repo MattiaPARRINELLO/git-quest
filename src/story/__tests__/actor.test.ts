@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_AUTHOR } from '../../engine/hashes';
 import { scenario } from '../../engine/scenario';
-import { PLAYER, TEAMMATES, stampAuthor, teammateAuthor } from '../actor';
+import { PLAYER, TEAMMATES, teammateForAuthor, stampAuthor, teammateAuthor } from '../actor';
 
 const state = scenario()
   .init()
@@ -33,6 +33,11 @@ describe('auteur de coéquipier', () => {
 
   it('laisse l’état intact si le commit est inconnu', () => {
     expect(stampAuthor(state, 'inconnu', teammateAuthor('ines'))).toBe(state);
+  });
+
+  it('retrouve un coéquipier par le nom d’auteur', () => {
+    expect(teammateForAuthor({ name: 'Samir Haddad', email: 'samir@nova.dev' })?.id).toBe('samir');
+    expect(teammateForAuthor({ name: 'GitQuest', email: 'gitquest@example.com' })).toBeUndefined();
   });
 
   it('refuse un coéquipier inconnu', () => {

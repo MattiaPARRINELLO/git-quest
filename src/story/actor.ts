@@ -45,6 +45,11 @@ export function teammateAuthor(id: TeammateId): Author {
   return teammate.author;
 }
 
+/** Retrouve un coéquipier par le nom d'auteur d'un commit (jamais par hash). */
+export function teammateForAuthor(author: Author): Teammate | undefined {
+  return Object.values(TEAMMATES).find((teammate) => teammate.author.name === author.name);
+}
+
 /** Réécrit l'auteur d'un commit existant. État inchangé si le hash est absent. */
 export function stampAuthor(
   state: RepoState,
