@@ -105,11 +105,38 @@ export function LessonDeck({
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
-      if (event.key === 'ArrowRight') {
-        setIndex((current) => Math.min(lesson.slides.length - 1, current + 1));
+      const total = lesson.slides.length;
+      if (event.key === 'ArrowRight' || event.key === 'PageDown') {
+        event.preventDefault();
+        setIndex((current) => Math.min(total - 1, current + 1));
+        return;
       }
-      if (event.key === 'ArrowLeft') {
+      if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+        event.preventDefault();
         setIndex((current) => Math.max(0, current - 1));
+        return;
+      }
+      if (event.key === 'Home') {
+        event.preventDefault();
+        setIndex(0);
+        return;
+      }
+      if (event.key === 'End') {
+        event.preventDefault();
+        setIndex(total - 1);
+        return;
+      }
+      // Entrée valide le slide quand le focus n'est pas sur un contrôle.
+      if (event.key === 'Enter' || event.key === ' ') {
+        const focused = event.target instanceof Element ? event.target : null;
+        if (
+          focused !== null &&
+          focused.closest('a[href], button, input, select, textarea, summary') !== null
+        ) {
+          return;
+        }
+        event.preventDefault();
+        setIndex((current) => Math.min(total - 1, current + 1));
       }
     };
     window.addEventListener('keydown', onKeyDown);

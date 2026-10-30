@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useDialogKeyboard } from '../../hooks/useDialogKeyboard';
 import type { AfterMission } from '../../content/index';
 import type { Mission } from '../../content/types';
 import { routePaths } from '../../router/useHashRoute';
@@ -18,6 +20,58 @@ interface MissionCompleteProps {
   readonly teaser?: string;
 }
 
+export function afterHref(after: AfterMission): string {
+  return after.kind === 'mission'
+    ? routePaths.mission(after.mission.id)
+    : after.kind === 'lesson'
+      ? routePaths.interlude(after.chapter.id)
+      : routePaths.home;
+}
+
+/**
+ * Barre compacte affichée à la place du panneau de fin quand on l'a réduit
+ * pour inspecter l'arbre : elle garde le chemin vers la suite accessible.
+ */
+export function MissionCompleteBar({
+  mission,
+  stars,
+  after,
+  onResume,
+}: {
+  readonly mission: Mission;
+  readonly stars: 1 | 2 | 3;
+  readonly after: AfterMission;
+  readonly onResume: () => void;
+}) {
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center p-3">
+      <div className="pointer-events-auto flex w-full max-w-lg flex-wrap items-center justify-between gap-2 rounded-2xl border border-success/40 bg-panel px-3 py-2 shadow-xl">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-success">
+            Mission accomplie
+          </span>
+          <span className="text-sm text-warning" aria-label={`${stars} étoile(s) sur 3`}>
+            {'★'.repeat(stars)}
+            <span className="text-muted/25">{'★'.repeat(3 - stars)}</span>
+          </span>
+          <span className="truncate text-[11px] text-muted">
+            {mission.number} — {mission.title}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button type="button" className="btn px-2 py-1 text-[11px]" onClick={onResume}>
+            Revoir
+          </button>
+          <a href={afterHref(after)} className="btn btn-accent px-2 py-1 text-[11px]">
+            Continuer
+            <Icon name="arrow-right" size={13} />
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function MissionComplete({
   mission,
   stars,
@@ -28,13 +82,18 @@ export function MissionComplete({
   outcome,
   teaser,
 }: MissionCompleteProps) {
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogKeyboard(dialog, { onCancel: onInspect });
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4 backdrop-blur-sm">
       <motion.div
+        ref={dialog}
+        tabIndex={-1}
         initial={{ opacity: 0, scale: 0.94, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="scrollbar-thin max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-panel p-5 shadow-2xl sm:p-6"
+        className="scrollbar-thin max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-panel p-5 shadow-2xl outline-none sm:p-6"
         role="dialog"
         aria-modal="true"
         aria-label={`Mission ${mission.number} réussie`}
@@ -122,19 +181,18 @@ export function MissionComplete({
             Carte des chapitres
           </a>
           <a
-            href={
-              after.kind === 'mission'
-                ? routePaths.mission(after.mission.id)
-                : after.kind === 'lesson'
-                  ? routePaths.interlude(after.chapter.id)
-                  : routePaths.home
-            }
+            href={afterHref(after)}
+            data-autofocus
             className="btn btn-accent justify-center px-3 py-2 text-sm"
           >
             Continuer
             <Icon name="arrow-right" size={15} />
           </a>
         </div>
+
+        <p className="mt-3 text-center text-[10px] text-muted/80" aria-hidden="true">
+          Entrée pour continuer · Échap pour rester dans le dépôt
+        </p>
       </motion.div>
     </div>
   );

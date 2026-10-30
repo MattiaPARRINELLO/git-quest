@@ -187,4 +187,26 @@ describe('MissionScreen', () => {
     await useProgressStore.getState().hydrate();
     expect(useProgressStore.getState().completed['trois-zones']?.stars).toBe(3);
   });
+
+  it('garde la suite accessible quand on inspecte l’arbre après la mission', async () => {
+    const user = userEvent.setup();
+    render(<MissionScreen missionId="trois-zones" />);
+
+    const input = await screen.findByRole('textbox', { name: /commande git/i });
+    for (const command of ['git add a.txt', 'git commit -m "fix: a.txt"']) {
+      await user.type(input, `${command}{Enter}`);
+    }
+    await user.click(await screen.findByRole('button', { name: /^a\.txt$/ }));
+
+    await screen.findByRole('dialog', { name: /Mission 1.1 réussie/i });
+    await user.click(screen.getByRole('button', { name: /^Inspecter$/ }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Mission accomplie')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Continuer/i })).toBeInTheDocument();
+    expect(useUiStore.getState().mobileTab).toBe('graph');
+
+    await user.click(screen.getByRole('button', { name: /^Revoir$/ }));
+    expect(await screen.findByRole('dialog', { name: /Mission 1.1 réussie/i })).toBeInTheDocument();
+  });
 });

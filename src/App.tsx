@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { TopBar } from './components/layout/TopBar';
 import { routePaths, useHashRoute } from './router/useHashRoute';
 import { HomeScreen } from './screens/HomeScreen';
@@ -14,6 +14,24 @@ import { useUiStore } from './store/useUiStore';
 export default function App() {
   const theme = useUiStore((store) => store.theme);
   const route = useHashRoute();
+  const mainRef = useRef<HTMLElement>(null);
+  const routeKey =
+    route.name === 'mission'
+      ? `mission:${route.missionId}`
+      : route.name === 'lesson' || route.name === 'interlude'
+        ? `${route.name}:${route.chapterId}`
+        : route.name;
+
+  /**
+   * Après une navigation, le focus reste sur le lien cliqué qui vient d'être
+   * démonté. On le pose sur le contenu, sauf si un écran a déjà pris la main
+   * (le terminal focalise sa saisie au montage).
+   */
+  useEffect(() => {
+    if (document.activeElement === document.body || document.activeElement === null) {
+      mainRef.current?.focus();
+    }
+  }, [routeKey]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -66,8 +84,21 @@ export default function App() {
 
   return (
     <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-bg text-text">
+      <a
+        href="#contenu-principal"
+        className="sr-only rounded-lg border border-border bg-panel px-3 py-2 text-sm text-text focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[60]"
+      >
+        Aller au contenu
+      </a>
       <TopBar />
-      <main className="min-h-0 flex-1">{screen}</main>
+      <main
+        id="contenu-principal"
+        ref={mainRef}
+        tabIndex={-1}
+        className="min-h-0 flex-1 outline-none"
+      >
+        {screen}
+      </main>
     </div>
   );
 }
