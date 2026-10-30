@@ -63,7 +63,7 @@ export const mission23: Mission = {
   takeaway:
     'Un commit détaché n’appartient à aucune branche : il devient orphelin dès qu’on repart, sauf si on crée une étiquette dessus.',
   difficulty: 3,
-  par: 6,
+  par: 5,
   initialState: initial,
   validate: (state, ctx) => {
     const entry = ctx?.entry ?? initial;
@@ -83,7 +83,7 @@ export const mission23: Mission = {
   hints: [
     'git checkout <hash> détache HEAD : le commit créé ici n’appartiendra à aucune branche.',
     'Après le retour sur main, Git liste le commit laissé derrière et propose git branch <nom> <hash>.',
-    'git checkout {m1.1-c1}, edit exp.txt "mes notes", git add exp.txt, git commit -m "exp: idée", git switch main, git branch sauvetage {m2.3-c1}.',
+    'git checkout {m1.1-c1}, git add exp.txt, git commit -m "exp: idée", git switch main, git branch sauvetage {m2.3-c1}.',
   ],
   get solution() {
     return referenceCommands('commit-perdu');
@@ -94,11 +94,10 @@ export const mission23: Mission = {
     hints: [
       'git checkout <hash> détache HEAD : le commit créé ici n’appartiendra à aucune branche.',
       'Après le retour sur main, Git liste le commit laissé derrière et propose git branch <nom> <hash>.',
-      'git checkout {m1.1-c1}, edit exp.txt "mes notes", git add exp.txt, git commit -m "exp: idée", git switch main, git branch sauvetage {m2.3-c1}.',
+      'git checkout {m1.1-c1}, git add exp.txt, git commit -m "exp: idée", git switch main, git branch sauvetage {m2.3-c1}.',
     ],
     solution: [
       'git checkout {m1.1-c1}',
-      'edit exp.txt "expérience"',
       'git add exp.txt',
       'git commit -m "exp: idée"',
       'git switch main',

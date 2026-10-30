@@ -23,7 +23,7 @@ function solutionFor(mission: Mission, entry: RepoState): readonly string[] {
   const beforeBranching = mission.solution.slice(0, -1);
   const intermediate = runAll(entry, beforeBranching);
   const orphan = Object.values(intermediate.commits).find(
-    (commit) => entry.commits[commit.hash] === undefined && commit.snapshot['exp.txt'] === 'expérience',
+    (commit) => entry.commits[commit.hash] === undefined && commit.snapshot['exp.txt'] !== undefined,
   );
   if (orphan === undefined) throw new Error('Commit orphelin introuvable');
   return [...beforeBranching, `git branch sauvetage ${orphan.hash}`];

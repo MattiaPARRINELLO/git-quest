@@ -13,6 +13,6 @@ export const storyRoot = scenario()
     'a.txt': 'version 1',
     'b.txt': 'version 1',
     'app.ts': 'v1',
-    'bug.txt': 'bug critique',
+    'bug.txt': 'export function login(req) { return db.find(req.user); }',
   })
   .build();

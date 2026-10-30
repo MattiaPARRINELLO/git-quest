@@ -4,7 +4,12 @@ import type { ChainMission } from '../../story/chain';
 export const chapter02Story: readonly ChainMission[] = [
   {
     missionId: 'branche-pointeur',
-    prelude: [],
+    prelude: [
+      {
+        id: 'm2.1-p1',
+        commands: ['edit notes.txt "Notes internes : piste de cache LRU pour Nova."'],
+      },
+    ],
     slots: [
       {
         slotId: 'm2.1-c1',
@@ -15,9 +20,8 @@ export const chapter02Story: readonly ChainMission[] = [
     reference: [
       'git branch experiment',
       'git switch experiment',
-      'edit notes.txt "notes de la branche"',
       'git add notes.txt',
-      'git commit -m "feat: notes expérimentales"',
+      'git commit -m "docs: notes internes"',
     ],
   },
   {
@@ -25,7 +29,13 @@ export const chapter02Story: readonly ChainMission[] = [
     prelude: [
       {
         id: 'm2.2-p1',
-        commands: ['git switch main', 'git branch feature', 'git switch feature'],
+        commands: [
+          'git switch main',
+          'git branch feature',
+          'git switch feature',
+          'edit feature.ts "export const feature = { billing: true, exportCsv: false };"',
+          'edit main.ts "export const main = { bootstrap: true, retries: 3 };"',
+        ],
       },
     ],
     slots: [
@@ -41,18 +51,21 @@ export const chapter02Story: readonly ChainMission[] = [
       },
     ],
     reference: [
-      'edit feature.ts "export const feature = true;"',
       'git add feature.ts',
       'git commit -m "feat: module feature"',
       'git switch main',
-      'edit main.ts "export const main = true;"',
       'git add main.ts',
       'git commit -m "feat: module main"',
     ],
   },
   {
     missionId: 'commit-perdu',
-    prelude: [],
+    prelude: [
+      {
+        id: 'm2.3-p1',
+        commands: ['edit exp.txt "// trace: facturation v1 -> v2, mesurer le cache"'],
+      },
+    ],
     slots: [
       {
         slotId: 'm2.3-c1',
@@ -62,7 +75,6 @@ export const chapter02Story: readonly ChainMission[] = [
     ],
     reference: [
       'git checkout {m1.1-c1}',
-      'edit exp.txt "expérience"',
       'git add exp.txt',
       'git commit -m "exp: idée"',
       'git switch main',

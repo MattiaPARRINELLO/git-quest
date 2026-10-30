@@ -31,7 +31,13 @@ export const mission41: Mission = {
     },
     {
       label: 'Committer le correctif sur hotfix',
-      done: (state) => branchFile(state, 'hotfix', 'bug.txt') !== undefined && branchFile(state, 'hotfix', 'bug.txt') !== 'bug critique',
+      done: (state, ctx) => {
+        const entry = ctx?.entry ?? initial;
+        return (
+          branchFile(state, 'hotfix', 'bug.txt') !== undefined &&
+          branchFile(state, 'hotfix', 'bug.txt') !== branchFile(entry, 'main', 'bug.txt')
+        );
+      },
     },
     {
       label: 'Revenir au worktree principal avec le WIP intact',
@@ -55,7 +61,7 @@ export const mission41: Mission = {
       ),
       check(
         branchFile(state, 'hotfix', 'bug.txt') !== undefined &&
-          branchFile(state, 'hotfix', 'bug.txt') !== 'bug critique',
+          branchFile(state, 'hotfix', 'bug.txt') !== branchFile(entry, 'main', 'bug.txt'),
         'Le correctif doit être commité sur hotfix.',
       ),
       check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
@@ -71,14 +77,14 @@ export const mission41: Mission = {
   hints: [
     'Essaie de passer sur main. Que dit Git ?',
     'Crée un worktree sur une nouvelle branche hotfix à partir de main, sans toucher au worktree principal.',
-    'git worktree add ../gitquest-hotfix -b hotfix main, cd ../gitquest-hotfix, edit bug.txt "corrigé", git add bug.txt, git commit -m "fix: bug critique", cd ../gitquest.',
+    'git worktree add ../gitquest-hotfix -b hotfix main, cd ../gitquest-hotfix, edit bug.txt "export function login(req) { if (!req.user) return null; return db.find(req.user); }", git add bug.txt, git commit -m "fix: login sans session", cd ../gitquest.',
   ],
   solution: [
     'git worktree add ../gitquest-hotfix -b hotfix main',
     'cd ../gitquest-hotfix',
-    'edit bug.txt "corrigé"',
+    'edit bug.txt "export function login(req) { if (!req.user) return null; return db.find(req.user); }"',
     'git add bug.txt',
-    'git commit -m "fix: bug critique"',
+    'git commit -m "fix: login sans session"',
     'cd ../gitquest',
   ],
   forbidden: [

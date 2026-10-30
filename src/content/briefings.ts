@@ -37,7 +37,7 @@ export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
     paragraphs: [
       'L’équipe veut tester des notes internes sans polluer main. On te confie l’exploration.',
       'Crée une branche experiment, travaille dessus, puis prouve que main n’a pas bougé d’un millimètre.',
-      'Le contenu de notes.txt est libre : seule l’étiquette de branche compte ici.',
+      'notes.txt a déjà été mis à jour avec de vraies notes internes : à toi de commiter cette modification sur la branche, sans toucher à main.',
     ],
   },
   'qui-avance': {
@@ -45,7 +45,7 @@ export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
     paragraphs: [
       'La facturation part sur sa propre branche pendant que la configuration avance sur main.',
       'Personne ne veut écraser le travail de l’autre : chaque commit doit déplacer la bonne étiquette.',
-      'Fais diverger les deux lignes, puis reviens sur main pour vérifier qui a bougé.',
+      'feature.ts et main.ts sont déjà écrits dans ton working dir : à toi de les commiter sur la bonne branche, puis de vérifier qui a bougé.',
     ],
   },
   'commit-perdu': {
@@ -53,7 +53,7 @@ export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
     paragraphs: [
       'Une régression est apparue dans la facturation. Tu remontes le temps sur un ancien commit pour enquêter.',
       'Tu y commites une expérience… puis tu reviens sur main. Git t’avertit : ce commit n’est plus relié à rien.',
-      'Sauve-le dans une branche avant qu’il ne disparaisse. C’est exactement le genre d’oubli que Git ne pardonne pas.',
+      'exp.txt est déjà prêt dans ton working dir. Sauve ce commit dans une branche avant qu’il ne disparaisse.',
     ],
   },
   'avance-rapide': {
@@ -85,7 +85,7 @@ export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
     paragraphs: [
       'Tu es en pleine refonte sur feature, avec des modifications non commitées dans app.ts. Un bug critique tombe en prod.',
       'Réflexe naturel : git switch main. Mais main a aussi touché app.ts, et Git refuse d’écraser ton travail.',
-      'Pas de stash, pas de commit bricolé : monte un second espace de travail relié au même dépôt et corrige sans toucher au WIP.',
+      'Le bug est simple : login() appelle db.find(req.user) sans vérifier la session. Pas de stash, pas de commit bricolé : monte un second espace de travail et corrige sans toucher au WIP.',
     ],
   },
   'deux-worktrees': {

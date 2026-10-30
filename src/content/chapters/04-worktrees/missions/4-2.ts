@@ -39,7 +39,7 @@ export const mission42: Mission = {
         return (
           worktreePaths(state).includes('~/gitquest-docs') &&
           state.activeWorktree === 'main' &&
-          workingFile(state, 'README.md') === '# Nova — WIP de documentation' &&
+          workingFile(state, 'README.md') === '# Nova — brouillon de documentation' &&
           branchUnchanged(state, entry, 'main')
         );
       },
@@ -59,7 +59,7 @@ export const mission42: Mission = {
         'La branche docs doit contenir GUIDE.md.',
       ),
       check(
-        workingFile(state, 'README.md') === '# Nova — WIP de documentation',
+        workingFile(state, 'README.md') === '# Nova — brouillon de documentation',
         'Le WIP de README.md sur main doit rester intact.',
       ),
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
@@ -70,12 +70,12 @@ export const mission42: Mission = {
   hints: [
     'Crée un worktree sur la branche docs déjà existante, puis active-le avec cd.',
     'Dans le worktree docs, crée docs/GUIDE.md, indexe-le et commit.',
-    'git worktree add ../gitquest-docs docs, cd ../gitquest-docs, edit docs/GUIDE.md "# Guide Nova", git add docs/GUIDE.md, git commit -m "docs: guide", cd ../gitquest.',
+    'git worktree add ../gitquest-docs docs, cd ../gitquest-docs, edit docs/GUIDE.md "# Guide Nova — démarrer, configurer, déployer", git add docs/GUIDE.md, git commit -m "docs: guide", cd ../gitquest.',
   ],
   solution: [
     'git worktree add ../gitquest-docs docs',
     'cd ../gitquest-docs',
-    'edit docs/GUIDE.md "# Guide Nova"',
+    'edit docs/GUIDE.md "# Guide Nova — démarrer, configurer, déployer"',
     'git add docs/GUIDE.md',
     'git commit -m "docs: guide"',
     'cd ../gitquest',

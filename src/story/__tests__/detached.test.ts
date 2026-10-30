@@ -20,7 +20,6 @@ describe('message des commits détachés multiples', () => {
 
     const one = runAll(entry, [
       `git checkout ${oldest}`,
-      'edit exp.txt "expérience"',
       'git add exp.txt',
       'git commit -m "exp: idée"',
     ]);
@@ -46,7 +45,6 @@ describe('message des commits détachés multiples', () => {
     if (oldest === undefined) throw new Error('racine attendue');
     const one = runAll(entry, [
       `git checkout ${oldest}`,
-      'edit exp.txt "expérience"',
       'git add exp.txt',
       'git commit -m "exp: idée"',
     ]);

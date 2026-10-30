@@ -427,6 +427,16 @@ Nova positionné au checkpoint de la première mission non terminée.
 orphelins), détail d'un commit (auteur, branche, mission d'origine), export PNG
 côté client et `git log --oneline --graph` copiable.
 
+### Fichiers préparés
+
+Les missions dont le concept est Git (branche, divergence, rescue) livrent le
+working dir **déjà modifié** avec du contenu réaliste (notes internes,
+`feature.ts`, `main.ts`, trace de facturation). Le joueur n'a plus qu'à indexer
+et commiter. Les seules écritures restantes sont celles où le contenu fait
+partie du concept (1.2 : snapshot figé) ou qui se produisent dans un worktree
+créé pendant la mission (4.1, 4.2), et le contenu exact est alors fourni dans
+l'indice.
+
 ### Briefing et tolérance de contenu
 
 - Chaque mission s'ouvre sur un **briefing narratif** (`src/content/briefings.ts`),

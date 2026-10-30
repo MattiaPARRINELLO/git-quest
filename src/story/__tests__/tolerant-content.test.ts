@@ -82,7 +82,7 @@ describe('contenu libre quand le concept ne porte pas sur le contenu', () => {
     const target = mission('hotfix-worktree');
     const entry = target.initialState;
     const commands = target.solution.map((command) =>
-      command === 'edit bug.txt "corrigé"' ? 'edit bug.txt "patch prod"' : command,
+      command.startsWith('edit bug.txt') ? 'edit bug.txt "patch prod"' : command,
     );
     const final = runAll(entry, commands);
 
@@ -97,7 +97,9 @@ describe('contenu libre quand le concept ne porte pas sur le contenu', () => {
     const target = mission('deux-worktrees');
     const entry = target.initialState;
     const commands = target.solution.map((command) =>
-      command === 'edit docs/GUIDE.md "# Guide Nova"' ? 'edit docs/GUIDE.md "brouillon"' : command,
+      command.startsWith('edit docs/GUIDE.md')
+        ? 'edit docs/GUIDE.md "brouillon"'
+        : command,
     );
     const final = runAll(entry, commands);
 

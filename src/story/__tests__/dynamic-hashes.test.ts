@@ -26,7 +26,7 @@ describe('hashes affichés, résolus depuis l’état du joueur', () => {
     const before = runAll(shifted, mission.solution.slice(0, -1));
     const orphan = Object.values(before.commits).find(
       (commit) =>
-        shifted.commits[commit.hash] === undefined && commit.snapshot['exp.txt'] === 'expérience',
+        shifted.commits[commit.hash] === undefined && commit.snapshot['exp.txt'] !== undefined,
     );
     if (!orphan) throw new Error('orphelin attendu');
     const final = runAll(before, [`git branch sauvetage ${orphan.hash}`]);

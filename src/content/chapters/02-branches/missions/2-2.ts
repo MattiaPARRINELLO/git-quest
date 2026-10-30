@@ -48,7 +48,7 @@ export const mission22: Mission = {
   ],
   takeaway: 'Un commit ne déplace que la branche sur laquelle HEAD est attaché.',
   difficulty: 2,
-  par: 7,
+  par: 5,
   initialState: initial,
   validate: (state, ctx) => {
     const entry = ctx?.entry ?? initial;
@@ -70,15 +70,13 @@ export const mission22: Mission = {
   },
   hints: [
     'Un commit déplace uniquement l’étiquette de la branche sur laquelle HEAD est attaché.',
-    'Commite feature, puis bascule sur main avant de créer main.ts.',
-    'edit feature.ts "export const feature = true;", git add feature.ts, git commit -m "feat: module feature", git switch main, edit main.ts "export const main = true;", git add main.ts, git commit -m "feat: module main".',
+    'Les deux fichiers sont déjà écrits : commite feature.ts sur feature, puis main.ts sur main.',
+    'git add feature.ts, git commit -m "feat: module feature", git switch main, git add main.ts, git commit -m "feat: module main".',
   ],
   solution: [
-    'edit feature.ts "export const feature = true;"',
     'git add feature.ts',
     'git commit -m "feat: module feature"',
     'git switch main',
-    'edit main.ts "export const main = true;"',
     'git add main.ts',
     'git commit -m "feat: module main"',
   ],

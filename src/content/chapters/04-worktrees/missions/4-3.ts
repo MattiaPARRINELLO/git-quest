@@ -37,7 +37,7 @@ export const mission43: Mission = {
       label: 'Conserver le correctif dans l’historique',
       done: (state) =>
         !worktreePaths(state).includes('~/gitquest-hotfix') &&
-        branchFile(state, 'hotfix', 'bug.txt') === 'corrigé',
+        branchFile(state, 'hotfix', 'bug.txt') !== undefined && branchFile(state, 'hotfix', 'bug.txt') !== branchFile(initial, 'main', 'bug.txt'),
     },
   ],
   takeaway:
@@ -56,7 +56,11 @@ export const mission43: Mission = {
       check(branchUnchanged(state, entry, 'hotfix'), 'La branche hotfix ne doit pas bouger.'),
       check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
-      check(branchFile(state, 'hotfix', 'bug.txt') === 'corrigé', 'Le correctif doit rester dans l’historique.'),
+      check(
+        branchFile(state, 'hotfix', 'bug.txt') !== undefined &&
+          branchFile(state, 'hotfix', 'bug.txt') !== branchFile(entry, 'main', 'bug.txt'),
+        'Le correctif doit rester dans l’historique.',
+      ),
     );
   },
   hints: [

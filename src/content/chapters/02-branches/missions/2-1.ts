@@ -37,7 +37,7 @@ export const mission21: Mission = {
   story:
     "L'équipe veut tester une idée de notes internes sans polluer main. Tu crées une branche experiment, tu y travailles, puis tu vérifies que main n'a pas bougé d'un millimètre. Une branche n'est qu'une étiquette : c'est le moment de le prouver.",
   situation: 'HEAD est sur main ; la branche experiment n’existe pas encore.',
-  objective: 'Crée la branche experiment, commite notes.txt dessus (le contenu est libre), et laisse main intacte.',
+  objective: 'notes.txt a été mis à jour avec de vraies notes : commite cette modification sur experiment, et laisse main intacte.',
   steps: [
     { label: 'Créer la branche experiment', done: (state) => hasBranch(state, 'experiment') },
     {
@@ -54,7 +54,7 @@ export const mission21: Mission = {
   ],
   takeaway: 'Une branche est un pointeur : seule l’étiquette de HEAD avance au commit.',
   difficulty: 2,
-  par: 5,
+  par: 4,
   initialState: initial,
   validate: (state, ctx) => {
     const entry = ctx?.entry ?? initial;
@@ -74,15 +74,14 @@ export const mission21: Mission = {
   },
   hints: [
     'Créer une branche ne change pas HEAD : il faut ensuite y basculer.',
-    'Après le switch, crée notes.txt (n’importe quel contenu), indexe-le, puis commit.',
-    'git branch experiment, git switch experiment, edit notes.txt "mes notes", git add notes.txt, git commit -m "feat: notes expérimentales".',
+    'notes.txt est déjà modifié dans le working dir : après le switch, il ne reste qu’à l’indexer et le commiter.',
+    'git branch experiment, git switch experiment, git add notes.txt, git commit -m "docs: notes internes".',
   ],
   solution: [
     'git branch experiment',
     'git switch experiment',
-    'edit notes.txt "notes de la branche"',
     'git add notes.txt',
-    'git commit -m "feat: notes expérimentales"',
+    'git commit -m "docs: notes internes"',
   ],
   predictions: [
     {

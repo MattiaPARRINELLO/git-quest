@@ -75,9 +75,9 @@ describe('chaîne Nova (contenu réel)', () => {
     expect(snapshot['src/export.ts']).toBeDefined();
     expect(snapshot['src/notify.ts']).toBeDefined();
     expect(snapshot['src/login.ts']).toBe('export const login = () => \'ok\';');
-    expect(snapshot['bug.txt']).toBe('bug critique');
-    expect(last.after.commits[last.after.branches.hotfix ?? '']?.snapshot['bug.txt']).toBe(
-      'corrigé',
-    );
+    const hotfixSnapshot = last.after.commits[last.after.branches.hotfix ?? '']?.snapshot;
+    expect(snapshot['bug.txt']).toContain('db.find(req.user)');
+    expect(hotfixSnapshot?.['bug.txt']).not.toBe(snapshot['bug.txt']);
+    expect(hotfixSnapshot?.['bug.txt']).toContain('!req.user');
   });
 });

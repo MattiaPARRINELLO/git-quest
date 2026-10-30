@@ -47,7 +47,7 @@ export const chapter04Story: readonly ChainMission[] = [
     reference: [
       'git worktree add ../gitquest-hotfix -b hotfix main',
       'cd ../gitquest-hotfix',
-      'edit bug.txt "corrigé"',
+      'edit bug.txt "export function login(req) { if (!req.user) return null; return db.find(req.user); }"',
       'git add bug.txt',
       'git commit -m "fix: bug critique"',
       'cd ../gitquest',
@@ -64,7 +64,7 @@ export const chapter04Story: readonly ChainMission[] = [
           'git commit -m "wip: refonte UI (reprise)"',
           'git switch main',
           'git branch docs',
-          'edit README.md "# Nova — WIP de documentation"',
+          'edit README.md "# Nova — brouillon de documentation"',
         ],
       },
     ],
@@ -83,7 +83,7 @@ export const chapter04Story: readonly ChainMission[] = [
     reference: [
       'git worktree add ../gitquest-docs docs',
       'cd ../gitquest-docs',
-      'edit docs/GUIDE.md "# Guide Nova"',
+      'edit docs/GUIDE.md "# Guide Nova — démarrer, configurer, déployer"',
       'git add docs/GUIDE.md',
       'git commit -m "docs: guide"',
       'cd ../gitquest',

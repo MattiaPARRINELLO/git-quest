@@ -76,7 +76,7 @@ describe('briefing narratif de mission', () => {
     });
   });
 
-  it('2.1 dit explicitement que le contenu de notes.txt est libre', async () => {
+  it('2.1 dit que notes.txt est déjà prêt à être commité', async () => {
     useProgressStore.setState({
       completed: {
         'trois-zones': { stars: 3 },
@@ -86,7 +86,7 @@ describe('briefing narratif de mission', () => {
     });
     render(<MissionScreen missionId="branche-pointeur" />);
     expect(
-      await screen.findByText(/Le contenu de notes\.txt est libre/i),
+      await screen.findByText(/notes\.txt a déjà été mis à jour/i),
     ).toBeInTheDocument();
   });
 });

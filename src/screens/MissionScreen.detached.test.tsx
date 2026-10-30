@@ -53,7 +53,6 @@ describe('2.3 — commits détachés multiples', () => {
     await user.click(screen.getByRole('tab', { name: /terminal/i }));
 
     for (const command of [
-      'edit exp.txt "expérience"',
       'git add exp.txt',
       'git commit -m "exp: idée"',
       'edit trace.txt "seconde expérience"',
