@@ -182,6 +182,8 @@ export type ParsedCommand =
       readonly kind: 'git-commit';
       readonly message: string;
       readonly stageAllTracked: boolean;
+      /** Commit ciblé : `git commit -m "msg" <chemins>`. */
+      readonly paths?: readonly string[];
     }
   | { readonly kind: 'git-log'; readonly graph: boolean; readonly oneline: boolean }
   | {

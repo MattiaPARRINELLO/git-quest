@@ -130,7 +130,8 @@ la mission (voir `src/engine/__tests__/missions.test.ts`).
 
 ## Commandes du MVP
 
-`git init`, `status`, `add`, `commit -m` / `-am`, `log --oneline --graph`,
+`git init`, `status`, `add`, `commit -m` / `-am`, `commit -m "msg" <chemins>`,
+`log --oneline --graph`,
 `branch [<nom> [<start>]]` (créer / lister / `-d` / `-D`),
 `switch`, `switch -c [<nom> [<start>]]`, `checkout` (branche ou commit),
 `merge` (fast-forward, merge commit, merge 3-way fichiers), `worktree add` (+ `-b`),

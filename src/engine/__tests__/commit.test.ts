@@ -26,6 +26,50 @@ describe('git commit', () => {
     );
   });
 
+  it('commit ciblé : un seul fichier, sans git add préalable', () => {
+    const repo = run(
+      run(basicRepo(), 'edit README.md "v2"').newState,
+      'edit src/app.ts "export const app = 2;"',
+    ).newState;
+
+    const result = run(repo, 'git commit -m "docs: readme" README.md');
+    const tip = result.newState.branches.main;
+    if (!tip) throw new Error('main attendue');
+    const worktree = result.newState.worktrees.main;
+
+    expect(result.newState.commits[tip]?.snapshot['README.md']).toBe('v2');
+    expect(result.newState.commits[tip]?.snapshot['src/app.ts']).toBe('export const app = 1;');
+    expect(worktree?.index['README.md']).toBe('v2');
+    expect(worktree?.workingDir['src/app.ts']).toBe('export const app = 2;');
+  });
+
+  it('commit ciblé : les autres fichiers indexés restent hors du commit', () => {
+    const repo = run(
+      run(
+        run(basicRepo(), 'edit README.md "v2"').newState,
+        'edit src/app.ts "export const app = 2;"',
+      ).newState,
+      'git add src/app.ts',
+    ).newState;
+
+    const result = run(repo, 'git commit -m "docs: readme" README.md');
+    const tip = result.newState.branches.main;
+    if (!tip) throw new Error('main attendue');
+
+    expect(result.newState.commits[tip]?.snapshot['README.md']).toBe('v2');
+    expect(result.newState.commits[tip]?.snapshot['src/app.ts']).toBe('export const app = 1;');
+    expect(result.newState.worktrees.main?.index['src/app.ts']).toBe('export const app = 2;');
+  });
+
+  it('refuse -a avec un chemin, comme Git', () => {
+    const error = expectError(
+      basicRepo(),
+      'git commit -am "docs: readme" README.md',
+      'invalid-option',
+    );
+    expect(error.message).toBe("fatal: paths 'README.md' with -a does not make sense");
+  });
+
   it('refuse un commit sans rien d’indexé', () => {
     expectError(basicRepo(), 'git commit -m vide', 'nothing-to-commit');
 
