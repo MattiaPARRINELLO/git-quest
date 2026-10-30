@@ -19,8 +19,12 @@ describe('placement des étiquettes du graphe', () => {
 
     const ys = labels.map((label) => label.y).sort((left, right) => left - right);
     for (let index = 1; index < ys.length; index += 1) {
-      expect((ys[index] ?? 0) - (ys[index - 1] ?? 0)).toBeGreaterThanOrEqual(22);
+      expect((ys[index] ?? 0) - (ys[index - 1] ?? 0)).toBeGreaterThanOrEqual(20);
     }
+
+    const node = layout.nodes.find((candidate) => candidate.hash === repo.branches.main);
+    expect(node).toBeDefined();
+    expect(Math.abs((ys[0] ?? 0) - ((node?.y ?? 0) - 9))).toBeLessThanOrEqual(1);
 
     const marker = layout.headMarkers.find((candidate) => candidate.worktreeId === 'main');
     expect(marker).toBeDefined();

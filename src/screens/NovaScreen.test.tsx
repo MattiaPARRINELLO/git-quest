@@ -30,7 +30,32 @@ describe('écran Ton arbre Nova', () => {
     expect(screen.getByText('Worktrees créés')).toBeInTheDocument();
     expect(screen.getByText('Worktrees actifs')).toBeInTheDocument();
     expect(screen.getByText(/git log --oneline --graph/)).toBeInTheDocument();
-    expect(screen.getByText(/feat: export CSV/)).toBeInTheDocument();
+    expect(screen.getAllByText(/feat: export CSV/).length).toBeGreaterThan(0);
+  });
+
+  it('affiche le fil de l’histoire avec les messages du joueur', () => {
+    const nova = checkpointAfter('trois-zones');
+    useProgressStore.setState({
+      completed: { 'trois-zones': { stars: 3 } },
+      story: {
+        ...createEmptyStory(),
+        nova,
+        slots: {
+          'm1.1-c1': {
+            slotId: 'm1.1-c1',
+            missionId: 'trois-zones',
+            message: 'fix: mon correctif à moi',
+            commitHash: nova.branches.main ?? '',
+          },
+        },
+      },
+    });
+
+    render(<NovaScreen />);
+
+    expect(screen.getByText('Le fil de l’histoire')).toBeInTheDocument();
+    expect(screen.getByText('fix: mon correctif à moi')).toBeInTheDocument();
+    expect(screen.getByText('Les 3 zones')).toBeInTheDocument();
   });
 
   it('après un recalage, l’écran final ne montre que les commits de Nova', () => {
@@ -54,6 +79,6 @@ describe('écran Ton arbre Nova', () => {
     expect(nova).not.toBeNull();
     render(<NovaScreen />);
     expect(screen.queryByText(/décalage/)).toBeNull();
-    expect(screen.getByText(/fix: a\.txt/)).toBeInTheDocument();
+    expect(screen.getAllByText(/fix: a\.txt/).length).toBeGreaterThan(0);
   });
 });

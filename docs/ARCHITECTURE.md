@@ -441,6 +441,14 @@ correctif de login, guide). Le joueur ne fait que des commandes Git.
 - Le briefing liste les fichiers déjà présents (`preparedFiles`) sans demander
   d'écriture.
 
+### Boucle narrative
+
+Chaque mission a une intro (briefing), un **épilogue** (`outcome`) affiché dans
+l'écran de réussite et une accroche vers la suivante (`teaser`). L'écran
+`#/nova` ajoute « Le fil de l'histoire » : missions terminées, étoiles et
+messages de commit choisis par le joueur (lus depuis `story.slots`), ce qui rend
+l'histoire personnelle et pas seulement l'arbre.
+
 ### Briefing et tolérance de contenu
 
 - Chaque mission s'ouvre sur un **briefing narratif** (`src/content/briefings.ts`),

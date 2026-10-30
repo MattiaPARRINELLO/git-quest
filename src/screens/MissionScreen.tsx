@@ -391,6 +391,8 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
           commandsUsed={completed.used}
           after={afterMission(mission.id)}
           solution={missionText(mission, repoState).solution}
+          {...(briefing?.outcome === undefined ? {} : { outcome: briefing.outcome })}
+          {...(briefing?.teaser === undefined ? {} : { teaser: briefing.teaser })}
           onInspect={() => {
             setCompleted(null);
             useUiStore.getState().setMobileTab('terminal');

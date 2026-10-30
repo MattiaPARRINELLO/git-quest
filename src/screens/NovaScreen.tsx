@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { execute } from '../engine/execute';
 import type { RepoState } from '../engine/types';
 import { CommitGraph } from '../components/graph/CommitGraph';
+import { missionSequence } from '../content';
 import { routePaths } from '../router/useHashRoute';
 import { useProgressStore } from '../store/useProgressStore';
 import { unreferencedHashes } from '../story/display';
@@ -53,6 +54,20 @@ export function NovaScreen() {
   const origin = selected === null
     ? undefined
     : Object.values(story.slots).find((record) => record.commitHash === selected);
+
+  const timeline = missionSequence
+    .filter((mission) => completed[mission.id] !== undefined)
+    .map((mission) => ({
+      mission,
+      stars: completed[mission.id]?.stars ?? 1,
+      messages: [
+        ...new Set(
+          Object.values(story.slots)
+            .filter((record) => record.missionId === mission.id)
+            .map((record) => record.message),
+        ),
+      ],
+    }));
 
   const copyLog = async (): Promise<void> => {
     try {
@@ -110,6 +125,29 @@ export function NovaScreen() {
             </div>
           ))}
         </dl>
+
+        {timeline.length > 0 && (
+          <section className="mt-5" aria-label="Fil de l’histoire">
+            <h2 className="text-sm font-semibold text-text">Le fil de l’histoire</h2>
+            <ol className="mt-2 space-y-1.5">
+              {timeline.map(({ mission, stars, messages }) => (
+                <li
+                  key={mission.id}
+                  className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-lg border border-border bg-panel px-2.5 py-1.5"
+                >
+                  <span className="font-mono text-[10px] text-accent">{mission.number}</span>
+                  <span className="text-xs font-medium text-text">{mission.title}</span>
+                  <span className="text-[10px] text-warning" aria-label={`${stars} étoile(s)`}>
+                    {'★'.repeat(stars)}
+                  </span>
+                  <span className="w-full truncate font-mono text-[10px] text-muted">
+                    {messages.length > 0 ? messages.join(' · ') : 'Aucun message personnel'}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div

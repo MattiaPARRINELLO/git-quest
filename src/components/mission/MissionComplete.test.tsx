@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MissionComplete } from './MissionComplete';
-import { afterMission, allMissions, findChapter } from '../../content';
+import { afterMission, allMissions, findChapter, findMission } from '../../content';
 import { routePaths } from '../../router/useHashRoute';
 
 describe('MissionComplete — bouton Continuer', () => {
@@ -29,8 +29,27 @@ describe('MissionComplete — bouton Continuer', () => {
     });
   }
 
-  it('propose le cours du chapitre suivant à une frontière', () => {
-    const lastOfChapterOne = allMissions[2];
+  it('raconte l’épilogue et annonce la suite', () => {
+    const mission = findMission('trois-zones');
+    if (!mission) throw new Error('mission attendue');
+    render(
+      <MissionComplete
+        mission={mission}
+        stars={2}
+        commandsUsed={mission.par}
+        after={afterMission(mission.id)}
+        onInspect={() => undefined}
+        outcome="Le correctif est parti seul."
+        teaser="Le CTO veut prouver que la photo ne bougera plus."
+      />,
+    );
+
+    expect(screen.getByText('Le correctif est parti seul.')).toBeInTheDocument();
+    expect(screen.getByText(/Le CTO veut prouver/)).toBeInTheDocument();
+    expect(screen.getByText(/À suivre/)).toBeInTheDocument();
+  });
+
+  it('propose le cours du chapitre suivant à une frontière', () => {    const lastOfChapterOne = allMissions[2];
     if (!lastOfChapterOne) throw new Error('mission attendue');
     expect(lastOfChapterOne.chapterId).toBe('under-the-hood');
     const after = afterMission(lastOfChapterOne.id);

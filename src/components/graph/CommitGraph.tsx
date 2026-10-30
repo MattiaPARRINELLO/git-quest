@@ -555,10 +555,9 @@ function BranchLabelView({
         width={width}
         height={18}
         rx={9}
-        fill={label.color}
-        fillOpacity={0.16}
+        fill="var(--panel)"
         stroke={label.color}
-        strokeOpacity={0.65}
+        strokeOpacity={0.85}
       />
       <text x={9} y={12.5} fill={label.color} fontSize={10} className="font-mono font-semibold">
         {text}

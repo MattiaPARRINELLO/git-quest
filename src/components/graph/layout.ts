@@ -205,14 +205,14 @@ export function layoutGraph(state: RepoState): GraphLayout {
     const node = nodeByHash.get(commitHash);
     if (!node) continue;
     names.sort();
-    // Empilées au-dessus du nœud, jamais collées : 22 px d'écart, 18 px de haut.
-    const baseY = node.y - 26 - (names.length - 1) * 22;
+    // Collées au nœud, centrées dessus puis empilées vers le bas : on voit
+    // immédiatement à quel commit appartient chaque étiquette.
     names.forEach((name, index) => {
       const label: BranchLabel = {
         name,
         commit: commitHash,
-        x: node.x + 16,
-        y: baseY + index * 22,
+        x: node.x + 13,
+        y: node.y - 9 + index * 20,
         color: branchColor(name),
       };
       branchLabels.push(label);
