@@ -13,6 +13,7 @@ import type { MissionDraft } from '../story/types';
 import type { TerminalEntry } from '../store/useRepoStore';
 import { useRepoStore } from '../store/useRepoStore';
 import { useProgressStore } from '../store/useProgressStore';
+import { useMissionDraftStore } from '../store/useMissionDraftStore';
 import { useUiStore } from '../store/useUiStore';
 import { routePaths } from '../router/useHashRoute';
 import { detachedNotice } from '../story/display';
@@ -97,33 +98,46 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     if (!unlocked) return;
 
     const progress = useProgressStore.getState();
-    const saved = progress.draft;
-    const resumable = saved !== null && saved.missionId === mission.id;
-    const start = resumable
-      ? {
-          state: saved.state,
-          isolated: progress.story.isolated?.missionId === mission.id,
-          recalaged: false,
-        }
-      : progress.beginMission(mission);
+    const missionDraft = useMissionDraftStore.getState().draft;
+    const draftResumable =
+      missionDraft !== null && missionDraft.missionId === mission.id ? missionDraft : null;
+
+    const start =
+      draftResumable !== null
+        ? { state: draftResumable.state, isolated: false, recalaged: false }
+        : progress.beginMission(mission);
 
     entryRef.current = start.state;
-    useRepoStore.getState().startMission(start.state, introEntries(mission, start));
+
+    if (draftResumable !== null) {
+      useRepoStore
+        .getState()
+        .startMission(draftResumable.state, draftResumable.entries, draftResumable.commandHistory);
+    } else {
+      useRepoStore.getState().startMission(start.state, introEntries(mission, start));
+    }
     setPrepared(preparedFiles(start.state));
     setIsolatedMode(start.isolated);
     setShowBriefing(
-      !resumable &&
+      draftResumable === null &&
         !start.isolated &&
         !start.recalaged &&
         briefingFor(mission.id) !== undefined,
     );
-    setCommandsUsed(resumable ? saved.commandsUsed : 0);
-    setHintsUsed(resumable ? saved.hintsUsed : 0);
+    setCommandsUsed(draftResumable?.commandsUsed ?? 0);
+    setHintsUsed(draftResumable?.hintsUsed ?? 0);
     setCompleted(null);
     setPendingPrediction(null);
-    setAnswered(new Set());
+    setAnswered(
+      new Set(
+        (draftResumable?.answeredQuestions ?? [])
+          .map((question) => mission.predictions?.find((prediction) => prediction.question === question))
+          .filter((prediction): prediction is Prediction => prediction !== undefined),
+      ),
+    );
     setFeedback(null);
-    attemptedCommands.current = resumable ? [...saved.attempts] : [];
+    attemptedCommands.current =
+      draftResumable !== null ? [...draftResumable.attempted] : [];
     detachedNoticeRef.current = null;
     useUiStore.getState().setMobileTab('terminal');
 
@@ -175,6 +189,21 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
       attempts: attemptedCommands.current,
     };
     useProgressStore.getState().saveDraft(draft);
+
+    // Brouillon complet (terminal + historique) : repris au rechargement.
+    const repo = useRepoStore.getState();
+    if (repo.mode === 'mission') {
+      useMissionDraftStore.getState().save({
+        missionId: mission.id,
+        state: repo.state,
+        entries: repo.entries,
+        commandHistory: repo.commandHistory,
+        commandsUsed: usedCommands,
+        hintsUsed: usedHints,
+        attempted: attemptedCommands.current,
+        answeredQuestions: [...answered].map((prediction) => prediction.question),
+      });
+    }
   };
 
   const finish = (used: number): void => {
@@ -185,6 +214,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     setPendingPrediction(null);
     completeMission(mission.id, stars, useRepoStore.getState().state);
     useProgressStore.getState().clearDraft();
+    useMissionDraftStore.getState().clear();
   };
 
   const run = (input: string): void => {

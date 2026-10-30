@@ -5,6 +5,7 @@ import { MissionScreen } from './MissionScreen';
 import { createSandboxState } from '../content/sandbox';
 import { storage } from '../storage/storage';
 import { createEmptyStory, useProgressStore } from '../store/useProgressStore';
+import { useMissionDraftStore } from '../store/useMissionDraftStore';
 import { useRepoStore } from '../store/useRepoStore';
 import { useUiStore } from '../store/useUiStore';
 
@@ -45,7 +46,9 @@ describe('brouillon de mission', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     await storage.remove(V1);
     await storage.remove(V2);
+    await storage.remove('gitquest.mission-draft.v1');
     resetSandbox();
+    useMissionDraftStore.setState({ activeMission: null, draft: null, hydrated: true });
     useProgressStore.setState({
       completed: { 'trois-zones': { stars: 3 } },
       lessonSlides: {},
@@ -83,6 +86,8 @@ describe('brouillon de mission', () => {
     await user.type(input, 'git branch essai{Enter}');
     await user.type(input, 'git branch essai-2{Enter}');
     await screen.findByText(/2 \/ 1 commandes/);
+    const savedEntries = useRepoStore.getState().entries.length;
+    const savedHistory = useRepoStore.getState().commandHistory.length;
 
     first.unmount();
 
@@ -90,6 +95,8 @@ describe('brouillon de mission', () => {
     resetSandbox();
     useProgressStore.setState({ draft: null, story: createEmptyStory(), hydrated: false });
     await useProgressStore.getState().hydrate();
+    useMissionDraftStore.setState({ activeMission: null, draft: null, hydrated: false });
+    await useMissionDraftStore.getState().hydrate();
 
     render(<MissionScreen missionId="snapshot-fige" />);
 
@@ -97,9 +104,9 @@ describe('brouillon de mission', () => {
     const state = useRepoStore.getState().state;
     expect(Object.keys(state.branches)).toContain('essai');
     expect(Object.keys(state.branches)).toContain('essai-2');
-    // Aucune réexécution : le terminal ne contient que l'introduction.
-    expect(useRepoStore.getState().entries).toHaveLength(2);
-    expect(useRepoStore.getState().commandHistory).toEqual([]);
+    // Aucune réexécution : le terminal et l'historique sont restaurés tels quels.
+    expect(useRepoStore.getState().entries).toHaveLength(savedEntries);
+    expect(useRepoStore.getState().commandHistory).toHaveLength(savedHistory);
   });
 
   it('n’écrit aucun brouillon pour une commande non mutante', async () => {
