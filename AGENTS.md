@@ -44,7 +44,8 @@ strict, Zustand, Tailwind v4, Framer Motion, SVG maison, Vitest, IndexedDB via
 
 ## UI (Phases 2-3)
 
-- Routes : `#/` (carte des chapitres), `#/chapter/:id/lesson`, `#/mission/:id`,
+- Routes : `#/` (carte des chapitres), `#/prologue` (syntaxe des commandes),
+  `#/chapter/:id/lesson`, `#/mission/:id`,
   `#/sandbox`. Routeur maison par hash, pas de dépendance externe.
 - `src/screens/SandboxScreen.tsx` reste le bac à sable libre ; `MissionScreen`
   réutilise `SandboxLayout` et isole son dépôt du sandbox (backup/restore).

@@ -82,6 +82,14 @@ describe('HomeScreen — point d’entrée de reprise', () => {
     );
   });
 
+  it('propose le prologue de syntaxe en tête de parcours', () => {
+    render(<HomeScreen />);
+
+    expect(
+      screen.getByRole('link', { name: /Prologue · Lire une commande Git/i }),
+    ).toHaveAttribute('href', '#/prologue');
+  });
+
   it('garde le bac à sable accessible quel que soit l’état', () => {
     useProgressStore.setState({ completed: allCompleted, lessonSlides: {}, hydrated: true });
     render(<HomeScreen />);

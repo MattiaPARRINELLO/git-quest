@@ -76,10 +76,10 @@ function parseCommit(args: readonly string[]): ParseResult {
   }
 
   const [firstPathspec] = pathspecs;
-  if (firstPathspec !== undefined) {
+  if (firstPathspec !== undefined && stageAllTracked) {
     return fail(
-      'commit-message-not-quoted',
-      `error: pathspec '${firstPathspec}' did not match any file(s) known to git`,
+      'invalid-option',
+      `fatal: paths '${pathspecs.join(', ')}' with -a does not make sense`,
     );
   }
 
@@ -87,7 +87,9 @@ function parseCommit(args: readonly string[]): ParseResult {
     return fail('invalid-commit-message', "error: switch `m' requires a value");
   }
 
-  return { ok: true, command: { kind: 'git-commit', message, stageAllTracked } };
+  const base = { kind: 'git-commit' as const, message, stageAllTracked };
+  if (pathspecs.length === 0) return { ok: true, command: base };
+  return { ok: true, command: { ...base, paths: pathspecs } };
 }
 
 function parseBranch(args: readonly string[]): ParseResult {
