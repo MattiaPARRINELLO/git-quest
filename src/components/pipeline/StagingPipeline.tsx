@@ -193,7 +193,15 @@ export function StagingPipeline() {
   const previewContent = preview === null ? undefined : contentFor(preview);
 
   return (
-    <section className="relative flex shrink-0 flex-col gap-2 border-t border-border bg-panel px-2 py-2.5 sm:h-[210px] sm:px-3">
+    <section
+      className="relative flex shrink-0 flex-col gap-2 border-t border-border bg-panel px-2 py-2.5 sm:h-[210px] sm:px-3"
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape' || preview === null) return;
+        event.preventDefault();
+        setPinned(false);
+        setPreview(null);
+      }}
+    >
       <div className="flex items-center justify-between px-0.5">
         <div className="flex items-center gap-2">
           <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted">
@@ -268,7 +276,10 @@ export function StagingPipeline() {
               ×
             </button>
           </header>
-          <pre className="scrollbar-thin max-h-24 overflow-auto whitespace-pre-wrap break-words px-2.5 py-2 font-mono text-[10px] leading-relaxed text-muted">
+          <pre
+            aria-live="polite"
+            className="scrollbar-thin max-h-24 overflow-auto whitespace-pre-wrap break-words px-2.5 py-2 font-mono text-[10px] leading-relaxed text-muted"
+          >
             {previewContent === undefined ? '— absent dans cette zone' : previewContent || '(fichier vide)'}
           </pre>
         </div>

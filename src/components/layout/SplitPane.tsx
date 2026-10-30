@@ -52,8 +52,22 @@ export function SplitPane({ left, right, initialLeftPercent = 40 }: SplitPanePro
         onPointerUp={stopDragging}
         onPointerCancel={stopDragging}
         onKeyDown={(event) => {
-          if (event.key === 'ArrowLeft') setLeftPercent((value) => Math.max(28, value - 2));
-          if (event.key === 'ArrowRight') setLeftPercent((value) => Math.min(62, value + 2));
+          if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            setLeftPercent((value) => Math.max(28, value - 2));
+          }
+          if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            setLeftPercent((value) => Math.min(62, value + 2));
+          }
+          if (event.key === 'Home') {
+            event.preventDefault();
+            setLeftPercent(28);
+          }
+          if (event.key === 'End') {
+            event.preventDefault();
+            setLeftPercent(62);
+          }
         }}
         className="group relative z-10 w-2 shrink-0 cursor-col-resize bg-transparent"
       >

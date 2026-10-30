@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { useRef } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 import { CommitGraph } from '../graph/CommitGraph';
 import { SplitPane } from './SplitPane';
 import { StagingPipeline } from '../pipeline/StagingPipeline';
@@ -30,19 +31,41 @@ function MobileTabs() {
   const tab = useUiStore((store) => store.mobileTab);
   const unseen = useUiStore((store) => store.graphUnseen);
   const setTab = useUiStore((store) => store.setMobileTab);
+  const buttons = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
+    let next = index;
+    if (event.key === 'ArrowRight') next = (index + 1) % TABS.length;
+    else if (event.key === 'ArrowLeft') next = (index - 1 + TABS.length) % TABS.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = TABS.length - 1;
+    else return;
+
+    event.preventDefault();
+    const target = TABS[next];
+    if (target === undefined) return;
+    setTab(target.id);
+    buttons.current[next]?.focus();
+  };
 
   return (
     <nav
+      role="tablist"
       aria-label="Panneaux du bac à sable"
       className="flex shrink-0 border-b border-border bg-panel"
     >
-      {TABS.map((item) => (
+      {TABS.map((item, index) => (
         <button
           key={item.id}
+          ref={(element) => {
+            buttons.current[index] = element;
+          }}
           type="button"
           role="tab"
+          tabIndex={tab === item.id ? 0 : -1}
           aria-selected={tab === item.id}
           className={cn('tab flex items-center justify-center gap-1.5', tab === item.id && 'tab-active')}
+          onKeyDown={(event) => onKeyDown(event, index)}
           onClick={() => setTab(item.id)}
         >
           <Icon name={item.icon} size={14} />

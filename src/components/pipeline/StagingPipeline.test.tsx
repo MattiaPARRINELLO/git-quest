@@ -36,5 +36,8 @@ describe('StagingPipeline', () => {
 
     await user.click(screen.getByRole('button', { name: /Dernier commit — README\.md/i }));
     expect(await screen.findByText('version 1')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByText('version 1')).toBeNull();
   });
 });
