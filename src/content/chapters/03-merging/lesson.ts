@@ -64,7 +64,8 @@ export const lesson03: Lesson = {
       title: 'Déjà à jour, et nettoyage',
       paragraphs: [
         'Si la cible est déjà contenue dans HEAD, Git répond « Already up to date. » et ne fait rien.',
-        'Une branche fusionnée peut être supprimée avec git branch -d. Git refuse si des commits seraient perdus ; -D force.',
+        'Une branche fusionnée peut être supprimée avec git branch -d. Si elle ne l’est pas, Git refuse avec « The branch … is not fully merged ».',
+        'Deux choix conscients : fusionner d’abord puis -d, ou forcer avec -D. -D jette les commits non référencés : à utiliser en connaissance de cause.',
       ],
       command: 'git branch -d feature',
       note: 'Les conflits existent dans Git réel mais sont hors du périmètre de GitQuest.',

@@ -41,7 +41,7 @@ export const mission41: Mission = {
   number: '4.1',
   title: 'Le bug de prod',
   story:
-    "Tu es en pleine refonte sur feature, avec des modifications non commitées dans src/app.ts. Un bug critique tombe en prod : tu ne peux pas basculer sur main, Git refuserait d'écraser ton travail. Un commit bricolé ou un stash ne sont pas acceptables : il te faut un second espace de travail relié au même dépôt.",
+    "Tu es en pleine refonte sur feature, avec des modifications non commitées dans src/app.ts. Un bug critique tombe en prod. Réflexe naturel : git switch main — mais Git refuse net, car main a aussi modifié src/app.ts et ton WIP serait écrasé. Un commit bricolé ou un stash ne sont pas acceptables : il te faut un second espace de travail relié au même dépôt.",
   objective:
     'Corrige bug.txt sur une branche hotfix dans un worktree séparé, sans toucher au WIP de feature.',
   difficulty: 3,
@@ -67,8 +67,8 @@ export const mission41: Mission = {
       check(state.activeWorktree === 'main', 'Le terminal doit revenir au worktree principal.'),
     ),
   hints: [
-    'Le worktree principal ne peut pas changer de branche : crée un autre worktree.',
-    'git worktree add <chemin> -b hotfix main part de main, même si HEAD est sur feature.',
+    'Essaie de passer sur main. Que dit Git ?',
+    'Crée un worktree sur une nouvelle branche hotfix à partir de main, sans toucher au worktree principal.',
     'git worktree add ../gitquest-hotfix -b hotfix main, cd ../gitquest-hotfix, edit bug.txt "corrigé", git add bug.txt, git commit -m "fix: bug critique", cd ../gitquest.',
   ],
   solution: [

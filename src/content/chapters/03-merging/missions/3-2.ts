@@ -60,7 +60,7 @@ export const mission32: Mission = {
   solution: ['git merge feature'],
   predictions: [
     {
-      whenCommand: 'git merge feature',
+      trigger: (parsed) => parsed.kind === 'git-merge',
       question: 'Combien de parents aura le commit de fusion ?',
       options: [
         { id: 'zero', label: 'Aucun parent' },

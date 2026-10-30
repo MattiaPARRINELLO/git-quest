@@ -1,12 +1,11 @@
 import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
-  branchFile,
-  branchTip,
   check,
   commitCount,
   headBranch,
   headFile,
+  workingFile,
 } from '../../../../engine/validate';
 import type { Mission } from '../../../types';
 
@@ -18,60 +17,51 @@ const initial = scenario()
   })
   .build();
 
-const mainTip = initial.branches.main ?? '';
-
 export const mission12: Mission = {
-  id: 'branche-pointeur',
+  id: 'snapshot-fige',
   chapterId: 'under-the-hood',
   order: 2,
   number: '1.2',
-  title: 'Le pointeur fantôme',
+  title: 'La photo ne bouge plus',
   story:
-    "L'équipe veut tester une idée de notes internes sans polluer main. Tu crées une branche experiment, tu y travailles, puis tu vérifies que main n'a pas bougé d'un millimètre. Une branche n'est qu'une étiquette : c'est le moment de le prouver.",
-  objective: 'Crée la branche experiment, commite notes.txt dessus, et laisse main intacte.',
+    "La doc de Nova doit passer en version 2, mais tu continues à la retoucher après l’avoir indexée. Le CTO veut vérifier une intuition : un commit est une photo figée de l’index, pas un miroir du fichier en train de changer sur ton disque.",
+  objective: 'Indexe la version 2, modifie encore le fichier, puis commit : le commit doit garder la version 2.',
   difficulty: 2,
-  par: 5,
+  par: 4,
   initialState: initial,
   validate: (state) =>
     allOf(
-      check(headBranch(state) === 'experiment', 'HEAD doit être sur experiment.'),
-      check(branchFile(state, 'experiment', 'notes.txt') === 'notes de la branche', 'experiment doit contenir notes.txt.'),
-      check(branchTip(state, 'main') === mainTip, 'main ne doit pas bouger.'),
-      check(headFile(state, 'notes.txt') === 'notes de la branche', 'Le HEAD de experiment doit voir notes.txt.'),
-      check(commitCount(state) === 2, 'Un seul nouveau commit est attendu.'),
+      check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
+      check(commitCount(state) === 2, 'Il faut exactement deux commits.'),
+      check(headFile(state, 'README.md') === 'version 2', 'Le commit doit contenir la version indexée (version 2).'),
+      check(
+        workingFile(state, 'README.md') === 'version 3 (non commitée)',
+        'Le working dir doit conserver la retouche non commitée.',
+      ),
     ),
   hints: [
-    'Créer une branche ne change pas HEAD : il faut ensuite y basculer.',
-    'Après le switch, crée notes.txt, indexe-le, puis commit.',
-    'git branch experiment, git switch experiment, edit notes.txt "notes de la branche", git add notes.txt, git commit -m "feat: notes expérimentales".',
+    'Le commit photographie l’index, même si le fichier change ensuite sur le disque.',
+    'Indexe la version 2, puis modifie à nouveau le fichier sans refaire git add.',
+    'edit README.md "version 2", git add README.md, edit README.md "version 3 (non commitée)", git commit -m "docs: v2".',
   ],
   solution: [
-    'git branch experiment',
-    'git switch experiment',
-    'edit notes.txt "notes de la branche"',
-    'git add notes.txt',
-    'git commit -m "feat: notes expérimentales"',
+    'edit README.md "version 2"',
+    'git add README.md',
+    'edit README.md "version 3 (non commitée)"',
+    'git commit -m "docs: v2"',
   ],
   predictions: [
     {
-      whenCommand: 'git switch experiment',
-      question: 'Après ce switch, où sera HEAD ?',
+      trigger: (parsed) => parsed.kind === 'git-commit',
+      question: 'Que contiendra le commit après cette seconde modification non indexée ?',
       options: [
-        { id: 'main', label: 'Sur la branche main', target: { kind: 'branch', value: 'main' } },
-        {
-          id: 'experiment',
-          label: 'Sur la branche experiment',
-          target: { kind: 'branch', value: 'experiment' },
-        },
-        {
-          id: 'detached',
-          label: `Détaché sur le commit ${mainTip.slice(0, 7)}`,
-          target: { kind: 'commit', value: mainTip },
-        },
+        { id: 'indexed', label: 'La version 2, celle de l’index' },
+        { id: 'working', label: 'La version 3 du working dir' },
+        { id: 'both', label: 'Les deux versions fusionnées' },
       ],
-      correctOptionId: 'experiment',
+      correctOptionId: 'indexed',
       explanation:
-        'git switch experiment attache HEAD à l’étiquette experiment, qui pointe sur le même commit que main pour l’instant.',
+        'La version 3 n’est pas indexée : le commit reste sur la photo de la version 2. Le working dir garde la retouche.',
     },
   ],
 };

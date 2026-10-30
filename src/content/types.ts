@@ -1,4 +1,4 @@
-import type { RepoState } from '../engine/types';
+import type { ParsedCommand, RepoState } from '../engine/types';
 import type { ValidationResult } from '../engine/validate';
 
 export type DiagramId =
@@ -64,8 +64,8 @@ export interface PredictionOption {
 }
 
 export interface Prediction {
-  /** Commande exacte (normalisée) qui déclenche la prédiction. */
-  readonly whenCommand: string;
+  /** Déclencheur structurel, évalué sur la commande parsée et l'état avant exécution. */
+  readonly trigger: (parsed: ParsedCommand, state: RepoState) => boolean;
   readonly question: string;
   readonly options: readonly PredictionOption[];
   readonly correctOptionId: string;
@@ -90,6 +90,8 @@ export interface Mission {
   readonly par: number;
   readonly initialState: RepoState;
   readonly validate: (state: RepoState) => ValidationResult;
+  /** Garde-fou de parcours (ex. avoir tenté -d avant de forcer). */
+  readonly validateAttempt?: (commands: readonly string[]) => ValidationResult;
   readonly hints: readonly [string, string, string];
   readonly solution: readonly string[];
   readonly predictions?: readonly Prediction[];

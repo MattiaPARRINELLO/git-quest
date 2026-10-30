@@ -1,4 +1,6 @@
 import type { ForbiddenCommand, Mission, Prediction } from '../content/types';
+import type { RepoState } from '../engine/types';
+import { parseCommand } from '../engine/parse/parse-command';
 
 export function normalizeCommand(input: string): string {
   return input.trim().replace(/\s+/g, ' ');
@@ -17,10 +19,15 @@ export function findForbiddenCommand(
   );
 }
 
-export function findPrediction(mission: Mission, input: string): Prediction | undefined {
-  const normalized = normalizeCommand(input);
-  return mission.predictions?.find(
-    (prediction) => normalizeCommand(prediction.whenCommand) === normalized,
+export function findPrediction(
+  mission: Mission,
+  input: string,
+  state: RepoState,
+): Prediction | undefined {
+  const parsed = parseCommand(input);
+  if (!parsed.ok) return undefined;
+  return mission.predictions?.find((prediction) =>
+    prediction.trigger(parsed.command, state),
   );
 }
 

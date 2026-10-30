@@ -1,4 +1,4 @@
-import { scenario } from '../../../../engine/scenario';
+import { Scenario, scenario } from '../../../../engine/scenario';
 import {
   allOf,
   branchTip,
@@ -6,49 +6,86 @@ import {
   commitCount,
   hasBranch,
   headBranch,
+  headFile,
+  workingFile,
 } from '../../../../engine/validate';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
+const base = scenario()
   .init()
   .commit('Initial commit', {
     'README.md': '# Projet Nova',
     'src/app.ts': "export const app = 'nova';",
   })
-  .branch('feature')
-  .checkout('feature')
-  .commit('feat: thème sombre', {
-    'src/theme.ts': "export const theme = 'dark';",
+  .branch('feature-login')
+  .checkout('feature-login')
+  .commit('feat: formulaire de connexion', {
+    'src/login.ts': "export const login = () => 'ok';",
   })
   .checkout('main')
-  .run('git merge feature')
+  .run('git merge feature-login')
   .build();
 
-const mainTip = initial.branches.main ?? '';
+const initial = Scenario.from(base)
+  .branch('experiment')
+  .checkout('experiment')
+  .commit('exp: test de cache', {
+    'exp.txt': 'expérience',
+  })
+  .checkout('main')
+  .build();
+
+const initialMainTip = initial.branches.main ?? '';
+const experimentTip = initial.branches.experiment ?? '';
+const initialCount = Object.keys(initial.commits).length;
 
 export const mission33: Mission = {
-  id: 'nettoyage-branche',
+  id: 'menage-branches',
   chapterId: 'merging',
   order: 3,
   number: '3.3',
-  title: 'Ranger après la fête',
+  title: 'Le ménage',
   story:
-    "Le thème sombre est déjà fusionné et déployé : feature pointe exactement sur le même commit que main. Le lead demande un nettoyage de fin de sprint, mais Git refuse de supprimer une branche sans vérifier qu'elle est bien fusionnée.",
-  objective: 'Confirme que feature est à jour, puis supprime la branche feature.',
-  difficulty: 2,
-  par: 2,
+    "Un collègue est parti en laissant deux branches derrière lui. feature-login est déjà fusionnée dans main ; experiment, elle, contient un test de cache jamais intégré. Le lead veut un nettoyage propre : constater le refus de -d sur la branche non fusionnée, puis choisir consciemment entre la merger ou forcer sa suppression.",
+  objective:
+    'Supprime feature-login et experiment. Pour experiment : tente -d, puis fusionne-la ou utilise -D.',
+  difficulty: 3,
+  par: 3,
   initialState: initial,
-  validate: (state) =>
-    allOf(
+  validate: (state) => {
+    const merged = branchTip(state, 'main') === experimentTip;
+    const forced = branchTip(state, 'main') === initialMainTip;
+    return allOf(
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
-      check(branchTip(state, 'main') === mainTip, 'main ne doit pas bouger.'),
-      check(!hasBranch(state, 'feature'), 'La branche feature doit être supprimée.'),
-      check(commitCount(state) === 2, 'Aucun commit ne doit être créé.'),
+      check(!hasBranch(state, 'feature-login'), 'La branche feature-login doit être supprimée.'),
+      check(!hasBranch(state, 'experiment'), 'La branche experiment doit être supprimée.'),
+      check(
+        merged || forced,
+        'Choisis consciemment : fusionner experiment puis -d, ou forcer avec -D.',
+      ),
+      check(
+        merged ? headFile(state, 'exp.txt') === 'expérience' : workingFile(state, 'exp.txt') === undefined,
+        merged
+          ? 'La fusion doit intégrer exp.txt.'
+          : 'La suppression forcée doit laisser main inchangée.',
+      ),
+      check(commitCount(state) === initialCount, 'Aucun commit supplémentaire ne doit être créé.'),
+    );
+  },
+  validateAttempt: (commands) =>
+    check(
+      commands.some((command) => command.trim().replace(/\s+/g, ' ') === 'git branch -d experiment'),
+      'Essaie d’abord git branch -d experiment et observe le refus de Git.',
     ),
   hints: [
-    'Fusionner une branche déjà contenue dans main ne crée rien : Git répond « Already up to date. ».',
-    'git branch -d refuse de supprimer une branche non fusionnée, mais feature est fusionnée.',
-    'git merge feature, puis git branch -d feature.',
+    'feature-login est déjà fusionnée : git branch -d doit passer directement.',
+    'Sur experiment, git branch -d échoue avec « not fully merged ». Tu peux alors fusionner puis -d, ou forcer avec -D.',
+    'git branch -d feature-login, git merge experiment, git branch -d experiment. Alternative : git branch -D experiment (après avoir constaté le refus de -d).',
   ],
-  solution: ['git merge feature', 'git branch -d feature'],
+  solution: [
+    'git branch -d feature-login',
+    'git merge experiment',
+    'git branch -d experiment',
+  ],
+  successNote: 'Deux branches rangées, aucun commit perdu par accident.',
 };

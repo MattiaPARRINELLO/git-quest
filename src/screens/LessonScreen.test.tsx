@@ -20,14 +20,14 @@ describe('LessonScreen', () => {
     await user.click(screen.getByRole('button', { name: /Suivant/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Une branche est une étiquette')).toBeInTheDocument();
+      expect(screen.getByText('Les 3 zones : disque, index, commit')).toBeInTheDocument();
     });
     expect(useProgressStore.getState().lessonSlides['under-the-hood']).toBe(2);
 
     first.unmount();
     render(<LessonScreen chapterId="under-the-hood" />);
     await waitFor(() => {
-      expect(screen.getByText('Une branche est une étiquette')).toBeInTheDocument();
+      expect(screen.getByText('Les 3 zones : disque, index, commit')).toBeInTheDocument();
     });
   });
 });

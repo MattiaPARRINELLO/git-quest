@@ -34,8 +34,12 @@ strict, Zustand, Tailwind v4, Framer Motion, SVG maison, Vitest, IndexedDB via
   son état initial ne doit pas la valider, et `par === solution.length`.
 - Les cours précèdent toujours le concept utilisé par une mission. Un slide `demo`
   rejoue de vraies commandes avec `scenario()`/`execute`, jamais une simulation UI.
-- Prédictions : `whenCommand` doit exister dans la solution, `correctOptionId`
-  doit pointer une option, et l'écran doit rester franchissable (« Passer »).
+- `validateAttempt(commands)` sert aux missions dont la réussite dépend d'un essai
+  préalable (ex. `-d` refusé avant `-D`) ; il s'ajoute à `validate(state)`.
+- Prédictions : `trigger(parsed, state)` doit être structurel (pas une égalité de
+  chaîne), `correctOptionId` doit pointer une option, et l'écran doit rester
+  franchissable (« Passer »). Une prédiction ne se déclenche qu'une fois par
+  tentative ; switch et checkout d'une même branche partagent le déclencheur.
 
 ## UI (Phases 2-3)
 

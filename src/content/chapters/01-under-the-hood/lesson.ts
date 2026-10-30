@@ -29,6 +29,27 @@ export const lesson01: Lesson = {
     },
     {
       kind: 'text',
+      title: 'Les 3 zones : disque, index, commit',
+      paragraphs: [
+        'Le working dir est ce que tu vois et modifies. L’index est la zone de préparation : c’est lui que le commit photographie.',
+        'Un fichier modifié mais non indexé n’entre pas dans le commit. Un fichier jamais suivi (untracked) doit d’abord être ajouté à l’index.',
+        'C’est pour cela qu’un commit peut ne contenir qu’une partie de tes modifications.',
+      ],
+      command: 'git add README.md',
+      note: 'Working dir → index → commit : chaque étape est explicite.',
+    },
+    {
+      kind: 'text',
+      title: 'Le piège de -am',
+      paragraphs: [
+        'git commit -am indexe automatiquement les fichiers déjà suivis, puis commit. Pratique pour une correction rapide.',
+        'Mais -a ignore les fichiers untracked : un nouveau fichier doit passer par git add, sinon il reste hors du commit.',
+      ],
+      command: 'git commit -am "fix: rapide"',
+      note: 'Un fichier untracked n’est jamais inclus par -a.',
+    },
+    {
+      kind: 'text',
       title: 'Une branche est une étiquette',
       paragraphs: [
         'Une branche comme main n’est qu’un pointeur vers un commit. La créer ne copie aucun fichier et ne déplace rien.',
@@ -66,6 +87,7 @@ export const lesson01: Lesson = {
         { command: 'git status', description: 'Montre working dir, index et état de HEAD.' },
         { command: 'git add <fichier>', description: 'Copie le fichier dans l’index.' },
         { command: 'git commit -m "message"', description: 'Photographie l’index et avance la branche de HEAD.' },
+        { command: 'git commit -am "message"', description: 'Indexe les fichiers suivis, mais pas les untracked.' },
         { command: 'git branch <nom>', description: 'Crée une étiquette sur le commit courant.' },
         { command: 'git switch <nom>', description: 'Rattache HEAD à une branche.' },
       ],

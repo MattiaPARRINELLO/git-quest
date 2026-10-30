@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { normalizeCommand, findForbiddenCommand, findPrediction, starsFor } from '../app/mission';
+import { useEffect, useRef, useState } from 'react';
+import { findForbiddenCommand, findPrediction, normalizeCommand, starsFor } from '../app/mission';
 import { MissionComplete } from '../components/mission/MissionComplete';
 import { MissionPanel } from '../components/mission/MissionPanel';
 import { PredictionFeedback, PredictionOverlay } from '../components/mission/PredictionOverlay';
@@ -44,7 +44,8 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [completed, setCompleted] = useState<Completion | null>(null);
   const [pendingPrediction, setPendingPrediction] = useState<PendingPrediction | null>(null);
-  const [answered, setAnswered] = useState<Set<string>>(new Set());
+  const [answered, setAnswered] = useState<Set<Prediction>>(new Set());
+  const attemptedCommands = useRef<string[]>([]);
   const [feedback, setFeedback] = useState<{ correct: boolean; explanation: string } | null>(null);
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     setPendingPrediction(null);
     setAnswered(new Set());
     setFeedback(null);
+    attemptedCommands.current = [];
     useUiStore.getState().setMobileTab('terminal');
 
     return () => {
@@ -109,12 +111,17 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   };
 
   const run = (input: string): void => {
+    attemptedCommands.current = [...attemptedCommands.current, normalizeCommand(input)];
     const result = useRepoStore.getState().execute(input);
     if (!result) return;
     const used = result.scored ? commandsUsed + 1 : commandsUsed;
     if (result.scored) setCommandsUsed(used);
     if (!result.error && result.events.length > 0) {
-      if (mission.validate(result.state).ok) finish(used);
+      const stateOk = mission.validate(result.state).ok;
+      const attemptOk = mission.validateAttempt
+        ? mission.validateAttempt(attemptedCommands.current).ok
+        : true;
+      if (stateOk && attemptOk) finish(used);
     }
   };
 
@@ -144,6 +151,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
       setPendingPrediction(null);
       setAnswered(new Set());
       setFeedback(null);
+      attemptedCommands.current = [];
       return;
     }
 
@@ -155,8 +163,8 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
       return;
     }
 
-    const prediction = findPrediction(mission, input);
-    if (prediction && !answered.has(normalizeCommand(input))) {
+    const prediction = findPrediction(mission, input, useRepoStore.getState().state);
+    if (prediction && !answered.has(prediction)) {
       setPendingPrediction({ prediction, input });
       useUiStore.getState().setMobileTab('graph');
       return;
@@ -168,8 +176,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const answerPrediction = (optionId: string): void => {
     if (!pendingPrediction) return;
     const { prediction, input } = pendingPrediction;
-    const key = normalizeCommand(input);
-    setAnswered((current) => new Set(current).add(key));
+    setAnswered((current) => new Set(current).add(prediction));
     setPendingPrediction(null);
     setFeedback({
       correct: optionId === prediction.correctOptionId,
@@ -180,8 +187,8 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
 
   const skipPrediction = (): void => {
     if (!pendingPrediction) return;
-    const { input } = pendingPrediction;
-    setAnswered((current) => new Set(current).add(normalizeCommand(input)));
+    const { prediction, input } = pendingPrediction;
+    setAnswered((current) => new Set(current).add(prediction));
     setPendingPrediction(null);
     run(input);
   };

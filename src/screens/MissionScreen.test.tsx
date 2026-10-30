@@ -31,7 +31,11 @@ describe('MissionScreen', () => {
 
   it('suspend l’exécution pour une prédiction, puis exécute après la réponse', async () => {
     useProgressStore.setState({
-      completed: { 'premier-commit': { stars: 3 } },
+      completed: {
+        'trois-zones': { stars: 3 },
+        'snapshot-fige': { stars: 3 },
+        'piege-am': { stars: 3 },
+      },
       lessonSlides: {},
       hydrated: true,
     });
@@ -42,7 +46,7 @@ describe('MissionScreen', () => {
     await user.type(input, 'git branch experiment{Enter}');
     await user.type(input, 'git switch experiment{Enter}');
 
-    expect(await screen.findByText(/Après ce switch, où sera HEAD/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Après ce changement de branche, où sera HEAD/i)).toBeInTheDocument();
     expect(useRepoStore.getState().state.worktrees.main?.head).toEqual({
       kind: 'branch',
       branch: 'main',
@@ -61,7 +65,7 @@ describe('MissionScreen', () => {
 
   it('refuse une commande interdite sans exécuter', async () => {
     useProgressStore.setState({
-      completed: { 'nettoyage-branche': { stars: 3 } },
+      completed: { 'menage-branches': { stars: 3 } },
       lessonSlides: {},
       hydrated: true,
     });
@@ -83,34 +87,36 @@ describe('MissionScreen', () => {
 
   it('affiche MissionComplete après la solution et persiste la progression', async () => {
     const user = userEvent.setup();
-    render(<MissionScreen missionId="premier-commit" />);
+    render(<MissionScreen missionId="trois-zones" />);
 
     const input = await screen.findByRole('textbox', { name: /commande git/i });
     for (const command of [
-      'touch README.md',
-      'edit README.md "# Projet Nova"',
-      'git add README.md',
-      'git commit -m "docs: premier commit"',
+      'git add a.txt',
+      'git commit -m "fix: a.txt"',
     ]) {
       await user.type(input, `${command}{Enter}`);
     }
+
+    await user.click(
+      await screen.findByRole('button', { name: /Uniquement le fichier indexé/i }),
+    );
 
     const dialog = await screen.findByRole('dialog', { name: /Mission 1.1 réussie/i });
     expect(dialog).toBeInTheDocument();
     expect(screen.getByText('Mission accomplie')).toBeInTheDocument();
     expect(screen.getByText(/Solution de référence/i)).toBeInTheDocument();
-    expect(useProgressStore.getState().completed['premier-commit']?.stars).toBe(3);
+    expect(useProgressStore.getState().completed['trois-zones']?.stars).toBe(3);
 
     await waitFor(async () => {
       const saved = await storage.get<{ completed: Record<string, { stars: number }> } | null>(
         'gitquest.progress.v1',
         null,
       );
-      expect(saved?.completed['premier-commit']?.stars).toBe(3);
+      expect(saved?.completed['trois-zones']?.stars).toBe(3);
     });
 
     useProgressStore.setState({ completed: {}, lessonSlides: {}, hydrated: false });
     await useProgressStore.getState().hydrate();
-    expect(useProgressStore.getState().completed['premier-commit']?.stars).toBe(3);
+    expect(useProgressStore.getState().completed['trois-zones']?.stars).toBe(3);
   });
 });

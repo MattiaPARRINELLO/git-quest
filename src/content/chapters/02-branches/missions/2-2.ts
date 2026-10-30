@@ -1,6 +1,7 @@
 import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
+  branchFile,
   branchTip,
   check,
   commitCount,
@@ -14,71 +15,67 @@ const initial = scenario()
     'README.md': '# Projet Nova',
     'src/app.ts': "export const app = 'nova';",
   })
-  .commit('feat: API de facturation', {
-    'src/billing.ts': "export const billing = 'v1';",
-  })
   .branch('feature')
-  .commit('fix: configuration', {
-    'src/config.ts': "export const config = { retries: 2 };",
-  })
+  .checkout('feature')
   .build();
 
-const target = Object.values(initial.commits)
-  .sort((left, right) => left.timestamp - right.timestamp)[1];
-if (!target) throw new Error('Contenu invalide : commit cible absent');
-const targetShort = target.hash.slice(0, 7);
-const mainTip = initial.branches.main ?? '';
-const featureTip = initial.branches.feature ?? '';
+const initialTip = initial.branches.main ?? '';
 
 export const mission22: Mission = {
-  id: 'detachement',
+  id: 'qui-avance',
   chapterId: 'branches',
   order: 2,
   number: '2.2',
-  title: 'Sonder le passé',
+  title: 'Qui avance ?',
   story:
-    "Une régression est apparue après le commit qui a introduit l'API de facturation. Tu dois te placer exactement sur ce commit pour enquêter, puis garder ce point d'inspection dans une branche diagnostic — sans jamais déplacer main ni feature.",
-  objective: `Bascule sur le commit ${targetShort}, puis crée la branche diagnostic sur ce commit.`,
+    "Tu es sur feature, et main pointe encore sur le même commit. Avant de livrer, l’équipe veut comprendre une règle simple : quand tu commites, quelle étiquette bouge ? Fais avancer feature, puis main de son côté pour créer deux lignes parallèles.",
+  objective:
+    'Commite feature.ts sur feature, puis main.ts sur main, et laisse les deux branches diverger.',
   difficulty: 2,
-  par: 2,
+  par: 7,
   initialState: initial,
   validate: (state) =>
     allOf(
-      check(headBranch(state) === 'diagnostic', 'HEAD doit finir sur la branche diagnostic.'),
+      check(headBranch(state) === 'main', 'HEAD doit revenir sur main.'),
+      check(branchFile(state, 'feature', 'feature.ts') !== undefined, 'feature doit contenir feature.ts.'),
+      check(branchFile(state, 'main', 'main.ts') !== undefined, 'main doit contenir main.ts.'),
+      check(branchFile(state, 'main', 'feature.ts') === undefined, 'main ne doit pas contenir feature.ts.'),
       check(
-        branchTip(state, 'diagnostic') === target.hash,
-        'diagnostic doit pointer sur le commit inspecté.',
+        branchTip(state, 'main') !== branchTip(state, 'feature'),
+        'Les deux branches doivent avoir divergé.',
       ),
-      check(branchTip(state, 'main') === mainTip, 'main ne doit pas bouger.'),
-      check(branchTip(state, 'feature') === featureTip, 'feature ne doit pas bouger.'),
-      check(commitCount(state) === 3, 'Aucun commit ne doit être créé.'),
+      check(
+        branchTip(state, 'feature') !== initialTip,
+        'feature doit avoir avancé après son commit.',
+      ),
+      check(commitCount(state) === 3, 'Deux nouveaux commits sont attendus.'),
     ),
   hints: [
-    'git checkout accepte un hash de commit : HEAD se détache alors de toute branche.',
-    'Depuis un HEAD détaché, git switch -c crée une branche sur place et t’y rattache.',
-    `git checkout ${targetShort}, puis git switch -c diagnostic.`,
+    'Un commit déplace uniquement l’étiquette de la branche sur laquelle HEAD est attaché.',
+    'Commite feature, puis bascule sur main avant de créer main.ts.',
+    'edit feature.ts "export const feature = true;", git add feature.ts, git commit -m "feat: module feature", git switch main, edit main.ts "export const main = true;", git add main.ts, git commit -m "feat: module main".',
   ],
-  solution: [`git checkout ${targetShort}`, 'git switch -c diagnostic'],
+  solution: [
+    'edit feature.ts "export const feature = true;"',
+    'git add feature.ts',
+    'git commit -m "feat: module feature"',
+    'git switch main',
+    'edit main.ts "export const main = true;"',
+    'git add main.ts',
+    'git commit -m "feat: module main"',
+  ],
   predictions: [
     {
-      whenCommand: `git checkout ${targetShort}`,
-      question: `Où sera HEAD après « git checkout ${targetShort} » ?`,
+      trigger: (parsed, state) =>
+        parsed.kind === 'git-commit' && headBranch(state) === 'feature',
+      question: 'Quelle étiquette bouge après ce commit ?',
       options: [
-        { id: 'main', label: 'Sur la branche main', target: { kind: 'branch', value: 'main' } },
-        {
-          id: 'detached',
-          label: `Détaché sur le commit ${targetShort}`,
-          target: { kind: 'commit', value: target.hash },
-        },
-        {
-          id: 'feature',
-          label: 'Sur la branche feature',
-          target: { kind: 'branch', value: 'feature' },
-        },
+        { id: 'main', label: 'main', target: { kind: 'branch', value: 'main' } },
+        { id: 'feature', label: 'feature', target: { kind: 'branch', value: 'feature' } },
       ],
-      correctOptionId: 'detached',
+      correctOptionId: 'feature',
       explanation:
-        'Un commit n’est pas une branche : HEAD se détache et pointe directement sur le commit. Aucune étiquette ne bouge.',
+        'HEAD est attaché à feature : seul son pointeur avance. main reste sur le commit partagé.',
     },
   ],
 };

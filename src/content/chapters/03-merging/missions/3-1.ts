@@ -53,7 +53,7 @@ export const mission31: Mission = {
   solution: ['git merge feature'],
   predictions: [
     {
-      whenCommand: 'git merge feature',
+      trigger: (parsed) => parsed.kind === 'git-merge',
       question: 'Cette fusion va-t-elle créer un nouveau commit ?',
       options: [
         { id: 'oui', label: 'Oui, un commit de fusion' },

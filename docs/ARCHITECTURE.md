@@ -326,6 +326,9 @@ toujours accessible.
 - Validation après chaque commande mutante (`events.length > 0`). En cas d'échec,
   aucune raison n'est affichée automatiquement : l'utilisateur demande un indice.
 - `forbidden` : interception avant le moteur, message pédagogique dans le terminal.
+- `validateAttempt(commands)` (optionnel) : garde-fou de parcours, par exemple avoir
+  tenté `git branch -d experiment` (refusée) avant de merger ou de forcer avec `-D`.
+  La réussite exige `validate(state).ok` **et** `validateAttempt(commands).ok`.
 - `hint` et `reset-mission` sont interceptés en mode mission ; le panneau propose
   aussi les trois indices.
 - `MissionComplete` : étoiles, commandes/par, note de réussite, solution de
@@ -333,9 +336,14 @@ toujours accessible.
 
 ### Prédictions
 
-- `Prediction.whenCommand` est comparée à la commande normalisée. L'exécution est
-  suspendue : overlay avec choix, clic possible sur un commit/une étiquette du
-  graphe (`onSelectCommit` / `onSelectBranch`) ou boutons, et bouton « Passer ».
+- `Prediction.trigger(parsed: ParsedCommand, state: RepoState) => boolean` est
+  évalué sur la commande parsée et l'état **avant** exécution : toute fusion
+  (`merge`), tout commit sous une branche donnée, ou tout `switch`/`checkout`
+  d'une branche partagent ainsi le même déclencheur. Une prédiction ne se
+  déclenche qu'une fois par tentative.
+- L'exécution est suspendue : overlay avec choix, clic possible sur un commit/une
+  étiquette du graphe (`onSelectCommit` / `onSelectBranch`) ou boutons, et bouton
+  « Passer ».
 - Après réponse : exécution réelle + animation, puis feedback correct/incorrect et
   explication. Rien ne bloque la suite.
 - Les cibles de graphe sont des `PredictionTarget` (`commit` avec hash complet,
