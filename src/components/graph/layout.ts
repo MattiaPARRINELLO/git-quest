@@ -2,10 +2,10 @@ import type { Commit, Head, RepoState, Worktree } from '../../engine/types';
 import { reachableCommits } from '../../engine/ops/diff';
 import { branchColor, ORPHAN_COLOR } from '../../lib/colors';
 
-export const X_SPACING = 132;
+export const X_SPACING = 148;
 export const ROW_HEIGHT = 78;
 export const PADDING_X = 48;
-export const PADDING_Y = 56;
+export const PADDING_Y = 72;
 
 export interface Point {
   readonly x: number;
@@ -183,12 +183,14 @@ export function layoutGraph(state: RepoState): GraphLayout {
     const node = nodeByHash.get(commitHash);
     if (!node) continue;
     names.sort();
+    // Empilées au-dessus du nœud, jamais collées : 22 px d'écart, 18 px de haut.
+    const baseY = node.y - 26 - (names.length - 1) * 22;
     names.forEach((name, index) => {
       const label: BranchLabel = {
         name,
         commit: commitHash,
-        x: node.x + 18,
-        y: node.y - 16 + (index - (names.length - 1) / 2) * 20,
+        x: node.x + 16,
+        y: baseY + index * 22,
         color: branchColor(name),
       };
       branchLabels.push(label);
@@ -216,9 +218,9 @@ export function layoutGraph(state: RepoState): GraphLayout {
         commit: commitHash,
         branch,
         detached: branch === null,
-        x: node.x + 18,
-        // Sous les étiquettes de branches, décalés par worktree pour ne pas se chevaucher.
-        y: node.y + 30 + index * 20,
+        x: node.x + 16,
+        // Sous le nœud, et sous toutes les étiquettes de branches.
+        y: node.y + 16 + index * 22,
         active: worktree.id === state.activeWorktree,
       });
     });

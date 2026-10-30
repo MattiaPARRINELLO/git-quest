@@ -487,7 +487,11 @@ function BranchLabelView({
   readonly duration: number;
   readonly onSelect?: (name: string) => void;
 }) {
-  const width = nodeLabelWidth(label.name);
+  const MAX_LABEL_WIDTH = 118;
+  const fullWidth = nodeLabelWidth(label.name);
+  const width = Math.min(MAX_LABEL_WIDTH, fullWidth);
+  const maxChars = Math.max(4, Math.floor((width - 18) / 6.6));
+  const text = fullWidth > width ? `${label.name.slice(0, maxChars)}…` : label.name;
   return (
     <motion.g
       initial={{ opacity: 0, x: label.x, y: label.y + 4 }}
@@ -532,7 +536,7 @@ function BranchLabelView({
         strokeOpacity={0.65}
       />
       <text x={9} y={12.5} fill={label.color} fontSize={10} className="font-mono font-semibold">
-        {label.name}
+        {text}
       </text>
     </motion.g>
   );
