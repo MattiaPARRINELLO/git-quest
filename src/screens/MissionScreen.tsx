@@ -14,6 +14,7 @@ import { useProgressStore } from '../store/useProgressStore';
 import { useUiStore } from '../store/useUiStore';
 import { routePaths } from '../router/useHashRoute';
 import { detachedNotice } from '../story/display';
+import { storyBetaEnabled } from '../lib/story-flags';
 import { Icon } from '../components/ui/Icon';
 
 interface PendingPrediction {
@@ -79,6 +80,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const entryRef = useRef<RepoState | null>(null);
   const detachedNoticeRef = useRef<string | null>(null);
   const [feedback, setFeedback] = useState<{ correct: boolean; explanation: string } | null>(null);
+  const [isolatedMode, setIsolatedMode] = useState(false);
 
   useEffect(() => {
     if (!mission) return;
@@ -101,6 +103,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
 
     entryRef.current = start.state;
     useRepoStore.getState().startMission(start.state, introEntries(mission, start));
+    setIsolatedMode(start.isolated);
     setCommandsUsed(resumable ? saved.commandsUsed : 0);
     setHintsUsed(resumable ? saved.hintsUsed : 0);
     setCompleted(null);
@@ -315,14 +318,41 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
       <SandboxLayout
         onCommand={handleCommand}
         missionPanel={
-          <MissionPanel
-            mission={mission}
-            state={repoState}
-            commandsUsed={commandsUsed}
-            hintsUsed={hintsUsed}
-            onHint={() => setHintsUsed((current) => Math.min(mission.hints.length, current + 1))}
-            onSuggest={(command) => useUiStore.getState().prefillCommand(command)}
-          />
+          <>
+            {isolatedMode && (
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-warning/30 bg-warning/10 px-3 py-2 text-[11px] text-warning">
+                <span>Entraînement : ton arbre Nova n’est pas modifié.</span>
+                {storyBetaEnabled() && (
+                  <button
+                    type="button"
+                    className="btn px-2 py-1 text-[11px]"
+                    onClick={() => {
+                      const confirmed = window.confirm(
+                        `Reprendre l’histoire depuis la mission ${mission.number} ?\n\n` +
+                          'Ton arbre Nova actuel et la suite de l’histoire seront remplacés. ' +
+                          'Tes étoiles déjà acquises sont conservées.',
+                      );
+                      if (!confirmed) return;
+                      useProgressStore
+                        .getState()
+                        .adoptIsolated(useRepoStore.getState().state);
+                      setIsolatedMode(false);
+                    }}
+                  >
+                    Reprendre l’histoire depuis ici
+                  </button>
+                )}
+              </div>
+            )}
+            <MissionPanel
+              mission={mission}
+              state={repoState}
+              commandsUsed={commandsUsed}
+              hintsUsed={hintsUsed}
+              onHint={() => setHintsUsed((current) => Math.min(mission.hints.length, current + 1))}
+              onSuggest={(command) => useUiStore.getState().prefillCommand(command)}
+            />
+          </>
         }
         {...(overlay === undefined ? {} : { graphOverlay: overlay })}
         {...(pendingPrediction === null

@@ -55,6 +55,11 @@ export interface ProgressStore {
   saveDraft(draft: MissionDraft): void;
   clearDraft(): void;
   beginMission(mission: Mission): MissionStart;
+  /**
+   * Adopte la copie isolée comme nouvel arbre principal : efface la suite de
+   * Nova (journal/slots suivants) et conserve les étoiles déjà acquises.
+   */
+  adoptIsolated(state: RepoState): void;
   hydrate(): Promise<void>;
 }
 
@@ -215,8 +220,7 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     persist();
   },
 
-  beginMission(mission) {
-    const current = get();
+  beginMission(mission) {    const current = get();
     const spec = storySpec(mission.id);
     const alreadyCompleted = current.completed[mission.id] !== undefined;
 
@@ -282,6 +286,27 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     set({ story: { ...current.story, nova: state, appliedPreludes } });
     persist();
     return { state, isolated: false, recalaged: false };
+  },
+
+  adoptIsolated(state) {
+    const current = get();
+    const isolated = current.story.isolated;
+    if (isolated === null) return;
+    const story: PersistedStory = {
+      ...current.story,
+      nova: state,
+      isolated: null,
+      journal: [
+        ...current.story.journal,
+        {
+          kind: 'recalage',
+          missionId: isolated.missionId,
+          reason: 'reprise depuis ici',
+        },
+      ],
+    };
+    set({ story });
+    persist();
   },
 
   async hydrate() {
