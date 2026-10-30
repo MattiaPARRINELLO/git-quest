@@ -15,9 +15,9 @@ describe('LessonScreen', () => {
 
     expect(screen.getByText('Un commit est une photo')).toBeInTheDocument();
 
-    const next = screen.getByRole('button', { name: /Suivant/i });
+    const next = screen.getByRole('button', { name: /^Suivant$/ });
     await user.click(next);
-    await user.click(screen.getByRole('button', { name: /Suivant/i }));
+    await user.click(screen.getByRole('button', { name: /^Suivant$/ }));
 
     await waitFor(() => {
       expect(screen.getByText('Les 3 zones : disque, index, commit')).toBeInTheDocument();

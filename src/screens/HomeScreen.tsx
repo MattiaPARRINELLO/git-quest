@@ -1,4 +1,4 @@
-import { chapters, isMissionUnlocked } from '../content';
+import { chapters, estimatedLessonMinutes, isMissionUnlocked } from '../content';
 import { useProgressStore } from '../store/useProgressStore';
 import { routePaths } from '../router/useHashRoute';
 import { branchColor } from '../lib/colors';
@@ -115,7 +115,7 @@ export function HomeScreen() {
 
                   <div className="mt-4 flex items-center justify-between gap-2 text-[11px] text-muted">
                     <span>
-                      {chapterDone} / {chapter.missions.length} missions · {chapter.lesson.minutes} min de cours
+                      {chapterDone} / {chapter.missions.length} missions · {estimatedLessonMinutes(chapter.lesson)} min de cours
                     </span>
                     <a
                       href={routePaths.lesson(chapter.id)}

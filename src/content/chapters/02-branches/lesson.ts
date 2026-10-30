@@ -15,7 +15,6 @@ if (!oldest) throw new Error('Contenu invalide : commit racine absent');
 export const lesson02: Lesson = {
   id: 'lesson-branches',
   title: 'Les branches',
-  minutes: 5,
   slides: [
     {
       kind: 'text',

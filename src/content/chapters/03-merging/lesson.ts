@@ -14,7 +14,6 @@ const demo = scenario()
 export const lesson03: Lesson = {
   id: 'lesson-merging',
   title: 'Fusionner',
-  minutes: 5,
   slides: [
     {
       kind: 'text',

@@ -47,7 +47,6 @@ export type LessonSlide = TextSlide | DiagramSlide | DemoSlide | RecapSlide;
 export interface Lesson {
   readonly id: string;
   readonly title: string;
-  readonly minutes: number;
   readonly slides: readonly LessonSlide[];
 }
 

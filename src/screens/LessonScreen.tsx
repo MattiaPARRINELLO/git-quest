@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { AnimatedSlide, DemoSlideView } from '../components/lesson/MiniDemo';
 import { Diagram } from '../components/lesson/diagrams';
 import { Icon } from '../components/ui/Icon';
-import { firstMissionOfChapter, findChapter, isMissionUnlocked } from '../content';
+import {
+  estimatedLessonMinutes,
+  firstMissionOfChapter,
+  findChapter,
+  isMissionUnlocked,
+} from '../content';
 import type { LessonSlide } from '../content/types';
 import { routePaths } from '../router/useHashRoute';
 import { useProgressStore } from '../store/useProgressStore';
@@ -134,7 +139,7 @@ export function LessonScreen({ chapterId }: { readonly chapterId: string }) {
             </span>
             <span className="inline-flex items-center gap-1">
               <Icon name="book" size={12} />
-              {chapter.lesson.minutes} min
+              {estimatedLessonMinutes(chapter.lesson)} min
             </span>
           </div>
         </div>

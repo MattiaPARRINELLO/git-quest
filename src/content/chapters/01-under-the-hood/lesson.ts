@@ -9,7 +9,6 @@ const demo = scenario()
 export const lesson01: Lesson = {
   id: 'lesson-under-the-hood',
   title: 'Sous le capot',
-  minutes: 4,
   slides: [
     {
       kind: 'text',
@@ -25,7 +24,7 @@ export const lesson01: Lesson = {
       kind: 'diagram',
       title: 'Du disque au snapshot',
       diagram: 'commit-snapshot',
-      caption: 'Index → commit : seuls les fichiers indexés entrent dans la photo.',
+      caption: 'Trois étapes : working dir, index, commit. Seul l’index entre dans la photo.',
     },
     {
       kind: 'text',

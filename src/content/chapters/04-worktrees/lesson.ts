@@ -12,7 +12,6 @@ const demo = scenario()
 export const lesson04: Lesson = {
   id: 'lesson-worktrees',
   title: 'Worktrees',
-  minutes: 5,
   slides: [
     {
       kind: 'text',

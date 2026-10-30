@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import type { DiagramId } from '../../../content/types';
@@ -76,47 +77,105 @@ function Arrow({ x1, x2, y, color = 'var(--border-strong)' }: { x1: number; x2: 
 }
 
 function SnapshotDiagram() {
-  const boxes = [
-    { x: 30, title: 'Working dir', files: ['README.md', 'app.ts'] },
-    { x: 250, title: 'Index', files: ['README.md', 'app.ts'] },
-    { x: 470, title: 'Commit', files: ['README.md'] },
+  const [step, setStep] = useState(0);
+  const steps = [
+    {
+      command: 'État initial : deux fichiers modifiés, rien d’indexé',
+      working: ['README.md', 'app.ts'],
+      index: [] as string[],
+      commit: [] as string[],
+      excluded: false,
+    },
+    {
+      command: 'git add README.md',
+      working: ['app.ts'],
+      index: ['README.md'],
+      commit: [] as string[],
+      excluded: false,
+    },
+    {
+      command: 'git commit -m "docs: snapshot"',
+      working: ['app.ts'],
+      index: ['README.md'],
+      commit: ['README.md'],
+      excluded: true,
+    },
+  ];
+  const current = steps[step] ?? steps[0];
+  if (!current) return null;
+  const zones = [
+    { x: 30, title: 'Working dir', files: current.working, color: 'var(--warning)' },
+    { x: 250, title: 'Index', files: current.index, color: 'var(--accent)' },
+    { x: 470, title: 'Commit', files: current.commit, color: 'var(--success)' },
   ];
 
   return (
-    <Frame>
-      {boxes.map((box, index) => (
-        <g key={box.title}>
-          <rect
-            x={box.x}
-            y={54}
-            width={170}
-            height={140}
-            rx={14}
-            fill="var(--panel-2)"
-            stroke="var(--border)"
-          />
-          <Label x={box.x + 85} y={80} color="var(--text)" size={13}>
-            {box.title}
-          </Label>
-          {box.files.map((file, fileIndex) => (
-            <g key={file}>
-              <rect x={box.x + 16} y={96 + fileIndex * 28} width={138} height={20} rx={5} fill="var(--panel)" stroke="var(--border)" />
-              <Label x={box.x + 26} y={110 + fileIndex * 28} anchor="start" size={10} color={file === 'README.md' ? 'var(--success)' : 'var(--muted)'}>
-                {file}
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-panel px-3 py-2">
+        <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
+          Étape {step + 1}/3
+        </span>
+        <code className="font-mono text-[11px] text-accent-2">{current.command}</code>
+      </div>
+
+      <Frame>
+        {zones.map((zone, index) => (
+          <g key={zone.title}>
+            <rect
+              x={zone.x}
+              y={54}
+              width={170}
+              height={140}
+              rx={14}
+              fill="var(--panel-2)"
+              stroke={zone.color}
+              strokeOpacity={0.35}
+            />
+            <Label x={zone.x + 85} y={80} color="var(--text)" size={13}>
+              {zone.title}
+            </Label>
+            {zone.files.length === 0 && (
+              <Label x={zone.x + 85} y={122} color="var(--muted)" size={10}>
+                {step === 0 ? 'vide' : '—'}
               </Label>
-            </g>
-          ))}
-          {index < boxes.length - 1 && (
-            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 + index * 0.2 }}>
-              <Arrow x1={box.x + 176} x2={box.x + 214} y={124} color="var(--accent)" />
-            </motion.g>
-          )}
-        </g>
-      ))}
-      <Label x={555} y={220} color="var(--accent)" size={11}>
-        snapshot complet
-      </Label>
-    </Frame>
+            )}
+            {zone.files.map((file, fileIndex) => (
+              <g key={file}>
+                <rect x={zone.x + 16} y={96 + fileIndex * 28} width={138} height={20} rx={5} fill="var(--panel)" stroke="var(--border)" />
+                <Label x={zone.x + 26} y={110 + fileIndex * 28} anchor="start" size={10} color={zone.color}>
+                  {file}
+                </Label>
+              </g>
+            ))}
+            {index === 0 && current.excluded && (
+              <Label x={zone.x + 85} y={174} color="var(--warning)" size={9}>
+                non indexé → pas dans la photo
+              </Label>
+            )}
+            {index < zones.length - 1 && (
+              <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+                <Arrow x1={zone.x + 176} x2={zone.x + 214} y={124} color="var(--accent)" />
+              </motion.g>
+            )}
+          </g>
+        ))}
+      </Frame>
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] text-muted">
+          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-warning" />Working dir</span>
+          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-accent" />Index</span>
+          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-success" />Commit</span>
+        </div>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => setStep((value) => (value >= steps.length - 1 ? 0 : value + 1))}
+        >
+          {step >= steps.length - 1 ? 'Recommencer' : 'Étape suivante'}
+        </button>
+      </div>
+    </div>
   );
 }
 

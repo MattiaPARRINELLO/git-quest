@@ -2,7 +2,7 @@ import { chapter01 } from './chapters/01-under-the-hood';
 import { chapter02 } from './chapters/02-branches';
 import { chapter03 } from './chapters/03-merging';
 import { chapter04 } from './chapters/04-worktrees';
-import type { Chapter, Mission } from './types';
+import type { Chapter, Lesson, Mission } from './types';
 
 export const chapters: readonly Chapter[] = [chapter01, chapter02, chapter03, chapter04];
 
@@ -67,4 +67,22 @@ export function afterMission(id: string): AfterMission {
   if (next.chapterId === current.chapterId) return { kind: 'mission', mission: next };
   const chapter = findChapter(next.chapterId);
   return chapter ? { kind: 'lesson', chapter } : { kind: 'home' };
+}
+
+
+/** Durée estimée à partir des slides (3 à 5 min). */
+export function estimatedLessonMinutes(lesson: Lesson): number {
+  const minutes = lesson.slides.reduce((total, slide) => {
+    switch (slide.kind) {
+      case 'text':
+        return total + 0.5;
+      case 'diagram':
+        return total + 0.75;
+      case 'demo':
+        return total + 1.25;
+      case 'recap':
+        return total + 0.5;
+    }
+  }, 0);
+  return Math.min(5, Math.max(3, Math.ceil(minutes)));
 }
