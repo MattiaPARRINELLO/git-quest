@@ -319,6 +319,7 @@ rechargement hors ligne.
 ### Routes
 
 - `#/` : carte des chapitres (`HomeScreen`).
+- `#/prologue` : `PrologueScreen`, leçon de syntaxe commune (`LessonDeck`).
 - `#/chapter/:id/lesson` : `LessonScreen`.
 - `#/mission/:id` : `MissionScreen` (réutilise `SandboxLayout`).
 - `#/sandbox` : bac à sable libre (inchangé).

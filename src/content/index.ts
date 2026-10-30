@@ -2,7 +2,10 @@ import { chapter01 } from './chapters/01-under-the-hood';
 import { chapter02 } from './chapters/02-branches';
 import { chapter03 } from './chapters/03-merging';
 import { chapter04 } from './chapters/04-worktrees';
+import { commandLineLesson } from './lessons/command-line';
 import type { Chapter, Lesson, Mission } from './types';
+
+export { commandLineLesson };
 
 export const chapters: readonly Chapter[] = [chapter01, chapter02, chapter03, chapter04];
 

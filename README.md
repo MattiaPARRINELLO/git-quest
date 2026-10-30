@@ -18,7 +18,8 @@ npm run build       # typecheck + build PWA
 npm run preview     # sert dist/ (vérifier le mode hors ligne)
 ```
 
-Routes : `#/` (carte des chapitres), `#/chapter/:id/lesson`, `#/mission/:id`,
+Routes : `#/` (carte des chapitres), `#/prologue` (syntaxe des commandes),
+`#/chapter/:id/lesson`, `#/mission/:id`,
 `#/sandbox` (bac à sable libre). Thème sombre par défaut, thème clair disponible.
 En local, servir via Portless : `portless gitquest npm run dev` puis
 `https://gitquest.localhost`. `npm run dev` fonctionne aussi sans Portless

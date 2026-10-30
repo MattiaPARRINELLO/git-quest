@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { chapters, estimatedLessonMinutes, isMissionUnlocked, missionSequence } from '../content';
+import { chapters, commandLineLesson, estimatedLessonMinutes, isMissionUnlocked, missionSequence } from '../content';
 import { briefingFor } from '../content/briefings';
 import { resumeContext, resumeTarget } from '../app/resume';
 import { useProgressStore } from '../store/useProgressStore';
@@ -33,6 +33,8 @@ export function HomeScreen() {
   const lastBriefing = lastCompleted === undefined ? undefined : briefingFor(lastCompleted.id);
   const done = Object.keys(completed).length;
   const percent = totalMissions === 0 ? 0 : Math.round((done / totalMissions) * 100);
+  const prologueRead =
+    (lessonSlides[commandLineLesson.id] ?? 0) >= commandLineLesson.slides.length - 1;
 
   return (
     <div className="scrollbar-thin h-full overflow-y-auto">
@@ -102,6 +104,30 @@ export function HomeScreen() {
               {percent}%
             </span>
           </div>
+        </section>
+
+        <section className="mt-4" aria-label="Prologue">
+          <a
+            href={routePaths.prologue}
+            className="group flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-panel px-4 py-3 transition-colors hover:border-border-strong"
+          >
+            <span className="flex min-w-0 items-start gap-3">
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-accent/40 bg-accent/10 text-accent">
+                <Icon name="book" size={14} />
+              </span>
+              <span className="min-w-0">
+                <span className="text-sm font-semibold text-text">Prologue · Lire une commande Git</span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-muted">
+                  Options, guillemets, placeholders : décoder n’importe quelle commande avant de
+                  commencer. {estimatedLessonMinutes(commandLineLesson)} min.
+                </span>
+              </span>
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-1 text-xs text-accent">
+              {prologueRead ? 'Relire' : 'Lire'}
+              <Icon name="arrow-right" size={13} />
+            </span>
+          </a>
         </section>
 
         {lastCompleted !== undefined && lastBriefing?.outcome !== undefined && (

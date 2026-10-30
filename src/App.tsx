@@ -3,6 +3,7 @@ import { TopBar } from './components/layout/TopBar';
 import { routePaths, useHashRoute } from './router/useHashRoute';
 import { HomeScreen } from './screens/HomeScreen';
 import { LessonScreen } from './screens/LessonScreen';
+import { PrologueScreen } from './screens/PrologueScreen';
 import { MissionScreen } from './screens/MissionScreen';
 import { SandboxScreen } from './screens/SandboxScreen';
 import { NovaScreen } from './screens/NovaScreen';
@@ -42,6 +43,9 @@ export default function App() {
       break;
     case 'lesson':
       screen = <LessonScreen key={route.chapterId} chapterId={route.chapterId} />;
+      break;
+    case 'prologue':
+      screen = <PrologueScreen />;
       break;
     case 'mission':
       screen = <MissionScreen key={route.missionId} missionId={route.missionId} />;
