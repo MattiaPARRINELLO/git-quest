@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { scenario } from '../../engine/scenario';
 import { buildChain, entryOf, resolveTemplate, runReference } from '../chain';
+import { applyPrelude } from '../chain';
 import type { ChainMission } from '../chain';
 import type { SlotDefinition } from '../types';
 
@@ -98,5 +99,38 @@ describe('chaîne de référence', () => {
     // Placeholder fourni par la table précédente absente : résolution par contenu.
     const after = runReference(entry, ['git add app.ts', 'git commit -m "fix: app"'], {}, slots1);
     expect(after.commits[after.branches.main ?? '']?.message).toBe('fix: app');
+  });
+
+  it('attribue les commits de prelude au coéquipier', () => {
+    const step = {
+      id: 'p',
+      teammate: 'lea' as const,
+      commands: ['edit app.ts "v2"', 'git add app.ts', 'git commit -m "chore: app"'],
+    };
+    const chain = buildChain(root, [
+      { missionId: 'm', prelude: [step], slots: [], reference: [] },
+    ]);
+    const entry = entryOf(chain, 'm');
+    expect(entry.commits[entry.branches.main ?? '']?.author.name).toBe('Léa Moreau');
+  });
+
+  it('ne réapplique pas une étape dont la garde est vraie', () => {
+    const step = {
+      id: 'p',
+      teammate: 'samir' as const,
+      commands: ['edit app.ts "v2"', 'git add app.ts', 'git commit -m "chore: app"'],
+    };
+    const chain = buildChain(root, [
+      { missionId: 'm', prelude: [step], slots: [], reference: [] },
+    ]);
+    const entry = entryOf(chain, 'm');
+
+    const replayed = applyPrelude(entry, [
+      {
+        ...step,
+        when: (state) => Object.values(state.commits).some((commit) => commit.message === 'chore: app'),
+      },
+    ]);
+    expect(replayed).toBe(entry);
   });
 });

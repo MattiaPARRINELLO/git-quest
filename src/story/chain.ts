@@ -1,7 +1,8 @@
 import { execute } from '../engine/execute';
 import type { RepoState } from '../engine/types';
+import { stampAuthor, teammateAuthor } from './actor';
 import { associateSlots, buildSlotTable } from './slots';
-import type { SlotDefinition, SlotTable } from './types';
+import type { SlotDefinition, SlotTable, TeammateId } from './types';
 
 /**
  * Chaîne de référence du story-repo.
@@ -14,6 +15,8 @@ export interface PreludeStep {
   readonly id: string;
   /** Garde d'idempotence : si vrai, l'étape est déjà appliquée. */
   readonly when?: (state: RepoState) => boolean;
+  /** Auteur des commits créés par l'étape (coéquipier). */
+  readonly teammate?: TeammateId;
   readonly commands: readonly string[];
 }
 
@@ -54,7 +57,14 @@ export function applyPrelude(
   let current = state;
   for (const step of prelude) {
     if (step.when?.(current) === true) continue;
+    const before = new Set(Object.keys(current.commits));
     current = runAll(current, step.commands);
+    if (step.teammate !== undefined) {
+      const author = teammateAuthor(step.teammate);
+      for (const hash of Object.keys(current.commits)) {
+        if (!before.has(hash)) current = stampAuthor(current, hash, author);
+      }
+    }
   }
   return current;
 }
