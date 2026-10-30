@@ -29,7 +29,28 @@ export const mission42: Mission = {
   title: 'Deux casquettes',
   story:
     "La doc de Nova doit être livrée pendant que tu réécris le README sur main. Impossible de tout faire dans le même working dir sans mélanger les deux chantiers. Monte un worktree dédié à la branche docs et avance dessus sans interrompre ton travail en cours.",
+  situation:
+    'HEAD est sur main avec README modifié ; docs pointe sur le même commit, non checkout ailleurs.',
   objective: 'Ajoute GUIDE.md sur docs depuis un worktree séparé, sans commiter le WIP de main.',
+  steps: [
+    {
+      label: 'Créer le worktree docs',
+      done: (state) => worktreePaths(state).includes('~/gitquest-docs'),
+    },
+    {
+      label: 'Committer GUIDE.md sur docs',
+      done: (state) => branchFile(state, 'docs', 'GUIDE.md') === '# Guide Nova',
+    },
+    {
+      label: 'Revenir sur main avec le WIP intact',
+      done: (state) =>
+        worktreePaths(state).includes('~/gitquest-docs') &&
+        state.activeWorktree === 'main' &&
+        workingFile(state, 'README.md') === '# Nova — WIP de documentation',
+    },
+  ],
+  takeaway:
+    'Deux worktrees permettent de mener deux branches en parallèle sans stash ni commit temporaire.',
   difficulty: 2,
   par: 6,
   initialState: initial,

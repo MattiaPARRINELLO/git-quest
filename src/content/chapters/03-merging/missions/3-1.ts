@@ -31,7 +31,24 @@ export const mission31: Mission = {
   title: 'Livrer sans cérémonie',
   story:
     "La feature d'export CSV est terminée et main n'a pas bougé depuis. Le release manager veut la livrer ce soir : ici, aucune divergence, Git peut simplement faire glisser l'étiquette main vers le travail déjà fait.",
+  situation: 'main est un ancêtre direct de feature : aucun commit de fusion n’existe encore.',
   objective: 'Fusionne feature dans main en avance rapide, sans créer de commit supplémentaire.',
+  steps: [
+    {
+      label: 'Fusionner feature dans main',
+      done: (state) => branchTip(state, 'main') === branchTip(state, 'feature'),
+    },
+    {
+      label: 'Ne créer aucun commit de fusion',
+      done: (state) =>
+        branchTip(state, 'main') === branchTip(state, 'feature') && commitCount(state) === 2,
+    },
+    {
+      label: 'Vérifier que export.ts arrive sur main',
+      done: (state) => headFile(state, 'src/export.ts') !== undefined,
+    },
+  ],
+  takeaway: 'Fast-forward : Git déplace l’étiquette, il ne crée pas de commit.',
   difficulty: 2,
   par: 1,
   initialState: initial,

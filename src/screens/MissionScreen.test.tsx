@@ -74,16 +74,16 @@ describe('MissionScreen', () => {
 
     const input = await screen.findByRole('textbox', { name: /commande git/i });
     for (const command of [
-      'edit README.md "version 2"',
-      'git add README.md',
-      'edit README.md "version 3 (non commitée)"',
+      'edit app.ts "v2"',
+      'git add app.ts',
+      'edit app.ts "v3"',
       'git commit -m "docs: v2"',
     ]) {
       await user.type(input, `${command}{Enter}`);
     }
 
     await user.click(
-      await screen.findByRole('button', { name: /La version 2, celle de l’index/i }),
+      await screen.findByRole('button', { name: /v2, la version indexée/i }),
     );
 
     await screen.findByRole('dialog', { name: /Mission 1.2 réussie/i });
@@ -91,6 +91,18 @@ describe('MissionScreen', () => {
     expect(continuer).toHaveAttribute('href', '#/mission/piege-am');
     expect(screen.queryByRole('button', { name: /Continuer/i })).toBeNull();
     expect(screen.queryByText(/Bonne prédiction/i)).toBeNull();
+  });
+
+  it('pré-remplit le terminal via les commandes suggérées', async () => {
+    const user = userEvent.setup();
+    render(<MissionScreen missionId="trois-zones" />);
+
+    const input = await screen.findByRole('textbox', { name: /commande git/i });
+    await user.click(screen.getByText('Commandes utiles ici'));
+    await user.click(screen.getByRole('button', { name: 'cat a.txt' }));
+
+    expect(input).toHaveValue('cat a.txt');
+    expect(useRepoStore.getState().commandHistory).toEqual([]);
   });
 
   it('refuse une commande interdite sans exécuter', async () => {

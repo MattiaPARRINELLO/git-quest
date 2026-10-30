@@ -62,6 +62,15 @@ export function MissionComplete({
           {mission.par}
         </p>
 
+        {mission.takeaway && (
+          <div className="mt-3 rounded-xl border border-accent/25 bg-accent-soft px-3 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-accent">
+              Ce que tu dois remarquer
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-text">{mission.takeaway}</p>
+          </div>
+        )}
+
         {mission.successNote && (
           <p className="mt-3 rounded-xl border border-success/25 bg-success/10 px-3 py-2 text-xs leading-relaxed text-success">
             {mission.successNote}

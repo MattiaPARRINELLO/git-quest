@@ -29,8 +29,29 @@ export const mission22: Mission = {
   title: 'Qui avance ?',
   story:
     "Tu es sur feature, et main pointe encore sur le même commit. Avant de livrer, l’équipe veut comprendre une règle simple : quand tu commites, quelle étiquette bouge ? Fais avancer feature, puis main de son côté pour créer deux lignes parallèles.",
+  situation: 'main et feature pointent sur le même commit ; HEAD est sur feature.',
   objective:
     'Commite feature.ts sur feature, puis main.ts sur main, et laisse les deux branches diverger.',
+  steps: [
+    {
+      label: 'Committer feature.ts sur feature',
+      done: (state) => branchFile(state, 'feature', 'feature.ts') !== undefined,
+    },
+    {
+      label: 'Basculer sur main',
+      done: (state) => headBranch(state) === 'main',
+    },
+    {
+      label: 'Committer main.ts sur main',
+      done: (state) => branchFile(state, 'main', 'main.ts') !== undefined,
+    },
+    {
+      label: 'Faire diverger main et feature',
+      done: (state) =>
+        branchTip(state, 'main') !== branchTip(state, 'feature') && commitCount(state) === 3,
+    },
+  ],
+  takeaway: 'Un commit ne déplace que la branche sur laquelle HEAD est attaché.',
   difficulty: 2,
   par: 7,
   initialState: initial,

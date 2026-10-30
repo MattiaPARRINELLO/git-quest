@@ -188,8 +188,11 @@ interface Mission {
   chapterId: string;
   order: number;
   title: string;
-  story: string;
+  story: string;                            // 3 phrases maximum
+  situation: string;                        // état de départ, 1 phrase
   objective: string;
+  steps: readonly { label: string; done: (state) => boolean }[]; // checklist 2-4
+  takeaway: string;                         // « Ce que tu dois remarquer »
   difficulty: 1 | 2 | 3;
   par: number;
   initialState: RepoState;                 // construit via scenario()
@@ -197,11 +200,27 @@ interface Mission {
   hints: readonly [string, string, string];
   solution: readonly string[];             // rejouée par un test
   predictions?: readonly Prediction[];
-  forbidden?: readonly string[];
+  forbidden?: readonly ForbiddenCommand[];
+  suggestedCommands?: readonly string[];    // 3-5, pré-remplissent le terminal
+  validateAttempt?: (commands: readonly string[]) => ValidationResult;
 }
 ```
 
 Une mission est un fichier dans `src/content/chapters/<chapitre>/missions/`.
+La checklist `steps` est cochée en direct dans le panneau mission ; `validate`
+reste la seule règle de réussite. `afterMission(id)` décide de la destination du
+bouton « Continuer » : mission suivante, cours du chapitre suivant, ou carte.
+
+Le panneau mission propose aussi « Commandes utiles ici » (`suggestedCommands`),
+qui pré-remplit le terminal sans exécuter.
+
+### Découvrabilité et inspection
+
+- `help` (app) liste les commandes groupées avec exemples ; une commande inconnue
+  suggère `help` et la commande la plus proche.
+- `cat <fichier>` lit le working dir sans mutation.
+- Le pipeline affiche le contenu d'un fichier par zone au survol/clic et signale
+  les écarts (`≠ index`, `≠ HEAD`).
 `validate` s'appuie sur les helpers de `engine/validate.ts` (`branchTip`,
 `isHeadDetached`, `fileContent`, …). La solution de chaque mission est testée :
 elle doit mener à `validate(state).ok === true`.

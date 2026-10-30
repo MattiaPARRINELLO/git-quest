@@ -30,8 +30,9 @@ strict, Zustand, Tailwind v4, Framer Motion, SVG maison, Vitest, IndexedDB via
   `docs/ARCHITECTURE.md` et `docs/VERIFY.md`.
 - Ajouter une commande = parseur + handler + registry + test dédié + event/explanation.
 - Ajouter une mission = fichier dans `src/content/chapters/<chapitre>/missions/` +
-  une ligne dans le `index.ts` du chapitre. Sa solution doit valider la mission,
-  son état initial ne doit pas la valider, et `par === solution.length`.
+  une ligne dans le `index.ts` du chapitre. Champs requis : `situation`, `steps`
+  (2-4, fausses au départ, vraies à la fin), `takeaway` ; story ≤ 3 phrases,
+  `par === solution.length`. `suggestedCommands` : 3-5 commandes pré-remplies.
 - Les cours précèdent toujours le concept utilisé par une mission. Un slide `demo`
   rejoue de vraies commandes avec `scenario()`/`execute`, jamais une simulation UI.
 - `validateAttempt(commands)` sert aux missions dont la réussite dépend d'un essai

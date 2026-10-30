@@ -41,9 +41,30 @@ export const mission41: Mission = {
   number: '4.1',
   title: 'Le bug de prod',
   story:
-    "Tu es en pleine refonte sur feature, avec des modifications non commitées dans src/app.ts. Un bug critique tombe en prod. Réflexe naturel : git switch main — mais Git refuse net, car main a aussi modifié src/app.ts et ton WIP serait écrasé. Un commit bricolé ou un stash ne sont pas acceptables : il te faut un second espace de travail relié au même dépôt.",
+    "Tu es en pleine refonte sur feature, avec des modifications non commitées dans src/app.ts. Un bug critique tombe en prod : réflexe naturel, git switch main — mais Git refuse net, car main a aussi modifié src/app.ts et ton WIP serait écrasé. Un commit bricolé ou un stash ne sont pas acceptables : il te faut un second espace de travail relié au même dépôt.",
+  situation:
+    'HEAD est sur feature avec src/app.ts modifié non commité ; main a aussi touché ce fichier.',
   objective:
     'Corrige bug.txt sur une branche hotfix dans un worktree séparé, sans toucher au WIP de feature.',
+  steps: [
+    {
+      label: 'Créer un worktree hotfix à partir de main',
+      done: (state) => worktreePaths(state).includes('~/gitquest-hotfix'),
+    },
+    {
+      label: 'Committer le correctif sur hotfix',
+      done: (state) => branchFile(state, 'hotfix', 'bug.txt') === 'corrigé',
+    },
+    {
+      label: 'Revenir au worktree principal avec le WIP intact',
+      done: (state) =>
+        worktreePaths(state).includes('~/gitquest-hotfix') &&
+        state.activeWorktree === 'main' &&
+        workingFile(state, 'src/app.ts') === "export const app = 'refonte WIP';",
+    },
+  ],
+  takeaway:
+    'Un worktree est un second bureau sur le même dépôt : HEAD, l’index et le disque y sont indépendants.',
   difficulty: 3,
   par: 6,
   initialState: initial,

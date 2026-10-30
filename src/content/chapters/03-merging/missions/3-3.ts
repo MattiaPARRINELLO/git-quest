@@ -47,8 +47,29 @@ export const mission33: Mission = {
   title: 'Le ménage',
   story:
     "Un collègue est parti en laissant deux branches derrière lui. feature-login est déjà fusionnée dans main ; experiment, elle, contient un test de cache jamais intégré. Le lead veut un nettoyage propre : constater le refus de -d sur la branche non fusionnée, puis choisir consciemment entre la merger ou forcer sa suppression.",
+  situation:
+    'feature-login est déjà fusionnée ; experiment contient un commit jamais intégré à main.',
   objective:
     'Supprime feature-login et experiment. Pour experiment : tente -d, puis fusionne-la ou utilise -D.',
+  steps: [
+    {
+      label: 'Supprimer feature-login',
+      done: (state) => !hasBranch(state, 'feature-login'),
+    },
+    {
+      label: 'Supprimer experiment',
+      done: (state) => !hasBranch(state, 'experiment'),
+    },
+    {
+      label: 'Choisir consciemment le sort d’experiment',
+      done: (state) =>
+        !hasBranch(state, 'experiment') &&
+        (branchTip(state, 'main') === experimentTip ||
+          branchTip(state, 'main') === initialMainTip),
+    },
+  ],
+  takeaway:
+    'git branch -d vérifie que la branche est fusionnée ; -D force la suppression, avec un risque assumé.',
   difficulty: 3,
   par: 3,
   initialState: initial,

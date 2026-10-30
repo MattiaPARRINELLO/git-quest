@@ -5,6 +5,7 @@ import {
   branchTip,
   check,
   commitCount,
+  hasBranch,
   headBranch,
   headFile,
 } from '../../../../engine/validate';
@@ -28,7 +29,21 @@ export const mission21: Mission = {
   title: 'Le pointeur fantôme',
   story:
     "L'équipe veut tester une idée de notes internes sans polluer main. Tu crées une branche experiment, tu y travailles, puis tu vérifies que main n'a pas bougé d'un millimètre. Une branche n'est qu'une étiquette : c'est le moment de le prouver.",
+  situation: 'HEAD est sur main ; la branche experiment n’existe pas encore.',
   objective: 'Crée la branche experiment, commite notes.txt dessus, et laisse main intacte.',
+  steps: [
+    { label: 'Créer la branche experiment', done: (state) => hasBranch(state, 'experiment') },
+    {
+      label: 'Committer notes.txt sur experiment',
+      done: (state) => branchFile(state, 'experiment', 'notes.txt') === 'notes de la branche',
+    },
+    {
+      label: 'Terminer sur experiment avec main inchangée',
+      done: (state) =>
+        headBranch(state) === 'experiment' && branchTip(state, 'main') === mainTip,
+    },
+  ],
+  takeaway: 'Une branche est un pointeur : seule l’étiquette de HEAD avance au commit.',
   difficulty: 2,
   par: 5,
   initialState: initial,

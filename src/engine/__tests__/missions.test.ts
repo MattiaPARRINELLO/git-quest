@@ -23,6 +23,23 @@ describe('missions (contenu réel)', () => {
       expect(mission.hints).toHaveLength(3);
       expect(mission.story.length).toBeGreaterThan(80);
       expect(mission.objective.length).toBeGreaterThan(10);
+      expect(mission.situation.length).toBeGreaterThan(20);
+      expect(mission.takeaway.length).toBeGreaterThan(20);
+      expect(mission.steps.length).toBeGreaterThanOrEqual(2);
+      expect(mission.steps.length).toBeLessThanOrEqual(4);
+
+      const sentences = mission.story.split(/[.!?](?:\s|$)/).filter((part) => part.trim() !== '');
+      expect(sentences.length).toBeLessThanOrEqual(3);
+
+      for (const step of mission.steps) {
+        expect(step.done(mission.initialState), `étape cochée au départ : ${step.label}`).toBe(false);
+        expect(step.done(finalState), `étape non cochée à la fin : ${step.label}`).toBe(true);
+      }
+
+      if (mission.suggestedCommands) {
+        expect(mission.suggestedCommands.length).toBeGreaterThanOrEqual(3);
+        expect(mission.suggestedCommands.length).toBeLessThanOrEqual(5);
+      }
     });
   }
 

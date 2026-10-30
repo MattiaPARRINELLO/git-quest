@@ -35,7 +35,28 @@ export const mission43: Mission = {
   title: 'Ranger le chantier',
   story:
     "Le hotfix est livré, la branche hotfix reste utile pour l'historique, mais le worktree temporaire traîne sur le disque. Git refuse de supprimer un worktree sale ; celui-ci est propre, tu peux donc ranger sans risque.",
+  situation:
+    'Le worktree ~/gitquest-hotfix existe encore ; la branche hotfix contient le correctif livré.',
   objective: 'Supprime le worktree ~/gitquest-hotfix sans supprimer la branche hotfix.',
+  steps: [
+    {
+      label: 'Supprimer le worktree hotfix',
+      done: (state) => !worktreePaths(state).includes('~/gitquest-hotfix'),
+    },
+    {
+      label: 'Conserver la branche hotfix',
+      done: (state) =>
+        !worktreePaths(state).includes('~/gitquest-hotfix') && hasBranch(state, 'hotfix'),
+    },
+    {
+      label: 'Conserver le correctif dans l’historique',
+      done: (state) =>
+        !worktreePaths(state).includes('~/gitquest-hotfix') &&
+        branchFile(state, 'hotfix', 'bug.txt') === 'corrigé',
+    },
+  ],
+  takeaway:
+    'Supprimer un worktree ne supprime pas la branche : l’historique et les commits restent dans le dépôt.',
   difficulty: 2,
   par: 1,
   initialState: initial,

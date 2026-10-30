@@ -99,8 +99,14 @@ export const mission: Mission = {
   chapterId: 'worktrees',
   order: 1,
   title: 'Le bug de prod',
-  story: '…',
+  story: '…',                          // 3 phrases max
+  situation: 'HEAD est sur feature avec un WIP non commité.',
   objective: 'Corrige la prod sans toucher à ton WIP.',
+  steps: [
+    { label: 'Créer le worktree hotfix', done: (state) => worktreePaths(state).length === 2 },
+    { label: 'Commiter le correctif', done: (state) => headFile(state, 'bug.txt') === 'corrigé' },
+  ],
+  takeaway: 'Un worktree est un second bureau sur le même dépôt.',
   difficulty: 3,
   par: 8,
   initialState: scenario()
@@ -114,6 +120,7 @@ export const mission: Mission = {
   forbidden: [{ prefix: 'git stash', message: '…' }],
   hints: ['vague', 'précis', 'solution'],
   solution: ['git worktree add ../hotfix -b hotfix main', 'cd ../hotfix', '…'],
+  suggestedCommands: ['git status', 'git worktree list', 'git worktree add ../hotfix -b hotfix main'],
 };
 ```
 

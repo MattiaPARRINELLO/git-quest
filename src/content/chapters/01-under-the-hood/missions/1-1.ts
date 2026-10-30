@@ -5,6 +5,7 @@ import {
   commitCount,
   headBranch,
   headFile,
+  indexFile,
   workingFile,
 } from '../../../../engine/validate';
 import type { Mission } from '../../../types';
@@ -27,7 +28,26 @@ export const mission11: Mission = {
   title: 'Les 3 zones',
   story:
     "Deux fichiers sont modifiés dans le projet Nova : a.txt et b.txt. Le lead ne veut livrer que le correctif de a.txt maintenant, et garder b.txt pour la prochaine release. Toute la question est de savoir ce que le commit va réellement photographier.",
+  situation: 'a.txt et b.txt sont modifiés ; rien n’est encore indexé.',
   objective: 'Commite uniquement a.txt et laisse b.txt modifié dans le working dir.',
+  steps: [
+    {
+      label: 'Indexer a.txt avec git add',
+      done: (state) => indexFile(state, 'a.txt') === 'version 2',
+    },
+    {
+      label: 'Committer a.txt en version 2',
+      done: (state) => headFile(state, 'a.txt') === 'version 2',
+    },
+    {
+      label: 'Laisser b.txt modifié hors du commit',
+      done: (state) =>
+        headFile(state, 'a.txt') === 'version 2' &&
+        workingFile(state, 'b.txt') === 'version 2' &&
+        headFile(state, 'b.txt') === 'version 1',
+    },
+  ],
+  takeaway: 'Le commit ne prend que l’index : b.txt reste hors de la photo tant qu’il n’est pas indexé.',
   difficulty: 1,
   par: 2,
   initialState: initial,

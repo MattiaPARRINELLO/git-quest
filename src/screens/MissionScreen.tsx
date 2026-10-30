@@ -39,6 +39,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const mission = findMission(missionId);
   const completedMissions = useProgressStore((store) => store.completed);
   const completeMission = useProgressStore((store) => store.completeMission);
+  const repoState = useRepoStore((store) => store.state);
 
   const [commandsUsed, setCommandsUsed] = useState(0);
   const [hintsUsed, setHintsUsed] = useState(0);
@@ -238,6 +239,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
         missionPanel={
           <MissionPanel
             mission={mission}
+            state={repoState}
             commandsUsed={commandsUsed}
             hintsUsed={hintsUsed}
             onHint={() => setHintsUsed((current) => Math.min(mission.hints.length, current + 1))}

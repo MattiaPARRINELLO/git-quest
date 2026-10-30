@@ -100,6 +100,11 @@ export function activeWorktreePath(state: RepoState): string {
   return activeWorktree(state).path;
 }
 
+/** Contenu d'un fichier dans l'index du worktree actif. */
+export function indexFile(state: RepoState, path: string): string | undefined {
+  return activeWorktree(state).index[path];
+}
+
 /** Contenu d'un fichier dans le working dir du worktree actif. */
 export function workingFile(state: RepoState, path: string): string | undefined {
   return activeWorktree(state).workingDir[path];

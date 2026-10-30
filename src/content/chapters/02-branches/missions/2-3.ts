@@ -6,6 +6,7 @@ import {
   check,
   commitCount,
   headBranch,
+  isHeadDetached,
 } from '../../../../engine/validate';
 import type { Mission } from '../../../types';
 
@@ -49,8 +50,31 @@ export const mission23: Mission = {
   number: '2.3',
   title: 'Le commit perdu',
   story:
-    "Une régression est apparue dans l'API de facturation. Tu te détaches sur l'ancien commit pour enquêter, tu commites une expérience, puis tu reviens sur main. Git t'avertit : ce commit n'est plus relié à aucune branche. Avant qu'il ne disparaisse, garde-le dans une branche de sauvetage.",
+    "Une régression est apparue dans l'API de facturation. Tu te détaches sur l'ancien commit pour enquêter, tu commites une expérience, puis tu reviens sur main. Git t'avertit alors que ce commit n'est plus relié à aucune branche : garde-le dans une branche de sauvetage avant qu'il ne disparaisse.",
+  situation: 'HEAD est sur main ; aucune branche ne protège encore l’expérience à venir.',
   objective: `Détache-toi sur ${oldShort}, commite exp.txt, reviens sur main, puis crée sauvetage sur le commit orphelin.`,
+  steps: [
+    {
+      label: 'Passer par un HEAD détaché sur l’ancien commit',
+      done: (state) =>
+        isHeadDetached(state) || commitCount(state) === initialCount + 1,
+    },
+    {
+      label: 'Créer le commit expérimental',
+      done: (state) => commitCount(state) === initialCount + 1,
+    },
+    {
+      label: 'Revenir sur main',
+      done: (state) =>
+        headBranch(state) === 'main' && commitCount(state) === initialCount + 1,
+    },
+    {
+      label: 'Créer sauvetage sur le commit orphelin',
+      done: (state) => branchTip(state, 'sauvetage') === orphan.hash,
+    },
+  ],
+  takeaway:
+    'Un commit détaché n’appartient à aucune branche : il devient orphelin dès qu’on repart, sauf si on crée une étiquette dessus.',
   difficulty: 3,
   par: 6,
   initialState: base,

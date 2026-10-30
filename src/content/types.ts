@@ -76,6 +76,11 @@ export interface ForbiddenCommand {
   readonly message: string;
 }
 
+export interface MissionStep {
+  readonly label: string;
+  readonly done: (state: RepoState) => boolean;
+}
+
 export interface Mission {
   readonly id: string;
   readonly chapterId: string;
@@ -84,7 +89,10 @@ export interface Mission {
   readonly number: string;
   readonly title: string;
   readonly story: string;
+  readonly situation: string;
   readonly objective: string;
+  readonly steps: readonly MissionStep[];
+  readonly takeaway: string;
   readonly difficulty: 1 | 2 | 3;
   readonly par: number;
   readonly initialState: RepoState;

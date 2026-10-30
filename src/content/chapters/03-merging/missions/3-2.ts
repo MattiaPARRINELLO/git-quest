@@ -33,7 +33,35 @@ export const mission32: Mission = {
   title: 'Le point de convergence',
   story:
     "Cette fois, main et feature ont toutes les deux avancé : la feature de notifications côtoie un correctif de configuration. Git doit créer un point de convergence qui relie les deux lignes, pas choisir un camp.",
+  situation: 'main et feature ont divergé : notifications et configuration vivent séparément.',
   objective: 'Fusionne feature dans main et vérifie que le commit de fusion a deux parents.',
+  steps: [
+    {
+      label: 'Créer un commit de fusion',
+      done: (state) => {
+        const tip = branchTip(state, 'main');
+        const commit = tip === undefined ? undefined : state.commits[tip];
+        return commit?.parents.length === 2;
+      },
+    },
+    {
+      label: 'Récupérer notify.ts sur main',
+      done: (state) => headFile(state, 'src/notify.ts') !== undefined,
+    },
+    {
+      label: 'Conserver config.ts après la fusion',
+      done: (state) => {
+        const tip = branchTip(state, 'main');
+        const commit = tip === undefined ? undefined : state.commits[tip];
+        return (
+          commit?.parents.length === 2 &&
+          commit.snapshot['src/config.ts'] !== undefined
+        );
+      },
+    },
+  ],
+  takeaway:
+    'Un merge commit a deux parents : il relie les deux lignes d’historique au lieu d’en choisir une.',
   difficulty: 2,
   par: 1,
   initialState: initial,

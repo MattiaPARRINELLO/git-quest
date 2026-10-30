@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Mission } from '../../content/types';
+import type { RepoState } from '../../engine/types';
 import { starsFor } from '../../app/mission';
 import { cn } from '../../lib/cn';
 import { Icon } from '../ui/Icon';
 
 interface MissionPanelProps {
   readonly mission: Mission;
+  readonly state: RepoState;
   readonly commandsUsed: number;
   readonly hintsUsed: number;
   readonly onHint: () => void;
@@ -15,6 +17,7 @@ interface MissionPanelProps {
 
 export function MissionPanel({
   mission,
+  state,
   commandsUsed,
   hintsUsed,
   onHint,
@@ -24,6 +27,7 @@ export function MissionPanel({
   const stars = starsFor(commandsUsed, mission.par);
   const remainingHints = mission.hints.length - hintsUsed;
   const revealed = mission.hints.slice(0, hintsUsed);
+  const stepsDone = mission.steps.filter((step) => step.done(state)).length;
 
   return (
     <section
@@ -49,7 +53,12 @@ export function MissionPanel({
                 <span className="text-muted/40">{'★'.repeat(3 - stars)}</span>
               </span>
             </div>
-            <p className="mt-0.5 text-[11px] leading-snug text-muted">{mission.objective}</p>
+            <p className="mt-0.5 text-[11px] leading-snug text-muted">
+              <span className="mr-1 text-[9px] uppercase tracking-wider text-muted/70">
+                Situation de départ ·
+              </span>
+              {mission.situation}
+            </p>
           </div>
         </div>
 
@@ -95,8 +104,38 @@ export function MissionPanel({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="scrollbar-thin max-h-40 overflow-y-auto px-3 pb-3">
-              <p className="text-xs leading-relaxed text-muted">{mission.story}</p>
+            <div className="scrollbar-thin max-h-52 overflow-y-auto px-3 pb-3">
+              <div className="rounded-lg border border-border bg-panel-2/50 px-2.5 py-2">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted">
+                    Objectif
+                  </p>
+                  <span className="font-mono text-[10px] text-muted">
+                    {stepsDone}/{mission.steps.length}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs leading-relaxed text-text">{mission.objective}</p>
+                <ul className="mt-2 space-y-1">
+                  {mission.steps.map((step) => {
+                    const done = step.done(state);
+                    return (
+                      <li
+                        key={step.label}
+                        className={`flex items-start gap-1.5 text-[11px] leading-relaxed ${
+                          done ? 'text-success' : 'text-muted'
+                        }`}
+                      >
+                        <span className="mt-0.5 font-mono text-[10px]">{done ? '✓' : '○'}</span>
+                        <span className={done ? 'line-through decoration-success/50' : ''}>
+                          {step.label}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+
+              <p className="mt-2 text-xs leading-relaxed text-muted">{mission.story}</p>
 
               {revealed.length > 0 && (
                 <ul className="mt-2 space-y-1.5">
@@ -112,6 +151,12 @@ export function MissionPanel({
                 </ul>
               )}
 
+
+              <p className="mt-2 text-[10px] text-muted/70">
+                La validation se fait après chaque commande. En cas d’échec, utilise « Indice »
+                pour comprendre ce qui manque.
+              </p>
+            </div>
               {mission.suggestedCommands && mission.suggestedCommands.length > 0 && (
                 <details className="mt-2 rounded-lg border border-border bg-panel-2/50 px-2.5 py-2">
                   <summary className="cursor-pointer text-[11px] font-medium text-text">
@@ -132,12 +177,6 @@ export function MissionPanel({
                   </div>
                 </details>
               )}
-
-              <p className="mt-2 text-[10px] text-muted/70">
-                La validation se fait après chaque commande. En cas d’échec, utilise « Indice »
-                pour comprendre ce qui manque.
-              </p>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
