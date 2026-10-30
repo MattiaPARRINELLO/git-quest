@@ -50,6 +50,9 @@ export function NovaScreen() {
 
   const numbers = stats(nova, story.journal);
   const commit = selected === null ? undefined : nova.commits[selected];
+  const origin = selected === null
+    ? undefined
+    : Object.values(story.slots).find((record) => record.commitHash === selected);
 
   const copyLog = async (): Promise<void> => {
     try {
@@ -137,6 +140,9 @@ export function NovaScreen() {
                 <p className="text-[11px] text-muted">
                   Orphelin : {unreferencedHashes(nova).includes(commit.hash) ? 'oui' : 'non'}
                 </p>
+                {origin !== undefined && (
+                  <p className="text-[11px] text-muted">Mission d’origine : {origin.missionId}</p>
+                )}
               </div>
             ) : (
               <p className="text-xs leading-relaxed text-muted">

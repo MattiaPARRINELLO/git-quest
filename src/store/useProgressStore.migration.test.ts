@@ -40,7 +40,7 @@ describe('migration de progression v1 → v2', () => {
     expect(state.completed['commit-perdu']).toEqual({ stars: 2 });
     expect(state.lessonSlides.branches).toBe(2);
     expect(state.draft).toBeNull();
-    expect(state.story.nova).toBeNull();
+    expect(state.story.nova).not.toBeNull();
     expect(state.story.journal).toEqual([{ kind: 'migration', from: 1 }]);
     expect(await storage.get(V2, null)).toBeNull();
   });
@@ -59,7 +59,7 @@ describe('migration de progression v1 → v2', () => {
     expect(saved?.version).toBe(2);
     expect(saved?.completed['commit-perdu']).toEqual({ stars: 3 });
     expect(saved?.lessonSlides.branches).toBe(2);
-    expect(saved?.story.nova).toBeNull();
+    expect(saved?.story.nova).not.toBeNull();
     expect(saved?.story.journal.map((entry) => entry.kind)).toContain('mission-complete');
 
     // Le miroir v1 reste minimal et lisible par les anciens builds.

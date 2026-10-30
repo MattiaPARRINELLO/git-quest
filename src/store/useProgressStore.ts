@@ -4,7 +4,14 @@ import type { Mission } from '../content/types';
 import { missionSequence } from '../content';
 import type { RepoState } from '../engine/types';
 import { applyPrelude } from '../story/chain';
-import { checkpointAfter, entryState } from '../story/checkpoints';
+import {
+  checkpointAfter,
+  checkpointBeforeWith,
+  entryState,
+  entryStateWith,
+} from '../story/checkpoints';
+import { lastCompletedMission as lastCompletedInJournal } from '../story/journal';
+import { associateSlots, buildSlotTable } from '../story/slots';
 import { STORY_SPECS } from '../story/specs';
 import type { MissionDraft, PersistedStory } from '../story/types';
 
@@ -86,21 +93,33 @@ function hasLaterCompletion(
     .some((mission) => completed[mission.id] !== undefined);
 }
 
-function previousCheckpoint(missionId: string): RepoState | null {
-  const index = missionSequence.findIndex((mission) => mission.id === missionId);
-  if (index <= 0) return null;
+/** Messages du joueur par slot, pour reconstruire l'histoire au recalage. */
+function messageOverrides(story: PersistedStory): Record<string, string> {
+  const messages: Record<string, string> = {};
+  for (const record of Object.values(story.slots)) {
+    messages[record.slotId] = record.message;
+  }
+  return messages;
+}
+
+/** Nova au premier lancement : checkpoint de la première mission non terminée. */
+function migrationNova(completed: Readonly<Record<string, MissionCompletion>>): RepoState | null {
+  const index = missionSequence.findIndex((mission) => completed[mission.id] === undefined);
+  if (index === -1) {
+    const last = missionSequence[missionSequence.length - 1];
+    return last === undefined ? null : checkpointAfter(last.id);
+  }
+  if (index === 0) {
+    const first = missionSequence[0];
+    return first === undefined ? null : entryState(first.id);
+  }
   const previous = missionSequence[index - 1];
-  if (previous === undefined) return null;
-  return checkpointAfter(previous.id);
+  return previous === undefined ? null : checkpointAfter(previous.id);
 }
 
 /** Dernière mission terminée d'après le journal (jamais d'après un hash). */
 function lastCompletedMission(story: PersistedStory): string | null {
-  for (let index = story.journal.length - 1; index >= 0; index -= 1) {
-    const entry = story.journal[index];
-    if (entry?.kind === 'mission-complete') return entry.missionId;
-  }
-  return null;
+  return lastCompletedInJournal(story.journal);
 }
 
 /** Nova ne sert que s'il correspond bien au prédécesseur de la mission. */
@@ -123,9 +142,12 @@ function bestOf(
   return merged;
 }
 
-function migrateStory(): PersistedStory {
+function migrateStory(
+  completed: Readonly<Record<string, MissionCompletion>>,
+): PersistedStory {
   return {
     ...createEmptyStory(),
+    nova: migrationNova(completed),
     journal: [{ kind: 'migration', from: 1 }],
   };
 }
@@ -181,6 +203,15 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
             })),
           ],
         };
+        const spec = storySpec(id);
+        if (spec !== undefined) {
+          const entry = get().draft?.entry ?? entryState(id);
+          const groups = associateSlots(finalState, entry, spec.slots);
+          story = {
+            ...story,
+            slots: { ...story.slots, ...buildSlotTable(spec.slots, groups) },
+          };
+        }
       }
     } else {
       story = {
@@ -220,7 +251,8 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     persist();
   },
 
-  beginMission(mission) {    const current = get();
+  beginMission(mission) {
+    const current = get();
     const spec = storySpec(mission.id);
     const alreadyCompleted = current.completed[mission.id] !== undefined;
 
@@ -245,7 +277,8 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       }
 
       // Réécriture : recalage sur le checkpoint canonique, puis prelude inclus.
-      const previous = previousCheckpoint(mission.id);
+      const messages = messageOverrides(current.story);
+      const previous = checkpointBeforeWith(mission.id, messages);
       const appliedPreludes = current.story.appliedPreludes.filter(
         (stepId) => spec?.prelude.some((step) => step.id === stepId) !== true,
       );
@@ -261,7 +294,7 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       };
       set({ story });
       persist();
-      return { state: entryState(mission.id), isolated: false, recalaged: true };
+      return { state: entryStateWith(mission.id, messages), isolated: false, recalaged: true };
     }
 
     const nova = current.story.nova;
@@ -292,18 +325,32 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     const current = get();
     const isolated = current.story.isolated;
     if (isolated === null) return;
+    const index = missionSequence.findIndex((mission) => mission.id === isolated.missionId);
+    const later = new Set(
+      index < 0 ? [] : missionSequence.slice(index + 1).map((mission) => mission.id),
+    );
+    const slots = Object.fromEntries(
+      Object.entries(current.story.slots).filter(([, record]) => !later.has(record.missionId)),
+    );
+    const journal = current.story.journal.filter(
+      (entry) =>
+        !('missionId' in entry) ||
+        !later.has(entry.missionId) ||
+        entry.kind === 'mission-complete',
+    );
     const story: PersistedStory = {
       ...current.story,
       nova: state,
-      isolated: null,
+      slots,
       journal: [
-        ...current.story.journal,
+        ...journal,
         {
           kind: 'recalage',
           missionId: isolated.missionId,
           reason: 'reprise depuis ici',
         },
       ],
+      isolated: null,
     };
     set({ story });
     persist();
@@ -332,7 +379,7 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       set({
         completed: bestOf(get().completed, savedV1.completed),
         lessonSlides: { ...savedV1.lessonSlides },
-        story: migrateStory(),
+        story: migrateStory(savedV1.completed),
         draft: null,
         hydrated: true,
       });

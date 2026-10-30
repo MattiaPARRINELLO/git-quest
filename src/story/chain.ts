@@ -129,6 +129,7 @@ export function runReference(
 export function buildChain(
   root: RepoState,
   missions: readonly ChainMission[],
+  messages: Readonly<Record<string, string>> = {},
 ): ChainEntry[] {
   const chain: ChainEntry[] = [];
   let checkpoint = root;
@@ -136,18 +137,35 @@ export function buildChain(
   for (const mission of missions) {
     const entry = applyPrelude(checkpoint, mission.prelude);
     const previousTable = chain.length === 0 ? {} : chain[chain.length - 1]?.table ?? {};
-    const { state: after, commands } = runReferenceDetailed(
+    const detailed = runReferenceDetailed(
       entry,
       mission.reference,
       previousTable,
       mission.slots,
     );
-    const groups = associateSlots(after, entry, mission.slots);
+    const groups = associateSlots(detailed.state, entry, mission.slots);
     const table: SlotTable = {
       ...previousTable,
       ...buildSlotTable(mission.slots, groups),
     };
-    chain.push({ missionId: mission.missionId, entry, after, commands, table });
+
+    // Messages du joueur : chaque commit de slot reprend son message, une seule
+    // fois, sans jamais dédoubler un commit couvrant plusieurs slots.
+    let after = detailed.state;
+    for (const group of groups) {
+      const message = group.slots
+        .map((slotId) => messages[slotId])
+        .find((value): value is string => value !== undefined);
+      if (message === undefined) continue;
+      const commit = after.commits[group.commitHash];
+      if (commit === undefined) continue;
+      after = {
+        ...after,
+        commits: { ...after.commits, [group.commitHash]: { ...commit, message } },
+      };
+    }
+
+    chain.push({ missionId: mission.missionId, entry, after, commands: detailed.commands, table });
     checkpoint = after;
   }
 

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { findMission } from '../../content';
 import { storyChain } from '../checkpoints';
-import { STORY_SPECS } from '../specs';
+import { buildChain } from '../chain';
+import { STORY_ROOT, STORY_SPECS } from '../specs';
 
 const chain = storyChain();
 
@@ -43,8 +44,21 @@ describe('chaîne Nova (contenu réel)', () => {
     expect(snapshot['app.ts']).toBe('v3');
   });
 
-  it('produit l’arbre final attendu après les 12 missions', () => {
-    const last = chain[chain.length - 1];
+  it('un recalage reprend le message du joueur par slot', () => {
+    const overridden = buildChain(STORY_ROOT, STORY_SPECS, {
+      'm1.1-c1': 'fix: mon correctif à moi',
+    });
+    const first = overridden[0];
+    const tip = first?.after.branches.main ?? '';
+    expect(first?.after.commits[tip]?.message).toBe('fix: mon correctif à moi');
+
+    // Les missions suivantes gardent leurs messages de référence.
+    const second = overridden[1];
+    const secondTip = second?.after.branches.main ?? '';
+    expect(second?.after.commits[secondTip]?.message).not.toBe('fix: mon correctif à moi');
+  });
+
+  it('produit l’arbre final attendu après les 12 missions', () => {    const last = chain[chain.length - 1];
     if (!last) throw new Error('chaîne vide');
     expect(chain).toHaveLength(12);
 

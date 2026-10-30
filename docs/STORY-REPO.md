@@ -20,6 +20,7 @@
 | R7 | 2.3 : plusieurs commits détachés → message explicite dans le terminal, aucun choix silencieux | Fiche 2.3 |
 | R8 | Sandbox et mini-démos explicitement sans accès à Nova | §6.5 |
 | R9 | Estimation recomptée et chantier découpé en Phase A / Phase B | §9.4 |
+| R10 | Phase B implémentée : chaîne calculée, preludes, session (copie isolée/recalage), écran `#/nova`, journal, docs | §12 |
 
 ---
 
@@ -1156,3 +1157,63 @@ en Phase A.
 | --- | --- | --- |
 | v1 | 2026-10-30 | Conception initiale (12 fiches, modèle hybride, persistance v2, tests, risques). |
 | v2 | 2026-10-30 | Décisions Q1–Q10 ; recalage limité au rejeu ; `nextId` et slots ; groupes de slots ; brouillon de mission ; corrections 4.1 et 2.3 ; isolation sandbox/cours ; estimation et découpage Phase A/B. |
+
+---
+
+## 12. État d'implémentation (Phase B)
+
+Implémenté et testé (263 tests, typecheck et build verts) :
+
+- `src/story/` : `types`, `preconditions`, `slots`, `actor`, `chain`,
+  `checkpoints`, `display`, `journal`.
+- Chaîne des 12 missions calculée par rejeu ; `Mission.initialState` est le
+  checkpoint calculé, exposé sans changer l'API de contenu.
+- Preludes idempotents (gardes + `appliedPreludes`), commits attribués aux
+  coéquipiers (`stampAuthor`), slots par contenu, messages du joueur réappliqués
+  par slot au recalage.
+- Progression `gitquest.progress.v2` : `nova`, brouillon `activeMission`,
+  slots, journal, copie isolée ; migration v1 → v2 avec étoiles conservées et
+  Nova placé au checkpoint de la première mission non terminée. Miroir v1
+  minimal conservé.
+- Session : jeu normal sur l'arbre réel (détours compris), copie isolée pour un
+  rejeu dépassé, recalage uniquement au rejeu de la dernière mission,
+  `reset-mission` borné à l'entrée, chargement d'un brouillon sans rejouer le
+  prelude.
+- Écran `#/nova` : graphe lecture seule, statistiques (worktrees créés via le
+  journal / actifs via l'état), mission d'origine d'un commit, export PNG et
+  `git log` copiable.
+- Bouton « Reprendre l'histoire depuis ici » derrière `?story=beta`
+  (localStorage), qui remplace Nova, efface slots/journal des missions
+  suivantes et conserve les étoiles.
+- Aucun hash littéral dans `src/content` (test dédié) ; hashes des textes et
+  prédictions résolus depuis l'état du joueur.
+
+### Écarts assumés avec la conception
+
+1. **Renommages non appliqués** : `a.txt`, `b.txt`, `notes.txt`, `exp.txt`,
+   `bug.txt`, `app.ts`, `experiment`, `feature` restent en place. La contrainte
+   « aucun ancien test modifié » primait sur les renommages Nova de la v2.
+   Conséquence : `feature` est réutilisée pour l'export et les notifications,
+   et `experiment` est recréée au chapitre 3 (l'exploration de 2.1 est alors
+   abandonnée, ce qui est cohérent avec l'histoire).
+2. **4.2** utilise bien `docs/GUIDE.md` ; **4.3** ne vérifie plus « un seul
+   worktree » car le worktree `docs` de 4.2 reste actif : la mission range
+   `hotfix` et laisse `docs`.
+3. **Worktrees créés** : nouvelle entrée de journal `worktree` (chemin seul),
+   alimentée à la complétion ; l'écran final affiche « créés » et « actifs »
+   séparément.
+4. **Migration** : v2 est écrit à la première mutation (pas pendant
+   l'hydratation) ; v1 reste la source tant que rien ne change, et reste écrit
+   en miroir.
+5. **Copie isolée** : les étoiles sont mises à jour via `bestStars`, Nova et le
+   journal des missions suivantes ne bougent pas ; « Reprendre depuis ici »
+   conserve les entrées `mission-complete` (étoiles) et supprime les autres
+   entrées des missions suivantes.
+6. **Prelude en jeu normal** : si un prelude ne peut pas s'appliquer (état
+   incohérent, cas de test), la mission repart de son entrée canonique plutôt
+   que de casser. Ce repli n'est pas un recalage « doux » au sens strict.
+7. **2.3 multi-détachés** : le terminal liste les commits et annonce celui qui
+   sera sauvé ; `sauvetage` reste toutefois validé sur le commit choisi par le
+   joueur (contenu), pas sur un hash.
+8. **Pin du hash** : `hashFor(nextId)` conservé ; le recalage repart du
+   `nextId` canonique, donc les hashes redeviennent déterministes.

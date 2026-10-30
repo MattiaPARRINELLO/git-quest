@@ -46,3 +46,29 @@ export function referenceCommands(missionId: string): readonly string[] {
 export function slotTableAfter(missionId: string): ChainEntry['table'] {
   return findEntry(missionId).table;
 }
+
+/** Chaîne reconstruite avec les messages du joueur (recalage au rejeu). */
+export function storyChainWith(
+  messages: Readonly<Record<string, string>>,
+): readonly ChainEntry[] {
+  return buildChain(STORY_ROOT, STORY_SPECS, messages);
+}
+
+export function entryStateWith(
+  missionId: string,
+  messages: Readonly<Record<string, string>>,
+): RepoState {
+  const found = storyChainWith(messages).find((entry) => entry.missionId === missionId);
+  if (found === undefined) throw new Error(`Mission absente de la chaîne : ${missionId}`);
+  return found.entry;
+}
+
+export function checkpointBeforeWith(
+  missionId: string,
+  messages: Readonly<Record<string, string>>,
+): RepoState | null {
+  const chain = storyChainWith(messages);
+  const index = chain.findIndex((entry) => entry.missionId === missionId);
+  if (index <= 0) return null;
+  return chain[index - 1]?.after ?? null;
+}
