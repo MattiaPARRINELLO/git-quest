@@ -55,7 +55,7 @@ export function HomeScreen() {
             Maîtrise Git en le voyant.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
-            Quatre chapitres, douze missions réalistes. Chaque commande se rejoue sous tes
+            Cinq chapitres, quinze missions réalistes. Chaque commande se rejoue sous tes
             yeux : le graphe, HEAD, l’index et les worktrees deviennent enfin lisibles.
           </p>
 

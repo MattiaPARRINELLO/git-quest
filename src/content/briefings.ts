@@ -168,6 +168,42 @@ export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
       },
     ],
     outcome: 'Le chantier est rangé ; les branches et l’histoire restent.',
+    teaser: 'Il reste à gagner du temps sur les gestes du quotidien.',
+  },
+  'commit-cible': {
+    title: 'Nova, acte V : le correctif qui part seul',
+    lines: [
+      { speaker: 'lea', text: 'La config doit partir maintenant ; la doc attend la revue de demain.' },
+      {
+        speaker: 'narrateur',
+        text: 'Trois fichiers ont changé, un seul doit être commité. Fais-le sans git add.',
+      },
+    ],
+    outcome: 'La configuration est livrée seule ; la doc et la refonte restent sur le disque.',
+    teaser: 'La documentation finale mérite sa propre branche.',
+  },
+  'branche-en-une-commande': {
+    title: 'Nova, acte V : une branche pour la doc',
+    lines: [
+      { speaker: 'samir', text: 'La doc finale est prête, mais pas question de la poser sur main tout de suite.' },
+      {
+        speaker: 'narrateur',
+        text: 'Crée la branche docs-final et bascule dessus en une seule commande, puis commite le README seul.',
+      },
+    ],
+    outcome: 'La doc vit sur docs-final ; main n’a pas bougé d’un commit.',
+    teaser: 'Dernier sprint : tout le chantier doit partir d’un coup.',
+  },
+  'tout-indexer': {
+    title: 'Nova, acte V : le dernier sprint',
+    lines: [
+      { speaker: 'ines', text: 'Trois fichiers suivis ont changé, et src/health.ts vient d’apparaître.' },
+      {
+        speaker: 'narrateur',
+        text: 'Un seul commit propre, en deux commandes maximum, nouveau fichier compris.',
+      },
+    ],
+    outcome: 'Tout le sprint tient dans un commit ; le dépôt est propre.',
     teaser: 'Ton arbre Nova t’attend sur la carte.',
   },
 };

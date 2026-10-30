@@ -30,7 +30,7 @@ export function FinalScreen() {
             Ton arbre Nova
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
-            Douze missions plus tard, tu lis un dépôt Git comme une histoire : des commits,
+            Quinze missions plus tard, tu lis un dépôt Git comme une histoire : des commits,
             des branches qui pointent, un HEAD qui avance et des worktrees qui travaillent en
             parallèle. Voici l’arbre de Nova, avec un merge et un worktree de plus.
           </p>

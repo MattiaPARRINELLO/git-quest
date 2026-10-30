@@ -3,7 +3,7 @@
 PWA pédagogique pour apprendre Git visuellement : un terminal simulé et un graphe de
 commits animé, branchés sur un moteur Git **pur TypeScript**.
 
-> État : **Phases 0–3 livrées** — moteur, bac à sable, cours, 12 missions,
+> État : **Phases 0–3 livrées** — moteur, bac à sable, cours, 15 missions,
 > prédictions et PWA. L'XP, les niveaux et les badges arrivent en Phase 4.
 
 ## Démarrer
@@ -28,15 +28,17 @@ En local, servir via Portless : `portless gitquest npm run dev` puis
 
 ## Le parcours
 
-- **4 chapitres** : Sous le capot, Les branches, Fusionner, Worktrees.
+- **5 chapitres** : Sous le capot, Les branches, Fusionner, Worktrees, Raccourcis.
+- **Prologue** « Lire une commande Git » : programme, sous-commande, options,
+  guillemets et placeholders, accessible depuis l'accueil.
 - Chaque chapitre : un cours de 4–5 min (slides texte, diagrammes animés, mini-démo
   rejouée avec le vrai moteur, antisèche finale), puis 3 missions.
-- **12 missions** scénarisées : story d'équipe, objectif, 3 indices progressifs,
+- **15 missions** scénarisées : story d'équipe, objectif, 3 indices progressifs,
   validation sur l'état final, solution de référence et étoiles selon le nombre de
   commandes (`par` = longueur de la solution).
 - **Missions verrouillées** tant que la précédente n'est pas terminée ; le bac à
   sable reste toujours accessible.
-- **Prédictions** sur 1.2, 2.2, 3.1 et 3.2 : l'exécution est suspendue, on répond en
+- **Prédictions** sur 1.2, 1.3, 2.2, 3.1, 3.2, 5.1, 5.2 et 5.3 : l'exécution est suspendue, on répond en
   cliquant un commit/une étiquette du graphe ou un bouton, puis la commande
   s'exécute et le feedback explique.
 - **Progression** persistée localement (missions terminées, étoiles, slide de cours)
