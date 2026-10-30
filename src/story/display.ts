@@ -37,6 +37,33 @@ export function resolvePlaceholders(text: string, state: RepoState): string {
   });
 }
 
+/** Commits détachés créés depuis `entry` (branche de création absente). */
+export function detachedCommitsSince(
+  state: RepoState,
+  entry: RepoState,
+): { readonly hash: string; readonly message: string }[] {
+  return Object.values(state.commits)
+    .filter((commit) => entry.commits[commit.hash] === undefined && commit.branch === undefined)
+    .sort((left, right) => left.timestamp - right.timestamp)
+    .map((commit) => ({ hash: commit.hash, message: commit.message }));
+}
+
+/**
+ * Message explicite quand plusieurs commits détachés existent : on ne choisit
+ * jamais en silence lequel sera sauvé.
+ */
+export function detachedNotice(state: RepoState, entry: RepoState): string | null {
+  const commits = detachedCommitsSince(state, entry);
+  if (commits.length < 2) return null;
+  const list = commits
+    .map((commit) => `« ${commit.message} » (${commit.hash.slice(0, 7)})`)
+    .join(', ');
+  const last = commits[commits.length - 1];
+  return `Plusieurs commits détachés ont été créés : ${list}. Le sauvetage portera sur ${
+    last?.hash.slice(0, 7) ?? ''
+  } (le plus récent) ; les autres restent dans le journal.`;
+}
+
 /** Premier hash de commit de l'état, pour les libellés génériques. */
 export function oldestHash(state: RepoState): string | undefined {
   return Object.values(state.commits).sort(

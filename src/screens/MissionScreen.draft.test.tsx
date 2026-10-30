@@ -40,6 +40,8 @@ function resetSandbox(): void {
 
 describe('brouillon de mission', () => {
   beforeEach(async () => {
+    // Laisse les écritures fire-and-forget du test précédent se terminer.
+    await new Promise((resolve) => setTimeout(resolve, 0));
     await storage.remove(V1);
     await storage.remove(V2);
     resetSandbox();
@@ -110,7 +112,9 @@ describe('brouillon de mission', () => {
     });
 
     expect(useProgressStore.getState().draft).toBeNull();
-    expect(await storage.get<StoredDraft | null>(V2, null)).toBeNull();
+    expect(useProgressStore.getState().story.activeMission).toBeNull();
+    const saved = await storage.get<StoredDraft | null>(V2, null);
+    expect(saved?.story.activeMission ?? null).toBeNull();
   });
 
   it('efface le brouillon quand la mission est réussie', async () => {
