@@ -6,6 +6,7 @@ import { LessonScreen } from './screens/LessonScreen';
 import { MissionScreen } from './screens/MissionScreen';
 import { SandboxScreen } from './screens/SandboxScreen';
 import { NovaScreen } from './screens/NovaScreen';
+import { InterludeScreen } from './screens/InterludeScreen';
 import { useUiStore } from './store/useUiStore';
 
 export default function App() {
@@ -31,6 +32,9 @@ export default function App() {
       break;
     case 'nova':
       screen = <NovaScreen />;
+      break;
+    case 'interlude':
+      screen = <InterludeScreen chapterId={route.chapterId} />;
       break;
     case 'lesson':
       screen = <LessonScreen key={route.chapterId} chapterId={route.chapterId} />;

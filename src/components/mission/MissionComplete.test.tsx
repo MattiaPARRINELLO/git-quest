@@ -22,7 +22,7 @@ describe('MissionComplete — bouton Continuer', () => {
       if (after.kind === 'mission') {
         expect(link).toHaveAttribute('href', routePaths.mission(after.mission.id));
       } else if (after.kind === 'lesson') {
-        expect(link).toHaveAttribute('href', routePaths.lesson(after.chapter.id));
+        expect(link).toHaveAttribute('href', routePaths.interlude(after.chapter.id));
       } else {
         expect(link).toHaveAttribute('href', routePaths.home);
       }

@@ -6,6 +6,7 @@ export type Route =
   | { readonly name: 'lesson'; readonly chapterId: string }
   | { readonly name: 'mission'; readonly missionId: string }
   | { readonly name: 'nova' }
+  | { readonly name: 'interlude'; readonly chapterId: string }
   | { readonly name: 'not-found' };
 
 export function parseRoute(hash: string): Route {
@@ -15,6 +16,9 @@ export function parseRoute(hash: string): Route {
   if (parts.length === 0) return { name: 'home' };
   if (parts[0] === 'sandbox') return { name: 'sandbox' };
   if (parts[0] === 'nova') return { name: 'nova' };
+  if (parts[0] === 'interlude' && parts[1]) {
+    return { name: 'interlude', chapterId: parts[1] };
+  }
   if (parts[0] === 'chapter' && parts[1] && parts[2] === 'lesson') {
     return { name: 'lesson', chapterId: parts[1] };
   }
@@ -49,6 +53,7 @@ export const routePaths = {
   home: '#/',
   sandbox: '#/sandbox',
   nova: '#/nova',
+  interlude: (chapterId: string) => `#/interlude/${encodeURIComponent(chapterId)}`,
   lesson: (chapterId: string) => `#/chapter/${encodeURIComponent(chapterId)}/lesson`,
   mission: (missionId: string) => `#/mission/${encodeURIComponent(missionId)}`,
 };

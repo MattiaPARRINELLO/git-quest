@@ -126,7 +126,7 @@ export function MissionComplete({
               after.kind === 'mission'
                 ? routePaths.mission(after.mission.id)
                 : after.kind === 'lesson'
-                  ? routePaths.lesson(after.chapter.id)
+                  ? routePaths.interlude(after.chapter.id)
                   : routePaths.home
             }
             className="btn btn-accent justify-center px-3 py-2 text-sm"
