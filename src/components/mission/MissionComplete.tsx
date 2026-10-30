@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import type { AfterMission } from '../../content/index';
 import type { Mission } from '../../content/types';
 import { routePaths } from '../../router/useHashRoute';
 import { Icon } from '../ui/Icon';
@@ -7,7 +8,7 @@ interface MissionCompleteProps {
   readonly mission: Mission;
   readonly stars: 1 | 2 | 3;
   readonly commandsUsed: number;
-  readonly next: Mission | undefined;
+  readonly after: AfterMission;
   readonly onInspect: () => void;
 }
 
@@ -15,7 +16,7 @@ export function MissionComplete({
   mission,
   stars,
   commandsUsed,
-  next,
+  after,
   onInspect,
 }: MissionCompleteProps) {
   return (
@@ -89,20 +90,19 @@ export function MissionComplete({
           <a href={routePaths.home} className="btn justify-center px-3 py-2 text-sm">
             Carte des chapitres
           </a>
-          {next ? (
-            <a
-              href={routePaths.mission(next.id)}
-              className="btn btn-accent justify-center px-3 py-2 text-sm"
-            >
-              Mission suivante
-              <Icon name="arrow-right" size={15} />
-            </a>
-          ) : (
-            <a href={routePaths.home} className="btn btn-accent justify-center px-3 py-2 text-sm">
-              Terminer le parcours
-              <Icon name="arrow-right" size={15} />
-            </a>
-          )}
+          <a
+            href={
+              after.kind === 'mission'
+                ? routePaths.mission(after.mission.id)
+                : after.kind === 'lesson'
+                  ? routePaths.lesson(after.chapter.id)
+                  : routePaths.home
+            }
+            className="btn btn-accent justify-center px-3 py-2 text-sm"
+          >
+            Continuer
+            <Icon name="arrow-right" size={15} />
+          </a>
         </div>
       </motion.div>
     </div>

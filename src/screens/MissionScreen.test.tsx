@@ -63,6 +63,36 @@ describe('MissionScreen', () => {
     expect(screen.getByText(/Bonne prédiction/i)).toBeInTheDocument();
   });
 
+  it('1.2 — Continuer mène à 1.3 et ne laisse pas de feedback fantôme', async () => {
+    useProgressStore.setState({
+      completed: { 'trois-zones': { stars: 3 } },
+      lessonSlides: {},
+      hydrated: true,
+    });
+    const user = userEvent.setup();
+    render(<MissionScreen missionId="snapshot-fige" />);
+
+    const input = await screen.findByRole('textbox', { name: /commande git/i });
+    for (const command of [
+      'edit README.md "version 2"',
+      'git add README.md',
+      'edit README.md "version 3 (non commitée)"',
+      'git commit -m "docs: v2"',
+    ]) {
+      await user.type(input, `${command}{Enter}`);
+    }
+
+    await user.click(
+      await screen.findByRole('button', { name: /La version 2, celle de l’index/i }),
+    );
+
+    await screen.findByRole('dialog', { name: /Mission 1.2 réussie/i });
+    const continuer = screen.getByRole('link', { name: /Continuer/i });
+    expect(continuer).toHaveAttribute('href', '#/mission/piege-am');
+    expect(screen.queryByRole('button', { name: /Continuer/i })).toBeNull();
+    expect(screen.queryByText(/Bonne prédiction/i)).toBeNull();
+  });
+
   it('refuse une commande interdite sans exécuter', async () => {
     useProgressStore.setState({
       completed: { 'menage-branches': { stars: 3 } },

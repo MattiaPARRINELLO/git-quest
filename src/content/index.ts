@@ -47,3 +47,24 @@ export function firstMissionOfChapter(chapterId: string): Mission | undefined {
 export function chapterMissions(chapterId: string): readonly Mission[] {
   return allMissions.filter((mission) => mission.chapterId === chapterId);
 }
+
+export type AfterMission =
+  | { readonly kind: 'mission'; readonly mission: Mission }
+  | { readonly kind: 'lesson'; readonly chapter: Chapter }
+  | { readonly kind: 'home' };
+
+/**
+ * Destination du bouton « Continuer » après une mission :
+ * mission suivante du même chapitre, cours du chapitre suivant à une frontière,
+ * ou carte des chapitres après la dernière mission.
+ */
+export function afterMission(id: string): AfterMission {
+  const index = missionIndex(id);
+  if (index < 0) return { kind: 'home' };
+  const current = missionSequence[index];
+  const next = missionSequence[index + 1];
+  if (!current || !next) return { kind: 'home' };
+  if (next.chapterId === current.chapterId) return { kind: 'mission', mission: next };
+  const chapter = findChapter(next.chapterId);
+  return chapter ? { kind: 'lesson', chapter } : { kind: 'home' };
+}

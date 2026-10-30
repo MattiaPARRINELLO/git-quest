@@ -4,7 +4,7 @@ import { MissionComplete } from '../components/mission/MissionComplete';
 import { MissionPanel } from '../components/mission/MissionPanel';
 import { PredictionFeedback, PredictionOverlay } from '../components/mission/PredictionOverlay';
 import { SandboxLayout } from '../components/layout/SandboxLayout';
-import { findMission, isMissionUnlocked, nextMission } from '../content';
+import { afterMission, findMission, isMissionUnlocked } from '../content';
 import type { Mission, Prediction } from '../content/types';
 import type { TerminalEntry } from '../store/useRepoStore';
 import { useRepoStore } from '../store/useRepoStore';
@@ -107,6 +107,8 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     if (isCompleted) return;
     const stars = starsFor(used, mission.par);
     setCompleted({ stars, used });
+    setFeedback(null);
+    setPendingPrediction(null);
     completeMission(mission.id, stars);
   };
 
@@ -252,7 +254,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
           mission={mission}
           stars={completed.stars}
           commandsUsed={completed.used}
-          next={nextMission(mission.id)}
+          after={afterMission(mission.id)}
           onInspect={() => {
             setCompleted(null);
             useUiStore.getState().setMobileTab('terminal');
