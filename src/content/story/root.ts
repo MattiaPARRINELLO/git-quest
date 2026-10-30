@@ -10,8 +10,8 @@ import { scenario } from '../../engine/scenario';
 export const storyRoot = scenario()
   .init()
   .commit('Initial commit', {
-    'a.txt': 'version 1',
-    'b.txt': 'version 1',
+    'a.txt': 'Nova — notes de conception : synchronisation locale.',
+    'b.txt': 'Nova — idées : mode sombre, export PDF.',
     'app.ts': 'v1',
     'bug.txt': 'export function login(req) { return db.find(req.user); }',
   })

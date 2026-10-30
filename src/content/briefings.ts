@@ -19,9 +19,9 @@ export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
   'snapshot-fige': {
     title: 'Nova, acte I : la photo ne bouge plus',
     paragraphs: [
-      'Le CTO doute : « si je modifie un fichier après l’avoir indexé, le commit prend quelle version ? »',
-      'Il te demande de le prouver sur app.ts : prépare v2, indexe-la, réécris v3 sur le disque, puis commite.',
-      'La photo du commit doit rester figée sur v2, même si le fichier a changé depuis.',
+      'Le CTO doute : « si le fichier sur le disque change après l’index, le commit prend quelle version ? »',
+      'Tout est déjà prêt : l’index contient app.ts en v2, le disque est déjà passé en v3.',
+      'Commit l’index sans refaire git add, et observe : la photo reste figée sur v2.',
     ],
   },
   'piege-am': {
@@ -85,7 +85,8 @@ export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
     paragraphs: [
       'Tu es en pleine refonte sur feature, avec des modifications non commitées dans app.ts. Un bug critique tombe en prod.',
       'Réflexe naturel : git switch main. Mais main a aussi touché app.ts, et Git refuse d’écraser ton travail.',
-      'Le bug est simple : login() appelle db.find(req.user) sans vérifier la session. Pas de stash, pas de commit bricolé : monte un second espace de travail et corrige sans toucher au WIP.',
+      'Le bug est simple : login() appelle db.find(req.user) sans vérifier la session. Yanis a déjà poussé le correctif sur la branche hotfix.',
+      'Pas de stash, pas de commit bricolé : monte un second espace de travail sur hotfix pour vérifier le correctif sans toucher au WIP.',
     ],
   },
   'deux-worktrees': {
@@ -93,7 +94,7 @@ export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
     paragraphs: [
       'La doc doit avancer pendant que tu réécris le README sur main. Impossible de tout faire dans le même working dir.',
       'Yanis a repris ta refonte : il a commité ton WIP sur feature, rien n’est perdu, et tu peux maintenant passer sur main.',
-      'Monte un worktree dédié à la branche docs et avance dessus sans interrompre ton travail en cours.',
+      'Samir a déjà poussé le guide sur la branche docs : monte un worktree sur docs pour le relire sans interrompre ton README.',
     ],
   },
   'menage-worktree': {

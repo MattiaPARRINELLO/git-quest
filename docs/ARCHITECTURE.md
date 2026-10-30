@@ -429,13 +429,17 @@ côté client et `git log --oneline --graph` copiable.
 
 ### Fichiers préparés
 
-Les missions dont le concept est Git (branche, divergence, rescue) livrent le
-working dir **déjà modifié** avec du contenu réaliste (notes internes,
-`feature.ts`, `main.ts`, trace de facturation). Le joueur n'a plus qu'à indexer
-et commiter. Les seules écritures restantes sont celles où le contenu fait
-partie du concept (1.2 : snapshot figé) ou qui se produisent dans un worktree
-créé pendant la mission (4.1, 4.2), et le contenu exact est alors fourni dans
-l'indice.
+Toutes les missions sont jouables **sans écrire de fichier** : le working dir,
+l'index et les branches sont préparés par la chaîne de référence avec du contenu
+réaliste (notes internes, `feature.ts`, `main.ts`, trace de facturation,
+correctif de login, guide). Le joueur ne fait que des commandes Git.
+
+- 1.2 : l'index contient déjà v2 et le disque v3 ; il ne reste qu'à commiter.
+- 4.1 : le correctif est déjà commité sur `hotfix` ; la mission consiste à
+  monter le worktree pour le vérifier.
+- 4.2 : le guide est déjà commité sur `docs` ; idem.
+- Le briefing liste les fichiers déjà présents (`preparedFiles`) sans demander
+  d'écriture.
 
 ### Briefing et tolérance de contenu
 

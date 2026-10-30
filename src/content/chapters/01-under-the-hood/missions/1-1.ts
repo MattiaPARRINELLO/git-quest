@@ -25,18 +25,18 @@ export const mission11: Mission = {
   steps: [
     {
       label: 'Indexer a.txt avec git add',
-      done: (state) => indexFile(state, 'a.txt') === 'version 2',
+      done: (state) => indexFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.',
     },
     {
-      label: 'Committer a.txt en version 2',
-      done: (state) => headFile(state, 'a.txt') === 'version 2',
+      label: 'Committer la note de conception mise à jour',
+      done: (state) => headFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.',
     },
     {
       label: 'Laisser b.txt modifié hors du commit',
       done: (state) =>
-        headFile(state, 'a.txt') === 'version 2' &&
-        workingFile(state, 'b.txt') === 'version 2' &&
-        headFile(state, 'b.txt') === 'version 1',
+        headFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.' &&
+        workingFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF, partage de notes.' &&
+        headFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF.',
     },
   ],
   takeaway: 'Le commit ne prend que l’index : b.txt reste hors de la photo tant qu’il n’est pas indexé.',
@@ -48,14 +48,14 @@ export const mission11: Mission = {
     return allOf(
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
       check(commitDelta(state, entry) === 1, 'Un seul nouveau commit est attendu.'),
-      check(headFile(state, 'a.txt') === 'version 2', 'Le commit doit contenir a.txt en version 2.'),
-      check(headFile(state, 'b.txt') === 'version 1', 'Le commit ne doit pas contenir b.txt modifié.'),
+      check(headFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.', 'Le commit doit contenir la version mise à jour de a.txt.'),
+      check(headFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF.', 'Le commit ne doit pas contenir b.txt modifié.'),
       check(
-        workingFile(state, 'a.txt') === 'version 2',
+        workingFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.',
         'a.txt doit être à jour dans le working dir.',
       ),
       check(
-        workingFile(state, 'b.txt') === 'version 2',
+        workingFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF, partage de notes.',
         'b.txt doit rester modifié dans le working dir.',
       ),
     );

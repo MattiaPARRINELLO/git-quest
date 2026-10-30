@@ -7,14 +7,17 @@ export const chapter01Story: readonly ChainMission[] = [
     prelude: [
       {
         id: 'm1.1-p1',
-        commands: ['edit a.txt "version 2"', 'edit b.txt "version 2"'],
+        commands: [
+          'edit a.txt "Nova — notes de conception : synchronisation locale + cache hors-ligne."',
+          'edit b.txt "Nova — idées : mode sombre, export PDF, partage de notes."',
+        ],
       },
     ],
     slots: [
       {
         slotId: 'm1.1-c1',
         missionId: 'trois-zones',
-        signature: { branch: 'main', files: { 'a.txt': 'version 2' } },
+        signature: { branch: 'main', files: { 'a.txt': 'Nova — notes de conception : synchronisation locale + cache hors-ligne.' } },
       },
     ],
     reference: ['git add a.txt', 'git commit -m "fix: a.txt"'],
@@ -27,6 +30,10 @@ export const chapter01Story: readonly ChainMission[] = [
         teammate: 'lea',
         commands: ['git add b.txt', 'git commit -m "chore: b.txt v2"'],
       },
+      {
+        id: 'm1.2-p2',
+        commands: ['edit app.ts "v2"', 'git add app.ts', 'edit app.ts "v3"'],
+      },
     ],
     slots: [
       {
@@ -35,12 +42,7 @@ export const chapter01Story: readonly ChainMission[] = [
         signature: { branch: 'main', files: { 'app.ts': 'v2' } },
       },
     ],
-    reference: [
-      'edit app.ts "v2"',
-      'git add app.ts',
-      'edit app.ts "v3"',
-      'git commit -m "docs: v2"',
-    ],
+    reference: ['git commit -m "docs: v2"'],
   },
   {
     missionId: 'piege-am',
@@ -58,26 +60,26 @@ export const chapter01Story: readonly ChainMission[] = [
         id: 'm1.3-p2',
         teammate: 'samir',
         commands: [
-          'edit README.md "version 1"',
+          'edit README.md "# Nova — assistant de notes d’équipe."',
           'git add README.md',
           'git commit -m "docs: readme v1"',
         ],
       },
       {
         id: 'm1.3-p3',
-        commands: ['edit README.md "version 2"', 'edit notes.txt "notes de réunion"'],
+        commands: ['edit README.md "# Nova — assistant de notes d’équipe. Démarrage : npm run dev."', 'edit notes.txt "Notes de réunion : cache LRU, export CSV, hotfix login."'],
       },
     ],
     slots: [
       {
         slotId: 'm1.3-c1',
         missionId: 'piege-am',
-        signature: { branch: 'main', files: { 'README.md': 'version 2' } },
+        signature: { branch: 'main', files: { 'README.md': '# Nova — assistant de notes d’équipe. Démarrage : npm run dev.' } },
       },
       {
         slotId: 'm1.3-c2',
         missionId: 'piege-am',
-        signature: { branch: 'main', files: { 'notes.txt': 'notes de réunion' } },
+        signature: { branch: 'main', files: { 'notes.txt': 'Notes de réunion : cache LRU, export CSV, hotfix login.' } },
       },
     ],
     reference: [

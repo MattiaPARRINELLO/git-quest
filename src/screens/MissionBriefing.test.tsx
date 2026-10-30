@@ -45,6 +45,26 @@ describe('briefing narratif de mission', () => {
     expect(screen.queryByRole('dialog', { name: /Briefing 1\.1/i })).toBeNull();
   });
 
+  it('montre les fichiers déjà prêts dans le working dir', async () => {
+    render(<MissionScreen missionId="trois-zones" />);
+
+    await screen.findByRole('dialog', { name: /Briefing 1\.1/i });
+    expect(screen.getByText('Déjà dans ton working dir')).toBeInTheDocument();
+    expect(screen.getByText('a.txt')).toBeInTheDocument();
+    expect(screen.getByText('b.txt')).toBeInTheDocument();
+    expect(screen.getAllByText('modifié').length).toBeGreaterThan(0);
+  });
+
+  it('1.2 montre l’index déjà préparé et le disque en avance', async () => {
+    useProgressStore.setState({ completed: { 'trois-zones': { stars: 3 } } });
+    render(<MissionScreen missionId="snapshot-fige" />);
+
+    await screen.findByRole('dialog', { name: /Briefing 1\.2/i });
+    expect(screen.getByText('Déjà dans ton working dir')).toBeInTheDocument();
+    expect(screen.getByText('app.ts')).toBeInTheDocument();
+    expect(screen.getAllByText(/v3/).length).toBeGreaterThan(0);
+  });
+
   it('peut être passée immédiatement', async () => {
     useProgressStore.setState({
       completed: {

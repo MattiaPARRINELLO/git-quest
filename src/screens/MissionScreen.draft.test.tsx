@@ -20,6 +20,7 @@ interface StoredDraft {
         readonly worktrees: Readonly<
           Record<string, { readonly index: Readonly<Record<string, string>> }>
         >;
+        readonly branches: Readonly<Record<string, string>>;
       };
     } | null;
   };
@@ -60,17 +61,17 @@ describe('brouillon de mission', () => {
     render(<MissionScreen missionId="snapshot-fige" />);
 
     const input = await screen.findByRole('textbox', { name: /commande git/i });
-    await user.type(input, 'edit app.ts "v2"{Enter}');
-    await user.type(input, 'git add app.ts{Enter}');
+    await user.type(input, 'git branch essai{Enter}');
+    await user.type(input, 'git branch essai-2{Enter}');
 
-    await screen.findByText(/2 \/ 4 commandes/);
+    await screen.findByText(/2 \/ 1 commandes/);
 
     await waitFor(async () => {
       const saved = await storage.get<StoredDraft | null>(V2, null);
       const draft = saved?.story.activeMission;
       expect(draft?.missionId).toBe('snapshot-fige');
       expect(draft?.commandsUsed).toBe(2);
-      expect(draft?.state.worktrees.main?.index['app.ts']).toBe('v2');
+      expect(Object.keys(draft?.state.branches ?? {})).toContain('essai');
     });
   });
 
@@ -79,9 +80,9 @@ describe('brouillon de mission', () => {
     const first = render(<MissionScreen missionId="snapshot-fige" />);
 
     const input = await screen.findByRole('textbox', { name: /commande git/i });
-    await user.type(input, 'edit app.ts "v2"{Enter}');
-    await user.type(input, 'git add app.ts{Enter}');
-    await screen.findByText(/2 \/ 4 commandes/);
+    await user.type(input, 'git branch essai{Enter}');
+    await user.type(input, 'git branch essai-2{Enter}');
+    await screen.findByText(/2 \/ 1 commandes/);
 
     first.unmount();
 
@@ -92,10 +93,10 @@ describe('brouillon de mission', () => {
 
     render(<MissionScreen missionId="snapshot-fige" />);
 
-    await screen.findByText(/2 \/ 4 commandes/);
+    await screen.findByText(/2 \/ 1 commandes/);
     const state = useRepoStore.getState().state;
-    expect(state.worktrees.main?.index['app.ts']).toBe('v2');
-    expect(state.worktrees.main?.workingDir['app.ts']).toBe('v2');
+    expect(Object.keys(state.branches)).toContain('essai');
+    expect(Object.keys(state.branches)).toContain('essai-2');
     // Aucune réexécution : le terminal ne contient que l'introduction.
     expect(useRepoStore.getState().entries).toHaveLength(2);
     expect(useRepoStore.getState().commandHistory).toEqual([]);

@@ -39,8 +39,8 @@ describe('chaîne Nova (contenu réel)', () => {
     const last = storyChain()[2];
     const tip = last?.after.branches.main ?? '';
     const snapshot = last?.after.commits[tip]?.snapshot ?? {};
-    expect(snapshot['README.md']).toBe('version 2');
-    expect(snapshot['notes.txt']).toBe('notes de réunion');
+    expect(snapshot['README.md']).toContain('Démarrage');
+    expect(snapshot['notes.txt']).toContain('cache LRU');
     expect(snapshot['app.ts']).toBe('v3');
   });
 

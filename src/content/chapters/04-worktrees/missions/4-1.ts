@@ -12,6 +12,15 @@ import type { Mission } from '../../../types';
 
 const initial = entryState('hotfix-worktree');
 
+/** Le correctif est celui poussé par Yanis sur la branche hotfix. */
+function hasFix(state: typeof initial): boolean {
+  return (
+    worktreePaths(state).includes('~/gitquest-hotfix') &&
+    branchFile(state, 'hotfix', 'bug.txt') !== undefined &&
+    branchFile(state, 'hotfix', 'bug.txt') !== branchFile(initial, 'main', 'bug.txt')
+  );
+}
+
 export const mission41: Mission = {
   id: 'hotfix-worktree',
   chapterId: 'worktrees',
@@ -19,25 +28,19 @@ export const mission41: Mission = {
   number: '4.1',
   title: 'Le bug de prod',
   story:
-    "Tu es en pleine refonte sur feature, avec des modifications non commitées dans src/app.ts. Un bug critique tombe en prod : réflexe naturel, git switch main — mais Git refuse net, car main a aussi modifié src/app.ts et ton WIP serait écrasé. Un commit bricolé ou un stash ne sont pas acceptables : il te faut un second espace de travail relié au même dépôt.",
+    "Tu es en pleine refonte sur feature, avec des modifications non commitées dans app.ts. Un bug critique tombe en prod, et main a aussi touché app.ts : impossible de basculer sans écraser ton WIP. Yanis a déjà poussé le correctif sur la branche hotfix ; à toi de monter un second espace de travail pour le vérifier sans lâcher ta refonte.",
   situation:
-    'HEAD est sur feature avec src/app.ts modifié non commité ; main a aussi touché ce fichier.',
+    'HEAD est sur feature avec app.ts modifié non commité ; le correctif attend sur la branche hotfix.',
   objective:
-    'Corrige bug.txt sur une branche hotfix dans un worktree séparé, sans toucher au WIP de feature.',
+    'Monte un worktree hotfix depuis la branche hotfix, vérifie le correctif, puis reviens au worktree principal avec le WIP intact.',
   steps: [
     {
-      label: 'Créer un worktree hotfix à partir de main',
+      label: 'Créer un worktree hotfix à partir de la branche hotfix',
       done: (state) => worktreePaths(state).includes('~/gitquest-hotfix'),
     },
     {
-      label: 'Committer le correctif sur hotfix',
-      done: (state, ctx) => {
-        const entry = ctx?.entry ?? initial;
-        return (
-          branchFile(state, 'hotfix', 'bug.txt') !== undefined &&
-          branchFile(state, 'hotfix', 'bug.txt') !== branchFile(entry, 'main', 'bug.txt')
-        );
-      },
+      label: 'Vérifier que le worktree contient le correctif',
+      done: (state) => hasFix(state),
     },
     {
       label: 'Revenir au worktree principal avec le WIP intact',
@@ -50,7 +53,7 @@ export const mission41: Mission = {
   takeaway:
     'Un worktree est un second bureau sur le même dépôt : HEAD, l’index et le disque y sont indépendants.',
   difficulty: 3,
-  par: 6,
+  par: 3,
   initialState: initial,
   validate: (state, ctx) => {
     const entry = ctx?.entry ?? initial;
@@ -62,7 +65,7 @@ export const mission41: Mission = {
       check(
         branchFile(state, 'hotfix', 'bug.txt') !== undefined &&
           branchFile(state, 'hotfix', 'bug.txt') !== branchFile(entry, 'main', 'bug.txt'),
-        'Le correctif doit être commité sur hotfix.',
+        'Le correctif doit être présent sur hotfix.',
       ),
       check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
       check(branchUnchanged(state, entry, 'feature'), 'feature ne doit pas bouger.'),
@@ -76,15 +79,12 @@ export const mission41: Mission = {
   },
   hints: [
     'Essaie de passer sur main. Que dit Git ?',
-    'Crée un worktree sur une nouvelle branche hotfix à partir de main, sans toucher au worktree principal.',
-    'git worktree add ../gitquest-hotfix -b hotfix main, cd ../gitquest-hotfix, edit bug.txt "export function login(req) { if (!req.user) return null; return db.find(req.user); }", git add bug.txt, git commit -m "fix: login sans session", cd ../gitquest.',
+    'Le correctif est déjà sur la branche hotfix : crée un worktree sur cette branche, pas sur main.',
+    'git worktree add ../gitquest-hotfix hotfix, cd ../gitquest-hotfix, cat bug.txt, cd ../gitquest.',
   ],
   solution: [
-    'git worktree add ../gitquest-hotfix -b hotfix main',
+    'git worktree add ../gitquest-hotfix hotfix',
     'cd ../gitquest-hotfix',
-    'edit bug.txt "export function login(req) { if (!req.user) return null; return db.find(req.user); }"',
-    'git add bug.txt',
-    'git commit -m "fix: login sans session"',
     'cd ../gitquest',
   ],
   forbidden: [
@@ -94,5 +94,5 @@ export const mission41: Mission = {
         'Pas de stash ici : l’objectif est d’apprendre les worktrees. Ton WIP doit rester visible pendant l’intervention.',
     },
   ],
-  successNote: 'Prod corrigée, WIP intact, et aucune branche déplacée par accident.',
+  successNote: 'Correctif vérifié, WIP intact, et aucune branche déplacée par accident.',
 };

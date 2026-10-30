@@ -17,6 +17,8 @@ import { useUiStore } from '../store/useUiStore';
 import { routePaths } from '../router/useHashRoute';
 import { detachedNotice } from '../story/display';
 import { storyBetaEnabled } from '../lib/story-flags';
+import { preparedFiles } from '../lib/prepared-files';
+import type { PreparedFile } from '../lib/prepared-files';
 import { Icon } from '../components/ui/Icon';
 
 interface PendingPrediction {
@@ -84,6 +86,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const [feedback, setFeedback] = useState<{ correct: boolean; explanation: string } | null>(null);
   const [isolatedMode, setIsolatedMode] = useState(false);
   const [showBriefing, setShowBriefing] = useState(false);
+  const [prepared, setPrepared] = useState<readonly PreparedFile[]>([]);
 
   useEffect(() => {
     if (!mission) return;
@@ -106,6 +109,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
 
     entryRef.current = start.state;
     useRepoStore.getState().startMission(start.state, introEntries(mission, start));
+    setPrepared(preparedFiles(start.state));
     setIsolatedMode(start.isolated);
     setShowBriefing(
       !resumable &&
@@ -375,6 +379,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
         <MissionBriefing
           mission={mission}
           briefing={briefing}
+          prepared={prepared}
           onClose={() => setShowBriefing(false)}
         />
       )}

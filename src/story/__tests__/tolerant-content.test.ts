@@ -78,35 +78,6 @@ describe('contenu libre quand le concept ne porte pas sur le contenu', () => {
     expect(result.ok, result.reason).toBe(true);
   });
 
-  it('4.1 accepte une correction différente de « corrigé »', () => {
-    const target = mission('hotfix-worktree');
-    const entry = target.initialState;
-    const commands = target.solution.map((command) =>
-      command.startsWith('edit bug.txt') ? 'edit bug.txt "patch prod"' : command,
-    );
-    const final = runAll(entry, commands);
-
-    const result = target.validate(final, { entry });
-    expect(result.ok, result.reason).toBe(true);
-    for (const step of target.steps) {
-      expect(step.done(final, { entry }), step.label).toBe(true);
-    }
-  });
-
-  it('4.2 accepte un guide au contenu libre', () => {
-    const target = mission('deux-worktrees');
-    const entry = target.initialState;
-    const commands = target.solution.map((command) =>
-      command.startsWith('edit docs/GUIDE.md')
-        ? 'edit docs/GUIDE.md "brouillon"'
-        : command,
-    );
-    const final = runAll(entry, commands);
-
-    const result = target.validate(final, { entry });
-    expect(result.ok, result.reason).toBe(true);
-  });
-
   it('les préconditions d’entrée restent inchangées', () => {
     expect(entryState('branche-pointeur')).toBe(mission('branche-pointeur').initialState);
   });

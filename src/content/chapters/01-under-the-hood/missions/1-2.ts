@@ -3,7 +3,6 @@ import {
   check,
   headBranch,
   headFile,
-  indexFile,
   workingFile,
 } from '../../../../engine/validate';
 import { entryState } from '../../../../story/checkpoints';
@@ -19,37 +18,27 @@ export const mission12: Mission = {
   number: '1.2',
   title: 'La photo ne bouge plus',
   story:
-    'Le module app.ts de Nova doit passer en v2, mais tu continues à le modifier après l’avoir indexé. Le CTO veut vérifier une intuition : un commit est une photo figée de l’index, pas un miroir du fichier sur ton disque.',
-  situation: 'app.ts contient « v1 », déjà commité, et le working dir est propre.',
+    'Le module app.ts de Nova est prêt à passer en v3, mais l’index a été préparé avec v2. Le CTO veut vérifier une intuition : un commit est une photo figée de l’index, pas un miroir du fichier sur ton disque.',
+  situation: 'L’index contient app.ts en v2 ; le fichier sur le disque est déjà en v3.',
   objective:
-    'Écris v2, indexe-la, réécris v3 sans l’indexer, puis commite : le commit doit garder v2.',
+    'Commite l’index sans rien réindexer : le commit doit garder v2, et v3 doit rester sur le disque.',
   steps: [
     {
-      label: 'Écrire « v2 » dans app.ts',
-      done: (state) =>
-        workingFile(state, 'app.ts') === 'v2' ||
-        indexFile(state, 'app.ts') === 'v2' ||
-        headFile(state, 'app.ts') === 'v2',
+      label: 'Committer l’index sans refaire git add',
+      done: (state, ctx) =>
+        headFile(state, 'app.ts') === 'v2' &&
+        commitDelta(state, ctx?.entry ?? initial) === 1,
     },
     {
-      label: 'Indexer app.ts',
+      label: 'Laisser v3 sur le disque, hors du commit',
       done: (state) =>
-        indexFile(state, 'app.ts') === 'v2' || headFile(state, 'app.ts') === 'v2',
-    },
-    {
-      label: 'Réécrire « v3 » sans l’indexer',
-      done: (state) =>
-        workingFile(state, 'app.ts') === 'v3' && indexFile(state, 'app.ts') === 'v2',
-    },
-    {
-      label: 'Committer la version indexée (v2)',
-      done: (state) => headFile(state, 'app.ts') === 'v2',
+        headFile(state, 'app.ts') === 'v2' && workingFile(state, 'app.ts') === 'v3',
     },
   ],
   takeaway:
     'Le commit prend la photo de l’index, pas du disque. v3 est toujours là, non commitée.',
   difficulty: 2,
-  par: 4,
+  par: 1,
   initialState: initial,
   validate: (state, ctx) => {
     const entry = ctx?.entry ?? initial;
@@ -64,16 +53,11 @@ export const mission12: Mission = {
     );
   },
   hints: [
-    'Le commit photographie l’index, même si le fichier change ensuite sur le disque.',
-    'Indexe v2, puis réécris v3 sans refaire git add.',
-    'edit app.ts "v2", git add app.ts, edit app.ts "v3", git commit -m "docs: v2".',
+    'Le commit photographie l’index, même si le fichier sur le disque est déjà plus récent.',
+    'L’index contient déjà v2 : un git add app.ts écraserait cet état avec v3.',
+    'git commit -m "docs: v2".',
   ],
-  solution: [
-    'edit app.ts "v2"',
-    'git add app.ts',
-    'edit app.ts "v3"',
-    'git commit -m "docs: v2"',
-  ],
+  solution: ['git commit -m "docs: v2"'],
   predictions: [
     {
       trigger: (parsed) => parsed.kind === 'git-commit',
@@ -87,11 +71,5 @@ export const mission12: Mission = {
         'Seule v2 est dans l’index. v3 reste dans le working dir, non commitée.',
     },
   ],
-  suggestedCommands: [
-    'edit app.ts "v2"',
-    'cat app.ts',
-    'git add app.ts',
-    'git status',
-    'git commit -m "docs: v2"',
-  ],
+  suggestedCommands: ['cat app.ts', 'git status', 'git branch', 'git commit -m "docs: v2"'],
 };
