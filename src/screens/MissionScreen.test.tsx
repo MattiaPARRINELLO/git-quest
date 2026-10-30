@@ -5,12 +5,15 @@ import { MissionScreen } from './MissionScreen';
 import { createSandboxState } from '../content/sandbox';
 import { storage } from '../storage/storage';
 import { useProgressStore } from '../store/useProgressStore';
+import { useMissionDraftStore } from '../store/useMissionDraftStore';
 import { useRepoStore } from '../store/useRepoStore';
 import { useUiStore } from '../store/useUiStore';
 
 describe('MissionScreen', () => {
   beforeEach(async () => {
     await storage.remove('gitquest.progress.v1');
+    await storage.remove('gitquest.mission-draft.v1');
+    useMissionDraftStore.setState({ activeMission: null, draft: null, hydrated: true });
     useRepoStore.setState({
       mode: 'sandbox',
       state: createSandboxState(),
@@ -127,6 +130,33 @@ describe('MissionScreen', () => {
     expect(screen.getByText(/0 \/ 6 commandes/i)).toBeInTheDocument();
   });
 
+  it('restaure le brouillon sans rejouer le prelude', async () => {
+    const user = userEvent.setup();
+    const first = render(<MissionScreen missionId="trois-zones" />);
+
+    const input = await screen.findByRole('textbox', { name: /commande git/i });
+    await user.type(input, 'touch notes.txt{Enter}');
+
+    await waitFor(() => {
+      expect(useMissionDraftStore.getState().activeMission).toBe('trois-zones');
+    });
+    const savedState = useRepoStore.getState().state;
+    const savedEntries = useRepoStore.getState().entries.length;
+    expect(savedState.worktrees.main?.workingDir['notes.txt']).toBeDefined();
+
+    first.unmount();
+    expect(useRepoStore.getState().mode).toBe('sandbox');
+
+    render(<MissionScreen missionId="trois-zones" />);
+    await waitFor(() => {
+      expect(useRepoStore.getState().mode).toBe('mission');
+    });
+
+    expect(useRepoStore.getState().state).toEqual(savedState);
+    expect(useRepoStore.getState().entries.length).toBe(savedEntries);
+    expect(screen.getAllByText(/Mission 1\.1 —/i)).toHaveLength(1);
+  });
+
   it('affiche MissionComplete après la solution et persiste la progression', async () => {
     const user = userEvent.setup();
     render(<MissionScreen missionId="trois-zones" />);
@@ -148,6 +178,7 @@ describe('MissionScreen', () => {
     expect(screen.getByText('Mission accomplie')).toBeInTheDocument();
     expect(screen.getByText(/Solution de référence/i)).toBeInTheDocument();
     expect(useProgressStore.getState().completed['trois-zones']?.stars).toBe(3);
+    expect(useMissionDraftStore.getState().activeMission).toBeNull();
 
     await waitFor(async () => {
       const saved = await storage.get<{ completed: Record<string, { stars: number }> } | null>(

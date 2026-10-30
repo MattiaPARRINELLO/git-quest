@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { HomeScreen } from './HomeScreen';
 import { missionSequence } from '../content';
 import { useProgressStore } from '../store/useProgressStore';
+import { useMissionDraftStore } from '../store/useMissionDraftStore';
 
 const allCompleted = Object.fromEntries(
   missionSequence.map((mission) => [mission.id, { stars: 3 as const }]),
@@ -11,6 +12,7 @@ const allCompleted = Object.fromEntries(
 describe('HomeScreen — point d’entrée de reprise', () => {
   beforeEach(() => {
     useProgressStore.setState({ completed: {}, lessonSlides: {}, hydrated: true });
+    useMissionDraftStore.setState({ activeMission: null, draft: null, hydrated: true });
   });
 
   it('affiche le démarrage du chapitre 1 sans progression', () => {
@@ -45,6 +47,21 @@ describe('HomeScreen — point d’entrée de reprise', () => {
     expect(screen.getByRole('link', { name: /Reprendre le cours : Sous le capot/i })).toHaveAttribute(
       'href',
       '#/chapter/under-the-hood/lesson',
+    );
+  });
+
+  it('reprend la mission en brouillon avant tout le reste', () => {
+    useProgressStore.setState({
+      completed: { 'trois-zones': { stars: 3 }, 'snapshot-fige': { stars: 3 } },
+      lessonSlides: { 'under-the-hood': 1 },
+      hydrated: true,
+    });
+    useMissionDraftStore.setState({ activeMission: 'piege-am', hydrated: true });
+    render(<HomeScreen />);
+
+    expect(screen.getByRole('link', { name: /Reprendre la mission 1\.3/i })).toHaveAttribute(
+      'href',
+      '#/mission/piege-am',
     );
   });
 

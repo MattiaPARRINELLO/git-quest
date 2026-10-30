@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { chapters, estimatedLessonMinutes, isMissionUnlocked } from '../content';
 import { resumeContext, resumeTarget } from '../app/resume';
 import { useProgressStore } from '../store/useProgressStore';
+import { useMissionDraftStore } from '../store/useMissionDraftStore';
 import { routePaths } from '../router/useHashRoute';
 import { branchColor } from '../lib/colors';
 import { Icon } from '../components/ui/Icon';
@@ -18,10 +19,13 @@ function Stars({ count, max = 3 }: { readonly count: number; readonly max?: numb
 export function HomeScreen() {
   const completed = useProgressStore((store) => store.completed);
   const lessonSlides = useProgressStore((store) => store.lessonSlides);
-  const hydrated = useProgressStore((store) => store.hydrated);
+  const progressHydrated = useProgressStore((store) => store.hydrated);
+  const activeMission = useMissionDraftStore((store) => store.activeMission);
+  const draftHydrated = useMissionDraftStore((store) => store.hydrated);
+  const hydrated = progressHydrated && draftHydrated;
   const progress = useMemo(() => ({ completed, lessonSlides }), [completed, lessonSlides]);
-  const target = useMemo(() => resumeTarget(progress), [progress]);
-  const context = useMemo(() => resumeContext(progress), [progress]);
+  const target = useMemo(() => resumeTarget(progress, activeMission), [progress, activeMission]);
+  const context = useMemo(() => resumeContext(progress, activeMission), [progress, activeMission]);
   const totalMissions = chapters.reduce((sum, chapter) => sum + chapter.missions.length, 0);
   const totalStars = Object.values(completed).reduce((sum, item) => sum + item.stars, 0);
   const done = Object.keys(completed).length;
