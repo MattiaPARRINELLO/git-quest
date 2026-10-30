@@ -10,6 +10,8 @@ interface MissionCompleteProps {
   readonly commandsUsed: number;
   readonly after: AfterMission;
   readonly onInspect: () => void;
+  /** Solution affichée, hashes résolus depuis l'état du joueur. */
+  readonly solution?: readonly string[];
 }
 
 export function MissionComplete({
@@ -18,6 +20,7 @@ export function MissionComplete({
   commandsUsed,
   after,
   onInspect,
+  solution = mission.solution,
 }: MissionCompleteProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4 backdrop-blur-sm">
@@ -83,7 +86,7 @@ export function MissionComplete({
             Solution de référence
           </h3>
           <ol className="mt-2 space-y-1">
-            {mission.solution.map((command, index) => (
+            {solution.map((command, index) => (
               <li
                 key={`${command}-${index}`}
                 className="flex items-baseline gap-2 rounded-lg border border-border bg-panel-2/50 px-2.5 py-1.5 font-mono text-[11px] text-accent-2"

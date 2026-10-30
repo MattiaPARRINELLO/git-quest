@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { findForbiddenCommand, findPrediction, normalizeCommand, starsFor } from '../app/mission';
+import { findForbiddenCommand, findPrediction, missionText, normalizeCommand, resolvePrediction, starsFor } from '../app/mission';
 import { MissionComplete } from '../components/mission/MissionComplete';
 import { MissionPanel } from '../components/mission/MissionPanel';
 import { PredictionFeedback, PredictionOverlay } from '../components/mission/PredictionOverlay';
@@ -17,6 +17,7 @@ import { Icon } from '../components/ui/Icon';
 
 interface PendingPrediction {
   readonly prediction: Prediction;
+  readonly original: Prediction;
   readonly input: string;
 }
 
@@ -175,14 +176,15 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     const normalized = normalizeCommand(input);
 
     if (normalized === 'hint') {
-      const next = Math.min(mission.hints.length, hintsUsed + 1);
+      const hints = missionText(mission, useRepoStore.getState().state).hints;
+      const next = Math.min(hints.length, hintsUsed + 1);
       setHintsUsed(next);
       const store = useRepoStore.getState();
       store.appendCommand(input);
       store.appendOutput(
-        next === hintsUsed && next === mission.hints.length
+        next === hintsUsed && next === hints.length
           ? 'Tous les indices sont déjà révélés.'
-          : `Indice ${next}/${mission.hints.length} : ${mission.hints[next - 1] ?? ''}`,
+          : `Indice ${next}/${hints.length} : ${hints[next - 1] ?? ''}`,
         'warning',
       );
       persistDraft(commandsUsed, next);
@@ -211,7 +213,11 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
 
     const prediction = findPrediction(mission, input, useRepoStore.getState().state);
     if (prediction && !answered.has(prediction)) {
-      setPendingPrediction({ prediction, input });
+      setPendingPrediction({
+        prediction: resolvePrediction(prediction, useRepoStore.getState().state),
+        original: prediction,
+        input,
+      });
       useUiStore.getState().setMobileTab('graph');
       return;
     }
@@ -221,8 +227,8 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
 
   const answerPrediction = (optionId: string): void => {
     if (!pendingPrediction) return;
-    const { prediction, input } = pendingPrediction;
-    setAnswered((current) => new Set(current).add(prediction));
+    const { prediction, original, input } = pendingPrediction;
+    setAnswered((current) => new Set(current).add(original));
     setPendingPrediction(null);
     setFeedback({
       correct: optionId === prediction.correctOptionId,
@@ -233,8 +239,8 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
 
   const skipPrediction = (): void => {
     if (!pendingPrediction) return;
-    const { prediction, input } = pendingPrediction;
-    setAnswered((current) => new Set(current).add(prediction));
+    const { original, input } = pendingPrediction;
+    setAnswered((current) => new Set(current).add(original));
     setPendingPrediction(null);
     run(input);
   };
@@ -301,6 +307,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
           stars={completed.stars}
           commandsUsed={completed.used}
           after={afterMission(mission.id)}
+          solution={missionText(mission, repoState).solution}
           onInspect={() => {
             setCompleted(null);
             useUiStore.getState().setMobileTab('terminal');

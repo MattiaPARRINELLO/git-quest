@@ -62,6 +62,14 @@ export interface PredictionOption {
   readonly target?: PredictionTarget;
 }
 
+/** Remplacement dynamique des libellés d'une prédiction (hashes réels). */
+export interface PredictionResolution {
+  readonly question?: string;
+  readonly options?: readonly PredictionOption[];
+  readonly correctOptionId?: string;
+  readonly explanation?: string;
+}
+
 export interface Prediction {
   /** Déclencheur structurel, évalué sur la commande parsée et l'état avant exécution. */
   readonly trigger: (parsed: ParsedCommand, state: RepoState) => boolean;
@@ -69,6 +77,8 @@ export interface Prediction {
   readonly options: readonly PredictionOption[];
   readonly correctOptionId: string;
   readonly explanation: string;
+  /** Libellés recalculés depuis l'état (aucun hash figé à l'écran). */
+  readonly resolve?: (state: RepoState) => PredictionResolution;
 }
 
 export interface ForbiddenCommand {
@@ -89,6 +99,13 @@ export interface ValidationContext {
 export interface MissionStep {
   readonly label: string;
   readonly done: (state: RepoState, ctx?: ValidationContext) => boolean;
+}
+
+/** Textes affichés avec des placeholders `{slotId}` résolus à l'écran. */
+export interface MissionDisplay {
+  readonly objective?: string;
+  readonly hints?: readonly [string, string, string];
+  readonly solution?: readonly string[];
 }
 
 export interface Mission {
@@ -115,6 +132,8 @@ export interface Mission {
   readonly suggestedCommands?: readonly string[];
   readonly forbidden?: readonly ForbiddenCommand[];
   readonly successNote?: string;
+  /** Textes à afficher, avec hashes résolus depuis l'état du joueur. */
+  readonly display?: MissionDisplay;
 }
 
 export interface Chapter {

@@ -1,4 +1,4 @@
-import { scenario } from '../../../../engine/scenario';
+import { entryState } from '../../../../story/checkpoints';
 import {
   allOf,
   branchFile,
@@ -9,15 +9,7 @@ import {
 import { commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': '# Projet Nova',
-    'src/app.ts': "export const app = 'nova';",
-  })
-  .branch('feature')
-  .checkout('feature')
-  .build();
+const initial = entryState('qui-avance');
 
 export const mission22: Mission = {
   id: 'qui-avance',

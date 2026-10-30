@@ -1,4 +1,3 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   branchFile,
@@ -7,18 +6,11 @@ import {
   headBranch,
   headFile,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
 import { branchUnchanged, commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': '# Projet Nova',
-    'src/app.ts': "export const app = 'nova';",
-  })
-  .build();
-
-const mainTip = initial.branches.main ?? '';
+const initial = entryState('branche-pointeur');
 
 export const mission21: Mission = {
   id: 'branche-pointeur',
@@ -93,13 +85,30 @@ export const mission21: Mission = {
         },
         {
           id: 'detached',
-          label: `Détaché sur le commit ${mainTip.slice(0, 7)}`,
-          target: { kind: 'commit', value: mainTip },
+          label: 'Détaché sur un commit',
         },
       ],
       correctOptionId: 'experiment',
       explanation:
         'switch et checkout de branche rattachent HEAD à l’étiquette : experiment, même si elle pointe encore sur le commit de main.',
+      resolve: (state) => {
+        const tip = state.branches.main ?? '';
+        return {
+          options: [
+            { id: 'main', label: 'Sur la branche main', target: { kind: 'branch', value: 'main' } },
+            {
+              id: 'experiment',
+              label: 'Sur la branche experiment',
+              target: { kind: 'branch', value: 'experiment' },
+            },
+            {
+              id: 'detached',
+              label: `Détaché sur le commit ${tip.slice(0, 7)}`,
+              target: { kind: 'commit', value: tip },
+            },
+          ],
+        };
+      },
     },
   ],
 };
