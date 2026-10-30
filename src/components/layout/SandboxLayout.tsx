@@ -87,10 +87,16 @@ export function SandboxLayout({
   if (isDesktop) {
     return (
       <SplitPane
-        left={<Terminal {...(onCommand === undefined ? {} : { onCommand })} />}
-        right={
+        left={
           <div className="flex h-full min-h-0 flex-col">
             {missionPanel}
+            <div className="min-h-0 flex-1">
+              <Terminal {...(onCommand === undefined ? {} : { onCommand })} />
+            </div>
+          </div>
+        }
+        right={
+          <div className="flex h-full min-h-0 flex-col">
             {worktreeCount > 1 && <WorktreeStrip />}
             <div className="min-h-0 flex-1">{graph}</div>
             <StagingPipeline />
