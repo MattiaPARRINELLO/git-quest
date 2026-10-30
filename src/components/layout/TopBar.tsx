@@ -1,5 +1,7 @@
+import { useHashRoute, routePaths } from '../../router/useHashRoute';
 import { useRepoStore } from '../../store/useRepoStore';
 import { useUiStore } from '../../store/useUiStore';
+import { cn } from '../../lib/cn';
 import { Icon } from '../ui/Icon';
 
 function BrandMark() {
@@ -27,6 +29,7 @@ function BrandMark() {
 }
 
 export function TopBar() {
+  const route = useHashRoute();
   const loadDemo = useRepoStore((store) => store.loadDemo);
   const resetSandbox = useRepoStore((store) => store.resetSandbox);
   const theme = useUiStore((store) => store.theme);
@@ -34,53 +37,79 @@ export function TopBar() {
   const showExplanations = useUiStore((store) => store.showExplanations);
   const setShowExplanations = useUiStore((store) => store.setShowExplanations);
 
+  const isSandbox = route.name === 'sandbox';
+  const showExplanationToggle = isSandbox || route.name === 'mission';
+
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-panel/80 px-3 backdrop-blur-md sm:px-4">
       <div className="flex min-w-0 items-center gap-2.5">
-        <BrandMark />
-        <div className="flex items-baseline gap-2">
+        <a href={routePaths.home} className="flex items-center gap-2.5" aria-label="Accueil GitQuest">
+          <BrandMark />
           <span className="text-sm font-semibold tracking-tight text-text">GitQuest</span>
-          <span className="hidden rounded-full border border-border bg-panel-2 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted sm:inline">
+        </a>
+        <nav className="ml-1 hidden items-center gap-1 sm:flex" aria-label="Navigation principale">
+          <a
+            href={routePaths.home}
+            className={cn(
+              'rounded-lg px-2 py-1 text-xs font-medium transition-colors',
+              route.name === 'home' ? 'bg-panel-2 text-text' : 'text-muted hover:text-text',
+            )}
+          >
+            Chapitres
+          </a>
+          <a
+            href={routePaths.sandbox}
+            className={cn(
+              'rounded-lg px-2 py-1 text-xs font-medium transition-colors',
+              isSandbox ? 'bg-panel-2 text-text' : 'text-muted hover:text-text',
+            )}
+          >
             Bac à sable
-          </span>
-        </div>
+          </a>
+        </nav>
       </div>
 
       <div className="flex items-center gap-1.5">
-        <button
-          type="button"
-          className="btn hidden sm:inline-flex"
-          aria-pressed={showExplanations}
-          onClick={() => setShowExplanations(!showExplanations)}
-          title="Afficher les explications après chaque commande"
-        >
-          <span
-            className={`h-2 w-2 rounded-full ${
-              showExplanations ? 'bg-success' : 'bg-border-strong'
-            }`}
-          />
-          Explications
-        </button>
+        {showExplanationToggle && (
+          <button
+            type="button"
+            className="btn hidden sm:inline-flex"
+            aria-pressed={showExplanations}
+            onClick={() => setShowExplanations(!showExplanations)}
+            title="Afficher les explications après chaque commande"
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                showExplanations ? 'bg-success' : 'bg-border-strong'
+              }`}
+            />
+            Explications
+          </button>
+        )}
 
-        <button
-          type="button"
-          className="btn"
-          onClick={loadDemo}
-          title="Charger un dépôt de démonstration"
-        >
-          <Icon name="play" size={14} />
-          <span className="hidden sm:inline">Démo</span>
-        </button>
+        {isSandbox && (
+          <>
+            <button
+              type="button"
+              className="btn"
+              onClick={loadDemo}
+              title="Charger un dépôt de démonstration"
+            >
+              <Icon name="play" size={14} />
+              <span className="hidden sm:inline">Démo</span>
+            </button>
 
-        <button
-          type="button"
-          className="btn"
-          onClick={resetSandbox}
-          title="Réinitialiser le bac à sable"
-        >
-          <Icon name="reset" size={14} />
-          <span className="hidden sm:inline">Réinitialiser</span>
-        </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={resetSandbox}
+              title="Réinitialiser le bac à sable"
+            >
+              <Icon name="reset" size={14} />
+              <span className="hidden sm:inline">Réinitialiser</span>
+            </button>
+          </>
+        )}
 
         <button
           type="button"

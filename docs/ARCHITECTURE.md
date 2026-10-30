@@ -281,3 +281,62 @@ branchLabels, headMarkers }`, sans React.
 Manifest `standalone`, thème sombre, icônes 192/512 + maskable. Vérifié en
 production (`npm run build && npm run preview`) avec service worker actif puis
 rechargement hors ligne.
+
+## 12. Phase 3 — cours, missions, prédictions
+
+### Routes
+
+- `#/` : carte des chapitres (`HomeScreen`).
+- `#/chapter/:id/lesson` : `LessonScreen`.
+- `#/mission/:id` : `MissionScreen` (réutilise `SandboxLayout`).
+- `#/sandbox` : bac à sable libre (inchangé).
+
+Routeur maison par hash (`src/router/useHashRoute.ts`), aucun routeur externe.
+
+### Contenu
+
+- `src/content/types.ts` : `Chapter`, `Lesson`, `LessonSlide` (`text`, `diagram`,
+  `demo`, `recap`), `Mission`, `Prediction`, `ForbiddenCommand`.
+- Un chapitre = un dossier `src/content/chapters/<id>/` avec `lesson.ts`, ses
+  missions (un fichier par mission) et un `index.ts`. Ajouter une mission = ajouter
+  un fichier + une ligne dans le chapitre.
+- Les démos de cours rejouent une séquence avec le vrai moteur ; `MiniDemo` calcule
+  les états à l'avance et affiche `CommitGraph` pas à pas.
+- Les diagrammes sont un registre typé par `DiagramId` (`components/lesson/diagrams`).
+
+### Progression
+
+`useProgressStore` (clé `gitquest.progress.v1`) stocke :
+
+- `completed: Record<missionId, { stars }>` (les étoiles ne peuvent que monter) ;
+- `lessonSlides: Record<chapterId, index>` pour reprendre un cours.
+
+Les missions se déverrouillent **linéairement** : la première est ouverte, chaque
+suivante exige la précédente terminée (`isMissionUnlocked`). Le bac à sable reste
+toujours accessible.
+
+### Mode mission
+
+- `MissionScreen` démarre la mission via `startMission` : le dépôt du bac à sable
+  est sauvegardé en mémoire, remplacé par l'état initial, et restauré à la sortie
+  (`endMission`). Le mode mission ne persiste **pas** dans `gitquest.sandbox.v1`.
+- Compteur de commandes : seules les commandes `scored` comptent (mêmes exclusions
+  que le bac à sable). Étoiles : 3 si `≤ par`, 2 si `≤ par + 2`, sinon 1
+  (`src/app/mission.ts`).
+- Validation après chaque commande mutante (`events.length > 0`). En cas d'échec,
+  aucune raison n'est affichée automatiquement : l'utilisateur demande un indice.
+- `forbidden` : interception avant le moteur, message pédagogique dans le terminal.
+- `hint` et `reset-mission` sont interceptés en mode mission ; le panneau propose
+  aussi les trois indices.
+- `MissionComplete` : étoiles, commandes/par, note de réussite, solution de
+  référence, mission suivante.
+
+### Prédictions
+
+- `Prediction.whenCommand` est comparée à la commande normalisée. L'exécution est
+  suspendue : overlay avec choix, clic possible sur un commit/une étiquette du
+  graphe (`onSelectCommit` / `onSelectBranch`) ou boutons, et bouton « Passer ».
+- Après réponse : exécution réelle + animation, puis feedback correct/incorrect et
+  explication. Rien ne bloque la suite.
+- Les cibles de graphe sont des `PredictionTarget` (`commit` avec hash complet,
+  `branch` avec nom).

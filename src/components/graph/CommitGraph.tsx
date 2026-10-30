@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from 'react';
+import type { PointerEvent as ReactPointerEvent, ReactNode, WheelEvent as ReactWheelEvent } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { RepoState, GitEvent } from '../../engine/types';
 import { branchColor } from '../../lib/colors';
@@ -10,6 +10,10 @@ import { Icon } from '../ui/Icon';
 interface CommitGraphProps {
   readonly state: RepoState;
   readonly batch: { readonly id: number; readonly events: readonly GitEvent[] };
+  /** Contenu flottant au-dessus du graphe (prédiction, feedback). */
+  readonly overlay?: ReactNode;
+  readonly onSelectCommit?: (hash: string) => void;
+  readonly onSelectBranch?: (name: string) => void;
 }
 
 interface Viewport {
@@ -57,7 +61,13 @@ function nodeLabelWidth(name: string): number {
   return Math.max(34, name.length * 6.6 + 18);
 }
 
-export function CommitGraph({ state, batch }: CommitGraphProps) {
+export function CommitGraph({
+  state,
+  batch,
+  overlay,
+  onSelectCommit,
+  onSelectBranch,
+}: CommitGraphProps) {
   const layout = useMemo(() => layoutGraph(state), [state]);
   const delays = useMemo(() => eventDelays(batch.events), [batch]);
   const prefersReducedMotion = useReducedMotion();
@@ -147,7 +157,9 @@ export function CommitGraph({ state, batch }: CommitGraphProps) {
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
     dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    if (typeof event.currentTarget.setPointerCapture === 'function') {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -285,6 +297,7 @@ export function CommitGraph({ state, batch }: CommitGraphProps) {
                 delay={delays.commits.get(node.hash) ?? 0}
                 duration={duration}
                 onHover={setHovered}
+                {...(onSelectCommit === undefined ? {} : { onSelect: onSelectCommit })}
               />
             ))}
 
@@ -295,6 +308,7 @@ export function CommitGraph({ state, batch }: CommitGraphProps) {
                   label={label}
                   delay={delays.branches.get(label.name) ?? 0}
                   duration={duration}
+                  {...(onSelectBranch === undefined ? {} : { onSelect: onSelectBranch })}
                 />
               ))}
             </AnimatePresence>
@@ -355,6 +369,8 @@ export function CommitGraph({ state, batch }: CommitGraphProps) {
           </div>
         )}
 
+        {overlay}
+
         <div className="pointer-events-none absolute bottom-2 left-3 font-mono text-[10px] text-muted/80">
           molette = zoom · glisser = déplacer
         </div>
@@ -378,12 +394,14 @@ function CommitNodeView({
   delay,
   duration,
   onHover,
+  onSelect,
 }: {
   readonly node: GraphNode;
   readonly commit: RepoState['commits'][string] | undefined;
   readonly delay: number;
   readonly duration: number;
   readonly onHover: (node: GraphNode | null) => void;
+  readonly onSelect?: (hash: string) => void;
 }) {
   const color = node.branch === undefined ? 'var(--border-strong)' : branchColor(node.branch);
   const isMerge = node.parents.length > 1;
@@ -395,7 +413,31 @@ function CommitNodeView({
       transition={{ duration, delay }}
       onMouseEnter={() => onHover(node)}
       onMouseLeave={() => onHover(null)}
-      style={{ cursor: 'help' }}
+      onPointerDown={
+        onSelect === undefined ? undefined : (event) => event.stopPropagation()
+      }
+      onClick={
+        onSelect === undefined
+          ? undefined
+          : (event) => {
+              event.stopPropagation();
+              onSelect(node.hash);
+            }
+      }
+      role={onSelect === undefined ? undefined : 'button'}
+      tabIndex={onSelect === undefined ? undefined : 0}
+      aria-label={onSelect === undefined ? undefined : `Sélectionner le commit ${node.shortHash}`}
+      onKeyDown={
+        onSelect === undefined
+          ? undefined
+          : (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onSelect(node.hash);
+              }
+            }
+      }
+      style={{ cursor: onSelect === undefined ? 'help' : 'pointer' }}
     >
       <motion.circle
         cx={node.x}
@@ -438,10 +480,12 @@ function BranchLabelView({
   label,
   delay,
   duration,
+  onSelect,
 }: {
   readonly label: BranchLabel;
   readonly delay: number;
   readonly duration: number;
+  readonly onSelect?: (name: string) => void;
 }) {
   const width = nodeLabelWidth(label.name);
   return (
@@ -450,6 +494,31 @@ function BranchLabelView({
       animate={{ opacity: 1, x: label.x, y: label.y }}
       exit={{ opacity: 0 }}
       transition={{ duration, delay, ease: 'easeOut' }}
+      onPointerDown={
+        onSelect === undefined ? undefined : (event) => event.stopPropagation()
+      }
+      onClick={
+        onSelect === undefined
+          ? undefined
+          : (event) => {
+              event.stopPropagation();
+              onSelect(label.name);
+            }
+      }
+      role={onSelect === undefined ? undefined : 'button'}
+      tabIndex={onSelect === undefined ? undefined : 0}
+      aria-label={onSelect === undefined ? undefined : `Sélectionner la branche ${label.name}`}
+      onKeyDown={
+        onSelect === undefined
+          ? undefined
+          : (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onSelect(label.name);
+              }
+            }
+      }
+      style={{ cursor: onSelect === undefined ? 'default' : 'pointer' }}
     >
       <rect
         x={0}

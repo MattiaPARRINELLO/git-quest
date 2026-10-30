@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { routeCommand } from '../app/commands';
+import type { RoutedResult } from '../app/commands';
 import { explainEvent } from '../explanations/fr';
 import { createDemoState, createSandboxState } from '../content/sandbox';
 import { promptFor } from '../lib/prompt';
@@ -25,7 +26,10 @@ interface PersistedSandbox {
   readonly commandHistory: readonly string[];
 }
 
+export type RepoMode = 'sandbox' | 'mission';
+
 export interface RepoStore {
+  mode: RepoMode;
   state: RepoState;
   history: RepoState[];
   entries: TerminalEntry[];
@@ -33,7 +37,11 @@ export interface RepoStore {
   lastEvents: { id: number; events: readonly GitEvent[] };
   hydrated: boolean;
   nextEntryId: number;
-  execute(input: string): void;
+  execute(input: string): RoutedResult | null;
+  appendCommand(input: string): void;
+  appendOutput(text: string, tone?: OutputTone): void;
+  startMission(state: RepoState, entries: readonly TerminalEntry[]): void;
+  endMission(): void;
   clearTerminal(): void;
   resetSandbox(): void;
   loadDemo(): void;
@@ -59,7 +67,19 @@ function welcomeEntries(startId: number): TerminalEntry[] {
 
 const initialEntries = welcomeEntries(1);
 
+interface SandboxBackup {
+  readonly state: RepoState;
+  readonly entries: TerminalEntry[];
+  readonly commandHistory: string[];
+  readonly history: RepoState[];
+  readonly nextEntryId: number;
+  readonly lastEvents: { id: number; events: readonly GitEvent[] };
+}
+
+let sandboxBackup: SandboxBackup | null = null;
+
 export const useRepoStore = create<RepoStore>((set, get) => ({
+  mode: 'sandbox',
   state: createSandboxState(),
   history: [],
   entries: initialEntries,
@@ -70,7 +90,7 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
 
   execute(input) {
     const command = input.trim();
-    if (command === '') return;
+    if (command === '') return null;
 
     const current = get();
     const prompt = promptFor(current.state);
@@ -126,6 +146,77 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
     });
 
     if (result.events.length > 0) noteGraphChange();
+    persist();
+    return result;
+  },
+
+  appendCommand(input) {
+    const command = input.trim();
+    if (command === '') return;
+    const current = get();
+    set({
+      entries: [
+        ...current.entries,
+        {
+          id: current.nextEntryId,
+          kind: 'command' as const,
+          text: `${promptFor(current.state)} ${command}`,
+        },
+      ].slice(-ENTRY_LIMIT),
+      nextEntryId: current.nextEntryId + 1,
+    });
+    persist();
+  },
+
+  appendOutput(text, tone) {
+    const current = get();
+    set({
+      entries: [
+        ...current.entries,
+        {
+          id: current.nextEntryId,
+          kind: 'output' as const,
+          text,
+          ...(tone === undefined ? {} : { tone }),
+        },
+      ].slice(-ENTRY_LIMIT),
+      nextEntryId: current.nextEntryId + 1,
+    });
+    persist();
+  },
+
+  startMission(state, entries) {
+    const current = get();
+    if (current.mode === 'sandbox') {
+      sandboxBackup = {
+        state: current.state,
+        entries: current.entries,
+        commandHistory: current.commandHistory,
+        history: current.history,
+        nextEntryId: current.nextEntryId,
+        lastEvents: current.lastEvents,
+      };
+    }
+    const maxId = entries.reduce((max, entry) => Math.max(max, entry.id), 0);
+    set({
+      mode: 'mission',
+      state,
+      history: [],
+      entries: [...entries],
+      commandHistory: [],
+      lastEvents: { id: current.lastEvents.id + 1, events: [] },
+      nextEntryId: maxId + 1,
+    });
+  },
+
+  endMission() {
+    if (get().mode !== 'mission') return;
+    if (!sandboxBackup) {
+      set({ mode: 'sandbox' });
+      return;
+    }
+    set({ mode: 'sandbox', ...sandboxBackup });
+    sandboxBackup = null;
     persist();
   },
 
@@ -205,7 +296,8 @@ function noteGraphChange(): void {
 }
 
 function persist(): void {
-  const { state, entries, commandHistory } = useRepoStore.getState();
+  const { state, entries, commandHistory, mode } = useRepoStore.getState();
+  if (mode !== 'sandbox') return;
   void storage
     .set<PersistedSandbox>(SANDBOX_KEY, {
       version: 1,

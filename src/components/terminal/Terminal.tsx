@@ -36,7 +36,12 @@ function EntryLine({ entry }: { entry: TerminalEntry }) {
   );
 }
 
-export function Terminal() {
+interface TerminalProps {
+  /** Remplace `store.execute` (mode mission : interception prédiction/forbidden). */
+  readonly onCommand?: (input: string) => void;
+}
+
+export function Terminal({ onCommand }: TerminalProps) {
   const entries = useRepoStore((store) => store.entries);
   const state = useRepoStore((store) => store.state);
   const commandHistory = useRepoStore((store) => store.commandHistory);
@@ -60,7 +65,10 @@ export function Terminal() {
   }, []);
 
   const submit = () => {
-    if (input.trim() !== '') executeCommand(input);
+    if (input.trim() !== '') {
+      if (onCommand) onCommand(input);
+      else executeCommand(input);
+    }
     setInput('');
     setHistoryIndex(null);
     setSuggestions([]);

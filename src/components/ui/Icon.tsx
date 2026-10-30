@@ -11,7 +11,10 @@ export type IconName =
   | 'check'
   | 'chevron'
   | 'branch'
-  | 'target';
+  | 'target'
+  | 'lock'
+  | 'arrow-right'
+  | 'book';
 
 const PATHS: Record<IconName, string> = {
   terminal: 'M4 5h16v14H4zM7 9l3 3-3 3M12 15h5',
@@ -25,6 +28,9 @@ const PATHS: Record<IconName, string> = {
   chevron: 'M9 6l6 6-6 6',
   branch: 'M6 4v10a4 4 0 0 0 4 4h6M6 4h.01M18 14h.01M18 18h.01M6 18h.01',
   target: 'M12 2v3M12 19v3M2 12h3M19 12h3M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z',
+  lock: 'M6 10h12v10H6zM8 10V7a4 4 0 0 1 8 0v3M12 14v2',
+  'arrow-right': 'M4 12h16M14 6l6 6-6 6',
+  book: 'M4 4h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H4zM20 4h-3a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h3z',
 };
 
 interface IconProps extends SVGProps<SVGSVGElement> {

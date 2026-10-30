@@ -1,0 +1,67 @@
+import { scenario } from '../../../../engine/scenario';
+import {
+  allOf,
+  branchTip,
+  check,
+  commitCount,
+  headBranch,
+  headFile,
+} from '../../../../engine/validate';
+import type { Mission } from '../../../types';
+
+const initial = scenario()
+  .init()
+  .commit('Initial commit', {
+    'README.md': '# Projet Nova',
+    'src/app.ts': "export const app = 'nova';",
+  })
+  .branch('feature')
+  .checkout('feature')
+  .commit('feat: export CSV', {
+    'src/export.ts': "export const exportCsv = () => 'csv';",
+  })
+  .checkout('main')
+  .build();
+
+export const mission31: Mission = {
+  id: 'avance-rapide',
+  chapterId: 'merging',
+  order: 1,
+  number: '3.1',
+  title: 'Livrer sans cérémonie',
+  story:
+    "La feature d'export CSV est terminée et main n'a pas bougé depuis. Le release manager veut la livrer ce soir : ici, aucune divergence, Git peut simplement faire glisser l'étiquette main vers le travail déjà fait.",
+  objective: 'Fusionne feature dans main en avance rapide, sans créer de commit supplémentaire.',
+  difficulty: 2,
+  par: 1,
+  initialState: initial,
+  validate: (state) =>
+    allOf(
+      check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
+      check(
+        branchTip(state, 'main') === branchTip(state, 'feature'),
+        'main doit rejoindre le commit de feature.',
+      ),
+      check(commitCount(state) === 2, 'Aucun commit de fusion ne doit être créé.'),
+      check(headFile(state, 'src/export.ts') !== undefined, 'Le fichier export.ts doit arriver sur main.'),
+    ),
+  hints: [
+    'Quand HEAD est un ancêtre de la cible, Git peut avancer sans commit.',
+    'Une seule commande suffit : demande à Git de fusionner feature.',
+    'git merge feature.',
+  ],
+  solution: ['git merge feature'],
+  predictions: [
+    {
+      whenCommand: 'git merge feature',
+      question: 'Cette fusion va-t-elle créer un nouveau commit ?',
+      options: [
+        { id: 'oui', label: 'Oui, un commit de fusion' },
+        { id: 'non', label: 'Non, avance rapide' },
+      ],
+      correctOptionId: 'non',
+      explanation:
+        'main est un ancêtre direct de feature : Git déplace simplement le pointeur main, sans créer de commit.',
+    },
+  ],
+};

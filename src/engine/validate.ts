@@ -100,6 +100,23 @@ export function activeWorktreePath(state: RepoState): string {
   return activeWorktree(state).path;
 }
 
+/** Contenu d'un fichier dans le working dir du worktree actif. */
+export function workingFile(state: RepoState, path: string): string | undefined {
+  return activeWorktree(state).workingDir[path];
+}
+
+/** Contenu d'un fichier dans le working dir d'un worktree donné (par chemin). */
+export function workingFileIn(
+  state: RepoState,
+  worktreePath: string,
+  path: string,
+): string | undefined {
+  const worktree = Object.values(state.worktrees).find(
+    (candidate) => candidate.path === worktreePath,
+  );
+  return worktree?.workingDir[path];
+}
+
 export function isWorkingTreeClean(state: RepoState): boolean {
   const status = worktreeStatus(state, activeWorktree(state));
   return status.staged.length === 0 && status.unstaged.length === 0 && status.untracked.length === 0;

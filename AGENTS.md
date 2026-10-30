@@ -8,7 +8,7 @@ strict, Zustand, Tailwind v4, Framer Motion, SVG maison, Vitest, IndexedDB via
 
 - `npm run dev` — bac à sable en développement (Vite).
 - `npm run typecheck` — `tsc --noEmit`, obligatoire avant commit.
-- `npm test` — Vitest (moteur, layout, composants).
+- `npm test` — Vitest (moteur, contenu, layout, composants).
 - `npm run coverage` — couverture du moteur.
 - `npm run build` — typecheck + build PWA (génère `dist/sw.js`).
 - `npm run preview` — sert le build (vérifier le mode hors ligne).
@@ -30,12 +30,24 @@ strict, Zustand, Tailwind v4, Framer Motion, SVG maison, Vitest, IndexedDB via
   `docs/ARCHITECTURE.md` et `docs/VERIFY.md`.
 - Ajouter une commande = parseur + handler + registry + test dédié + event/explanation.
 - Ajouter une mission = fichier dans `src/content/chapters/<chapitre>/missions/` +
-  test de sa solution (`validate(state).ok === true`).
+  une ligne dans le `index.ts` du chapitre. Sa solution doit valider la mission,
+  son état initial ne doit pas la valider, et `par === solution.length`.
+- Les cours précèdent toujours le concept utilisé par une mission. Un slide `demo`
+  rejoue de vraies commandes avec `scenario()`/`execute`, jamais une simulation UI.
+- Prédictions : `whenCommand` doit exister dans la solution, `correctOptionId`
+  doit pointer une option, et l'écran doit rester franchissable (« Passer »).
 
-## UI (Phase 2)
+## UI (Phases 2-3)
 
-- Seul écran : `src/screens/SandboxScreen.tsx` (route `#/sandbox`). Ne pas ajouter
-  missions/cours/XP avant la Phase 3.
+- Routes : `#/` (carte des chapitres), `#/chapter/:id/lesson`, `#/mission/:id`,
+  `#/sandbox`. Routeur maison par hash, pas de dépendance externe.
+- `src/screens/SandboxScreen.tsx` reste le bac à sable libre ; `MissionScreen`
+  réutilise `SandboxLayout` et isole son dépôt du sandbox (backup/restore).
+- Progression : `useProgressStore`, clé `gitquest.progress.v1` (missions + étoiles
+  + slide de cours). Pas encore d'XP, niveaux ou badges (Phase 4).
+- La carte verrouille les missions linéairement ; le bac à sable reste accessible.
+- Les prédictions suspendent l'exécution, acceptent un clic sur le graphe ou un
+  bouton, et ne bloquent jamais.
 - `layoutGraph(state)` dans `src/components/graph/layout.ts` reste **pur et testé**.
   Ne jamais recalculer une position à partir de la liste des branches courantes :
   la stabilité des positions existantes est un contrat (x = timestamp, lane =
@@ -56,4 +68,4 @@ strict, Zustand, Tailwind v4, Framer Motion, SVG maison, Vitest, IndexedDB via
 ## Méthode
 
 Travail par phases (0 à 4), avec arrêt et validation à la fin de chaque phase.
-Ne pas démarrer la phase suivante sans accord explicite. Phases 0, 1 et 2 livrées.
+Ne pas démarrer la phase suivante sans accord explicite. Phases 0 à 3 livrées.

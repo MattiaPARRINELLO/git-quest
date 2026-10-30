@@ -24,6 +24,11 @@ function assertOk(result: ExecuteResult, command: string): RepoState {
 export class Scenario {
   private constructor(private readonly state: RepoState) {}
 
+  /** Reprend un état existant (utile pour composer des scénarios de contenu). */
+  static from(state: RepoState): Scenario {
+    return new Scenario(state);
+  }
+
   static create(): Scenario {
     return new Scenario({
       version: 1,
