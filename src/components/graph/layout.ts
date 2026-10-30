@@ -63,6 +63,8 @@ export interface BranchLabel {
   readonly x: number;
   readonly y: number;
   readonly color: string;
+  /** La branche porte le HEAD du worktree actif : elle est pleine. */
+  readonly current: boolean;
 }
 
 export interface HeadMarker {
@@ -209,11 +211,23 @@ export function layoutGraph(state: RepoState): GraphLayout {
     branchesAtCommit.set(tip, list);
   }
 
+  const activeWorktree = state.worktrees[state.activeWorktree];
+  const activeBranch =
+    activeWorktree !== undefined && activeWorktree.head.kind === 'branch'
+      ? activeWorktree.head.branch
+      : undefined;
+
   const branchLabels: BranchLabel[] = [];
   for (const [commitHash, names] of branchesAtCommit) {
     const node = nodeByHash.get(commitHash);
     if (!node) continue;
-    names.sort();
+    // La branche courante passe en tête : quand plusieurs branches partagent un
+    // commit, la sienne reste l'étiquette la plus visible, collée au nœud.
+    names.sort((left, right) => {
+      const leftCurrent = left === activeBranch ? 0 : 1;
+      const rightCurrent = right === activeBranch ? 0 : 1;
+      return leftCurrent !== rightCurrent ? leftCurrent - rightCurrent : left.localeCompare(right);
+    });
     // Collées au nœud, centrées dessus puis empilées vers le bas : on voit
     // immédiatement à quel commit appartient chaque étiquette.
     names.forEach((name, index) => {
@@ -223,6 +237,7 @@ export function layoutGraph(state: RepoState): GraphLayout {
         x: node.x + 13,
         y: node.y - 9 + index * 20,
         color: branchColor(name),
+        current: name === activeBranch,
       };
       branchLabels.push(label);
     });
