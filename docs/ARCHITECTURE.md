@@ -443,11 +443,18 @@ correctif de login, guide). Le joueur ne fait que des commandes Git.
 
 ### Boucle narrative
 
-Chaque mission a une intro (briefing), un **épilogue** (`outcome`) affiché dans
-l'écran de réussite et une accroche vers la suivante (`teaser`). L'écran
-`#/nova` ajoute « Le fil de l'histoire » : missions terminées, étoiles et
-messages de commit choisis par le joueur (lus depuis `story.slots`), ce qui rend
-l'histoire personnelle et pas seulement l'arbre.
+Chaque mission a une intro en **dialogue** (personnages `lea`, `samir`, `ines`,
+`yanis` ou narrateur), un **épilogue** (`outcome`) affiché dans l'écran de
+réussite et une accroche vers la suivante (`teaser`).
+
+- `#/interlude/:chapterId` : transition entre chapitres, avec le bilan du
+  chapitre précédent (étoiles et messages personnels lus dans `story.slots`).
+  Le bouton « Continuer » des fins de chapitre y mène, puis au cours suivant.
+- Carte `#/` : carte « Dernier épisode » avec l'épilogue et le teaser de la
+  dernière mission terminée, et un accès direct à `#/nova`.
+- `#/nova` : « Le fil de l'histoire » (missions, étoiles, messages du joueur) et,
+  au clic sur un commit, l'auteur avec son rôle de coéquipier et la mission
+  d'origine.
 
 ### Briefing et tolérance de contenu
 

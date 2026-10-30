@@ -1,4 +1,5 @@
-import { chapters, estimatedLessonMinutes, isMissionUnlocked } from '../content';
+import { chapters, estimatedLessonMinutes, isMissionUnlocked, missionSequence } from '../content';
+import { briefingFor } from '../content/briefings';
 import { useProgressStore } from '../store/useProgressStore';
 import { routePaths } from '../router/useHashRoute';
 import { branchColor } from '../lib/colors';
@@ -19,6 +20,8 @@ export function HomeScreen() {
   const totalStars = Object.values(completed).reduce((sum, item) => sum + item.stars, 0);
   const done = Object.keys(completed).length;
   const percent = totalMissions === 0 ? 0 : Math.round((done / totalMissions) * 100);
+  const lastCompleted = [...missionSequence].reverse().find((mission) => completed[mission.id]);
+  const lastBriefing = lastCompleted === undefined ? undefined : briefingFor(lastCompleted.id);
 
   return (
     <div className="scrollbar-thin h-full overflow-y-auto">
@@ -78,6 +81,33 @@ export function HomeScreen() {
             </span>
           </div>
         </section>
+
+        {lastCompleted !== undefined && lastBriefing?.outcome !== undefined && (
+          <section
+            className="mt-4 rounded-2xl border border-border bg-panel px-4 py-3"
+            aria-label="Dernier épisode"
+          >
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+                Dernier épisode
+              </p>
+              <a href={routePaths.nova} className="text-[11px] text-accent-2 hover:underline">
+                Ton arbre Nova
+              </a>
+            </div>
+            <p className="mt-1 text-sm text-text">
+              <span className="font-mono text-[11px] text-muted">{lastCompleted.number}</span>{' '}
+              <span className="font-medium">{lastCompleted.title}</span>
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-muted">{lastBriefing.outcome}</p>
+            {lastBriefing.teaser !== undefined && (
+              <p className="mt-1 text-[11px] leading-relaxed text-muted/80">
+                <span className="font-semibold uppercase tracking-wider text-accent">À suivre · </span>
+                {lastBriefing.teaser}
+              </p>
+            )}
+          </section>
+        )}
 
         <section className="mt-8" aria-label="Chapitres">
           <div className="mb-3 flex items-baseline justify-between">
