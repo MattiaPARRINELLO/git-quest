@@ -66,8 +66,14 @@ export function planCheckout(
       source[path] === undefined && worktree.index[path] === undefined;
     if (!isUntracked) continue;
     const next = target[path];
-    if (next !== undefined && next !== worktree.workingDir[path]) {
+    const local = worktree.workingDir[path];
+    if (next !== undefined && next !== local) {
       untrackedConflicts.add(path);
+      continue;
+    }
+    // Git conserve les fichiers non suivis lors d'un changement de branche.
+    if (next === undefined && local !== undefined) {
+      workingCarry.set(path, local);
     }
   }
 
