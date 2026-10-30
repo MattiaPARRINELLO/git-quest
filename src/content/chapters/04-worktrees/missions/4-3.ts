@@ -1,4 +1,3 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   branchFile,
@@ -7,22 +6,11 @@ import {
   headBranch,
   worktreePaths,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
 import { branchUnchanged } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': '# Projet Nova',
-    'src/app.ts': "export const app = 'nova';",
-    'bug.txt': 'bug critique',
-  })
-  .branch('hotfix')
-  .worktreeAdd('../gitquest-hotfix', { branch: 'hotfix' })
-  .activate('../gitquest-hotfix')
-  .commit('fix: bug critique', { 'bug.txt': 'corrigé' })
-  .activate('../gitquest')
-  .build();
+const initial = entryState('menage-worktree');
 
 export const mission43: Mission = {
   id: 'menage-worktree',
@@ -60,7 +48,6 @@ export const mission43: Mission = {
   validate: (state, ctx) => {
     const entry = ctx?.entry ?? initial;
     return allOf(
-      check(worktreePaths(state).length === 1, 'Il doit rester un seul worktree.'),
       check(
         !worktreePaths(state).includes('~/gitquest-hotfix'),
         'Le worktree temporaire doit être supprimé.',

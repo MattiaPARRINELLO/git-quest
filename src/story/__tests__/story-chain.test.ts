@@ -42,4 +42,28 @@ describe('chaîne Nova (contenu réel)', () => {
     expect(snapshot['notes.txt']).toBe('notes de réunion');
     expect(snapshot['app.ts']).toBe('v3');
   });
+
+  it('produit l’arbre final attendu après les 12 missions', () => {
+    const last = chain[chain.length - 1];
+    if (!last) throw new Error('chaîne vide');
+    expect(chain).toHaveLength(12);
+
+    const branches = Object.keys(last.after.branches).sort();
+    expect(branches).toEqual(['docs', 'feature', 'hotfix', 'main', 'sauvetage']);
+
+    const worktreePaths = Object.values(last.after.worktrees)
+      .map((worktree) => worktree.path)
+      .sort();
+    expect(worktreePaths).toEqual(['~/gitquest', '~/gitquest-docs']);
+
+    const mainTip = last.after.branches.main ?? '';
+    const snapshot = last.after.commits[mainTip]?.snapshot ?? {};
+    expect(snapshot['src/export.ts']).toBeDefined();
+    expect(snapshot['src/notify.ts']).toBeDefined();
+    expect(snapshot['src/login.ts']).toBe('export const login = () => \'ok\';');
+    expect(snapshot['bug.txt']).toBe('bug critique');
+    expect(last.after.commits[last.after.branches.hotfix ?? '']?.snapshot['bug.txt']).toBe(
+      'corrigé',
+    );
+  });
 });

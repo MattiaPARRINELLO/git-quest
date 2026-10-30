@@ -1,4 +1,3 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   branchFile,
@@ -7,18 +6,11 @@ import {
   workingFile,
   worktreePaths,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
 import { branchUnchanged } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': '# Projet Nova',
-    'src/app.ts': "export const app = 'nova';",
-  })
-  .branch('docs')
-  .write('README.md', '# Nova — WIP de documentation')
-  .build();
+const initial = entryState('deux-worktrees');
 
 export const mission42: Mission = {
   id: 'deux-worktrees',
@@ -30,7 +22,7 @@ export const mission42: Mission = {
     "La doc de Nova doit être livrée pendant que tu réécris le README sur main. Impossible de tout faire dans le même working dir sans mélanger les deux chantiers. Monte un worktree dédié à la branche docs et avance dessus sans interrompre ton travail en cours.",
   situation:
     'HEAD est sur main avec README modifié ; docs pointe sur le même commit, non checkout ailleurs.',
-  objective: 'Ajoute GUIDE.md sur docs depuis un worktree séparé, sans commiter le WIP de main.',
+  objective: 'Ajoute docs/GUIDE.md sur docs depuis un worktree séparé, sans commiter le WIP de main.',
   steps: [
     {
       label: 'Créer le worktree docs',
@@ -38,7 +30,7 @@ export const mission42: Mission = {
     },
     {
       label: 'Committer GUIDE.md sur docs',
-      done: (state) => branchFile(state, 'docs', 'GUIDE.md') === '# Guide Nova',
+      done: (state) => branchFile(state, 'docs', 'docs/GUIDE.md') === '# Guide Nova',
     },
     {
       label: 'Revenir sur main avec le WIP intact',
@@ -63,7 +55,7 @@ export const mission42: Mission = {
     return allOf(
       check(worktreePaths(state).includes('~/gitquest-docs'), 'Le worktree docs doit exister.'),
       check(
-        branchFile(state, 'docs', 'GUIDE.md') === '# Guide Nova',
+        branchFile(state, 'docs', 'docs/GUIDE.md') === '# Guide Nova',
         'La branche docs doit contenir GUIDE.md.',
       ),
       check(
@@ -71,20 +63,20 @@ export const mission42: Mission = {
         'Le WIP de README.md sur main doit rester intact.',
       ),
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
-      check(state.worktrees.main?.workingDir['GUIDE.md'] === undefined, 'GUIDE.md ne doit pas apparaître dans le worktree principal.'),
+      check(state.worktrees.main?.workingDir['docs/GUIDE.md'] === undefined, 'GUIDE.md ne doit pas apparaître dans le worktree principal.'),
       check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
     );
   },
   hints: [
     'Crée un worktree sur la branche docs déjà existante, puis active-le avec cd.',
-    'Dans le worktree docs, crée GUIDE.md, indexe-le et commit.',
-    'git worktree add ../gitquest-docs docs, cd ../gitquest-docs, edit GUIDE.md "# Guide Nova", git add GUIDE.md, git commit -m "docs: guide", cd ../gitquest.',
+    'Dans le worktree docs, crée docs/GUIDE.md, indexe-le et commit.',
+    'git worktree add ../gitquest-docs docs, cd ../gitquest-docs, edit docs/GUIDE.md "# Guide Nova", git add docs/GUIDE.md, git commit -m "docs: guide", cd ../gitquest.',
   ],
   solution: [
     'git worktree add ../gitquest-docs docs',
     'cd ../gitquest-docs',
-    'edit GUIDE.md "# Guide Nova"',
-    'git add GUIDE.md',
+    'edit docs/GUIDE.md "# Guide Nova"',
+    'git add docs/GUIDE.md',
     'git commit -m "docs: guide"',
     'cd ../gitquest',
   ],

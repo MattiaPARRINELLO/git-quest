@@ -1,4 +1,3 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   branchFile,
@@ -7,29 +6,11 @@ import {
   workingFile,
   worktreePaths,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
 import { branchUnchanged } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': '# Projet Nova',
-    'src/app.ts': "export const app = 'v1';",
-    'bug.txt': 'bug critique',
-  })
-  .branch('feature')
-  .checkout('feature')
-  .commit('feat: refonte du panneau', {
-    'src/app.ts': "export const app = 'refonte';",
-  })
-  .checkout('main')
-  .commit('fix: configuration', {
-    'src/app.ts': "export const app = 'v2 main';",
-    'src/config.ts': "export const config = { retries: 3 };",
-  })
-  .checkout('feature')
-  .write('src/app.ts', "export const app = 'refonte WIP';")
-  .build();
+const initial = entryState('hotfix-worktree');
 
 export const mission41: Mission = {
   id: 'hotfix-worktree',
@@ -57,7 +38,7 @@ export const mission41: Mission = {
       done: (state) =>
         worktreePaths(state).includes('~/gitquest-hotfix') &&
         state.activeWorktree === 'main' &&
-        workingFile(state, 'src/app.ts') === "export const app = 'refonte WIP';",
+        workingFile(state, 'app.ts') === "export const app = 'refonte WIP';",
     },
   ],
   takeaway:
@@ -79,7 +60,7 @@ export const mission41: Mission = {
       check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
       check(branchUnchanged(state, entry, 'feature'), 'feature ne doit pas bouger.'),
       check(
-        workingFile(state, 'src/app.ts') === "export const app = 'refonte WIP';",
+        workingFile(state, 'app.ts') === "export const app = 'refonte WIP';",
         'Le WIP de feature doit rester intact.',
       ),
       check(headBranch(state) === 'feature', 'Le worktree principal doit rester sur feature.'),
