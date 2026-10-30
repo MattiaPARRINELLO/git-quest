@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { RepoState, GitEvent } from '../../engine/types';
 import { branchColor } from '../../lib/colors';
 import { layoutGraph, PADDING_X } from './layout';
-import type { BranchLabel, GraphNode, HeadMarker } from './layout';
+import type { BranchLabel, GraphNode } from './layout';
 import { Icon } from '../ui/Icon';
 
 interface CommitGraphProps {
@@ -154,8 +154,21 @@ export function CommitGraph({
     });
   };
 
+  /**
+   * Éléments interactifs posés au-dessus du graphe (toolbar, prédiction,
+   * feedback). Un pointerdown dessus ne doit jamais démarrer le déplacement :
+   * `setPointerCapture` redirigerait le pointerup vers le graphe et le bouton
+   * ne recevrait aucun `click`.
+   */
+  const INTERACTIVE_SELECTOR =
+    'button, a, input, textarea, select, [role="alertdialog"], [role="dialog"], [data-no-pan]';
+
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
+    const target = event.target;
+    if (target instanceof Element && target.closest(INTERACTIVE_SELECTOR) !== null) {
+      return;
+    }
     dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
     if (typeof event.currentTarget.setPointerCapture === 'function') {
       event.currentTarget.setPointerCapture(event.pointerId);
@@ -312,17 +325,6 @@ export function CommitGraph({
                 />
               ))}
             </AnimatePresence>
-
-            <AnimatePresence initial={false}>
-              {layout.headMarkers.map((marker) => (
-                <HeadMarkerView
-                  key={marker.worktreeId}
-                  marker={marker}
-                  delay={0}
-                  duration={duration}
-                />
-              ))}
-            </AnimatePresence>
           </g>
         </svg>
 
@@ -439,11 +441,28 @@ function CommitNodeView({
       }
       style={{ cursor: onSelect === undefined ? 'help' : 'pointer' }}
     >
+      {node.head && (
+        <title>
+          {`HEAD · ${node.headPaths.join(', ')}${node.detachedHead ? ' (détaché)' : ''}`}
+        </title>
+      )}
+      {node.head && (
+        <circle
+          cx={node.x}
+          cy={node.y}
+          r={(isMerge ? 9 : 6.5) + 4}
+          fill="none"
+          stroke={color}
+          strokeOpacity={node.activeHead ? 0.9 : 0.4}
+          strokeWidth={1.4}
+          strokeDasharray={node.detachedHead ? '3 2' : undefined}
+        />
+      )}
       <motion.circle
         cx={node.x}
         cy={node.y}
         r={isMerge ? 9 : 6.5}
-        fill="var(--panel)"
+        fill={node.head ? color : 'var(--panel)'}
         stroke={color}
         strokeWidth={2.4}
         initial={{ scale: 0.4 }}
@@ -451,13 +470,18 @@ function CommitNodeView({
         transition={{ duration, delay, type: 'spring', stiffness: 260, damping: 20 }}
         style={{ transformOrigin: `${node.x}px ${node.y}px` }}
       />
-      {isMerge && <circle cx={node.x} cy={node.y} r={3} fill={color} />}
+      {isMerge && (
+        <circle cx={node.x} cy={node.y} r={3} fill={node.head ? 'var(--panel)' : color} />
+      )}
       <text
         x={node.x}
         y={node.y + 22}
         textAnchor="middle"
         className="fill-[var(--muted)] font-mono"
         fontSize={9}
+        stroke="var(--panel)"
+        strokeWidth={3}
+        paintOrder="stroke"
       >
         {node.shortHash}
       </text>
@@ -487,7 +511,11 @@ function BranchLabelView({
   readonly duration: number;
   readonly onSelect?: (name: string) => void;
 }) {
-  const width = nodeLabelWidth(label.name);
+  const MAX_LABEL_WIDTH = 118;
+  const fullWidth = nodeLabelWidth(label.name);
+  const width = Math.min(MAX_LABEL_WIDTH, fullWidth);
+  const maxChars = Math.max(4, Math.floor((width - 18) / 6.6));
+  const text = fullWidth > width ? `${label.name.slice(0, maxChars)}…` : label.name;
   return (
     <motion.g
       initial={{ opacity: 0, x: label.x, y: label.y + 4 }}
@@ -520,60 +548,19 @@ function BranchLabelView({
       }
       style={{ cursor: onSelect === undefined ? 'default' : 'pointer' }}
     >
+      <title>{`Branche ${label.name}`}</title>
       <rect
         x={0}
         y={0}
         width={width}
         height={18}
         rx={9}
-        fill={label.color}
-        fillOpacity={0.16}
+        fill="var(--panel)"
         stroke={label.color}
-        strokeOpacity={0.65}
+        strokeOpacity={0.85}
       />
       <text x={9} y={12.5} fill={label.color} fontSize={10} className="font-mono font-semibold">
-        {label.name}
-      </text>
-    </motion.g>
-  );
-}
-
-function HeadMarkerView({
-  marker,
-  delay,
-  duration,
-}: {
-  readonly marker: HeadMarker;
-  readonly delay: number;
-  readonly duration: number;
-}) {
-  const width = Math.min(160, Math.max(58, marker.path.length * 5.6 + 30));
-  const label = marker.detached
-    ? `HEAD détaché · ${marker.path.split('/').pop() ?? marker.path}`
-    : `HEAD · ${marker.path.split('/').pop() ?? marker.path}`;
-  const color = marker.active ? 'var(--accent)' : 'var(--muted)';
-
-  return (
-    <motion.g
-      initial={{ opacity: 0, x: marker.x, y: marker.y + 5 }}
-      animate={{ opacity: 1, x: marker.x, y: marker.y }}
-      exit={{ opacity: 0 }}
-      transition={{ duration, delay, ease: 'easeOut' }}
-    >
-      <rect
-        x={0}
-        y={0}
-        width={width}
-        height={17}
-        rx={5}
-        fill="var(--panel)"
-        stroke={color}
-        strokeOpacity={0.75}
-        strokeDasharray={marker.detached ? '3 2' : undefined}
-      />
-      <text x={7} y={11.5} fill={color} fontSize={8.5} className="font-mono">
-        {marker.detached ? '◌ ' : '▶ '}
-        {label.slice(0, 26)}
+        {text}
       </text>
     </motion.g>
   );

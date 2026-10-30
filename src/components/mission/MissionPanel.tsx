@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Mission } from '../../content/types';
 import type { RepoState } from '../../engine/types';
-import { starsFor } from '../../app/mission';
+import { missionText, starsFor } from '../../app/mission';
 import { cn } from '../../lib/cn';
 import { Icon } from '../ui/Icon';
 
@@ -25,9 +25,12 @@ export function MissionPanel({
 }: MissionPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
   const stars = starsFor(commandsUsed, mission.par);
+  const texts = missionText(mission, state);
   const remainingHints = mission.hints.length - hintsUsed;
-  const revealed = mission.hints.slice(0, hintsUsed);
-  const stepsDone = mission.steps.filter((step) => step.done(state)).length;
+  const revealed = texts.hints.slice(0, hintsUsed);
+  const stepsDone = mission.steps.filter((step) =>
+    step.done(state, { entry: mission.initialState }),
+  ).length;
 
   return (
     <section
@@ -114,10 +117,10 @@ export function MissionPanel({
                     {stepsDone}/{mission.steps.length}
                   </span>
                 </div>
-                <p className="mt-1 text-xs leading-relaxed text-text">{mission.objective}</p>
+                <p className="mt-1 text-xs leading-relaxed text-text">{texts.objective}</p>
                 <ul className="mt-2 space-y-1">
                   {mission.steps.map((step) => {
-                    const done = step.done(state);
+                    const done = step.done(state, { entry: mission.initialState });
                     return (
                       <li
                         key={step.label}

@@ -1,0 +1,177 @@
+import type { TeammateId } from '../story/types';
+
+/**
+ * Briefing narratif de chaque mission, affiché au démarrage et skippable.
+ * Données pures : aucun texte d'histoire dans un composant.
+ */
+export type BriefingSpeaker = TeammateId | 'narrateur';
+
+export interface BriefingLine {
+  readonly speaker: BriefingSpeaker;
+  readonly text: string;
+}
+
+export interface MissionBriefing {
+  readonly title: string;
+  readonly lines: readonly BriefingLine[];
+  /** Ce que le joueur vient d'accomplir, raconté. */
+  readonly outcome?: string;
+  /** Accroche vers l'épisode suivant. */
+  readonly teaser?: string;
+}
+
+export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
+  'trois-zones': {
+    title: 'Nova, acte I : le correctif qui n’attend pas',
+    lines: [
+      {
+        speaker: 'narrateur',
+        text: 'Nova est l’assistant de notes de l’équipe. Ce matin, deux fichiers ont été modifiés : a.txt et b.txt.',
+      },
+      { speaker: 'lea', text: 'Le correctif de a.txt part à midi. b.txt peut attendre demain.' },
+      {
+        speaker: 'narrateur',
+        text: 'Prépare une photo qui ne contient que a.txt, sans embarquer le reste du chantier.',
+      },
+    ],
+    outcome:
+      'Le correctif de a.txt est parti seul ; les idées de b.txt attendent toujours sur ton disque.',
+    teaser: 'Le CTO veut maintenant prouver que cette photo ne bougera plus.',
+  },
+  'snapshot-fige': {
+    title: 'Nova, acte I : la photo ne bouge plus',
+    lines: [
+      {
+        speaker: 'yanis',
+        text: 'Le disque est déjà en v3, mais l’index est resté sur v2. Qu’est-ce que le commit va photographier ?',
+      },
+      {
+        speaker: 'narrateur',
+        text: 'Le CTO veut la preuve : commit l’index sans refaire git add, et regarde ce qui reste sur le disque.',
+      },
+    ],
+    outcome: 'La photo est figée sur v2 : v3 est resté sur le disque, hors du commit.',
+    teaser: 'Un coéquipier jure que -am suffit pour tout livrer.',
+  },
+  'piege-am': {
+    title: 'Nova, acte I : le raccourci qui trahit',
+    lines: [
+      { speaker: 'ines', text: 'git commit -am s’occupe de tout, non ? Pas besoin d’indexer.' },
+      { speaker: 'samir', text: 'L’ADR vient d’arriver, et README.md a été retouché.' },
+      {
+        speaker: 'narrateur',
+        text: 'Vérifie ce que -am photographie vraiment, et livre les deux fichiers sans laisser de travail sale.',
+      },
+    ],
+    outcome:
+      'README et notes sont partis ensemble ; le réflexe -am a montré sa limite sur l’ADR.',
+    teaser: 'L’équipe veut explorer une idée sans toucher à main.',
+  },
+  'branche-pointeur': {
+    title: 'Nova, acte II : une idée à part',
+    lines: [
+      { speaker: 'lea', text: 'On veut tester des notes internes sans polluer main. Je te confie l’exploration.' },
+      {
+        speaker: 'narrateur',
+        text: 'notes.txt est déjà modifié. Crée experiment, commite la modification dessus, et prouve que main n’a pas bougé.',
+      },
+    ],
+    outcome: 'experiment porte tes notes, main n’a pas bougé d’un pixel.',
+    teaser: 'La facturation doit avancer en parallèle de la configuration.',
+  },
+  'qui-avance': {
+    title: 'Nova, acte II : deux chantiers en parallèle',
+    lines: [
+      { speaker: 'lea', text: 'La facturation part sur sa branche ; la configuration avance sur main.' },
+      {
+        speaker: 'narrateur',
+        text: 'feature.ts et main.ts sont déjà écrits. Commite chacun sur la bonne branche, puis reviens sur main pour vérifier qui a bougé.',
+      },
+    ],
+    outcome: 'Deux lignes parallèles, deux étiquettes distinctes : chaque commit a déplacé la bonne.',
+    teaser: 'Une régression dans la facturation t’attend sur un vieux commit.',
+  },
+  'commit-perdu': {
+    title: 'Nova, acte II : l’expérience qui s’échappe',
+    lines: [
+      { speaker: 'ines', text: 'La facturation a régressé. Remonte sur un vieux commit pour enquêter.' },
+      {
+        speaker: 'narrateur',
+        text: 'exp.txt est déjà prêt. Commit-le en HEAD détaché, reviens sur main, puis sauve l’orphelin dans une branche.',
+      },
+    ],
+    outcome: 'L’expérience est sauvée : sauvetage la garde accessible, même détachée.',
+    teaser: 'L’export CSV est prêt, main est restée en arrière.',
+  },
+  'avance-rapide': {
+    title: 'Nova, acte III : livrer sans cérémonie',
+    lines: [
+      { speaker: 'ines', text: 'L’export CSV est prêt, et main n’a pas bougé depuis.' },
+      { speaker: 'narrateur', text: 'Livre sans commit de fusion : ici, un fast-forward suffit.' },
+    ],
+    outcome: 'main a glissé sur le travail déjà fait, sans commit de fusion.',
+    teaser: 'Notifications et configuration ont divergé.',
+  },
+  'merge-commit': {
+    title: 'Nova, acte III : le point de convergence',
+    lines: [
+      { speaker: 'lea', text: 'Notifications d’un côté, configuration de l’autre : les deux lignes ont avancé.' },
+      { speaker: 'ines', text: 'Il nous faut un point de convergence, pas un camp qui gagne.' },
+    ],
+    outcome: 'Le merge commit relie les deux lignes : personne n’a perdu son travail.',
+    teaser: 'Inès est partie en laissant deux branches derrière elle.',
+  },
+  'menage-branches': {
+    title: 'Nova, acte III : le placard mal rangé',
+    lines: [
+      { speaker: 'ines', text: 'Je pars : feature-login est fusionnée, mais experiment contient un test jamais intégré.' },
+      {
+        speaker: 'narrateur',
+        text: 'Commence par constater le refus de -d sur experiment. Ensuite, choisis consciemment : fusionner, ou forcer.',
+      },
+    ],
+    outcome: 'Le placard est rangé : feature-login supprimée, experiment traitée consciemment.',
+    teaser: 'Un bug critique tombe en pleine refonte.',
+  },
+  'hotfix-worktree': {
+    title: 'Nova, acte IV : le bug de prod',
+    lines: [
+      { speaker: 'yanis', text: 'J’ai poussé le correctif de login sur la branche hotfix.' },
+      {
+        speaker: 'narrateur',
+        text: 'Ton WIP sur feature bloque le switch vers main. Monte un second espace de travail sur hotfix pour vérifier, sans lâcher la refonte.',
+      },
+    ],
+    outcome: 'Le correctif est vérifié depuis un second bureau, ton WIP n’a pas bougé.',
+    teaser: 'La doc doit avancer pendant que tu réécris le README.',
+  },
+  'deux-worktrees': {
+    title: 'Nova, acte IV : deux casquettes',
+    lines: [
+      { speaker: 'samir', text: 'Le guide est déjà commité sur la branche docs.' },
+      { speaker: 'yanis', text: 'J’ai repris ta refonte et commité ton WIP : tu peux passer sur main.' },
+      {
+        speaker: 'narrateur',
+        text: 'Monte un worktree sur docs pour relire le guide, sans interrompre ton README en cours.',
+      },
+    ],
+    outcome: 'Le guide est relu depuis son worktree, main garde ton brouillon.',
+    teaser: 'Le worktree temporaire traîne encore sur le disque.',
+  },
+  'menage-worktree': {
+    title: 'Nova, acte IV : ranger le chantier',
+    lines: [
+      { speaker: 'ines', text: 'Le hotfix est livré, mais le worktree temporaire traîne encore.' },
+      {
+        speaker: 'narrateur',
+        text: 'Rangement propre : supprime l’espace de travail, garde la branche et le correctif.',
+      },
+    ],
+    outcome: 'Le chantier est rangé ; les branches et l’histoire restent.',
+    teaser: 'Ton arbre Nova t’attend sur la carte.',
+  },
+};
+
+export function briefingFor(missionId: string): MissionBriefing | undefined {
+  return missionBriefings[missionId];
+}

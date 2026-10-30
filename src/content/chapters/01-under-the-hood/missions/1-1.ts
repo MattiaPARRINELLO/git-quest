@@ -1,24 +1,16 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   check,
-  commitCount,
   headBranch,
   headFile,
   indexFile,
   workingFile,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
+import { commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'a.txt': 'version 1',
-    'b.txt': 'version 1',
-  })
-  .write('a.txt', 'version 2')
-  .write('b.txt', 'version 2')
-  .build();
+const initial = entryState('trois-zones');
 
 export const mission11: Mission = {
   id: 'trois-zones',
@@ -33,39 +25,41 @@ export const mission11: Mission = {
   steps: [
     {
       label: 'Indexer a.txt avec git add',
-      done: (state) => indexFile(state, 'a.txt') === 'version 2',
+      done: (state) => indexFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.',
     },
     {
-      label: 'Committer a.txt en version 2',
-      done: (state) => headFile(state, 'a.txt') === 'version 2',
+      label: 'Committer la note de conception mise à jour',
+      done: (state) => headFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.',
     },
     {
       label: 'Laisser b.txt modifié hors du commit',
       done: (state) =>
-        headFile(state, 'a.txt') === 'version 2' &&
-        workingFile(state, 'b.txt') === 'version 2' &&
-        headFile(state, 'b.txt') === 'version 1',
+        headFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.' &&
+        workingFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF, partage de notes.' &&
+        headFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF.',
     },
   ],
   takeaway: 'Le commit ne prend que l’index : b.txt reste hors de la photo tant qu’il n’est pas indexé.',
   difficulty: 1,
   par: 2,
   initialState: initial,
-  validate: (state) =>
-    allOf(
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    return allOf(
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
-      check(commitCount(state) === 2, 'Un seul nouveau commit est attendu.'),
-      check(headFile(state, 'a.txt') === 'version 2', 'Le commit doit contenir a.txt en version 2.'),
-      check(headFile(state, 'b.txt') === 'version 1', 'Le commit ne doit pas contenir b.txt modifié.'),
+      check(commitDelta(state, entry) === 1, 'Un seul nouveau commit est attendu.'),
+      check(headFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.', 'Le commit doit contenir la version mise à jour de a.txt.'),
+      check(headFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF.', 'Le commit ne doit pas contenir b.txt modifié.'),
       check(
-        workingFile(state, 'a.txt') === 'version 2',
+        workingFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.',
         'a.txt doit être à jour dans le working dir.',
       ),
       check(
-        workingFile(state, 'b.txt') === 'version 2',
+        workingFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF, partage de notes.',
         'b.txt doit rester modifié dans le working dir.',
       ),
-    ),
+    );
+  },
   hints: [
     'Un commit photographie l’index, pas tout le working dir. Il faut choisir quoi indexer.',
     'Ajoute seulement a.txt à l’index, puis commit : b.txt restera modifié sur le disque.',

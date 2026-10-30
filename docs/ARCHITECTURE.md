@@ -228,8 +228,10 @@ elle doit mener à `validate(state).ok === true`.
 ## 8. Stockage
 
 Tout passe par `StorageAdapter` (`get`, `set`, `remove`). Implémentations :
-`IndexedDbAdapter` (idb-keyval) et `MemoryAdapter` (tests). Clés versionnées
-(`gitquest.progress.v1`) et module de migration avant toute synchronisation future.
+`IndexedDbAdapter` (idb-keyval) et `MemoryAdapter` (tests). Clés versionnées :
+`gitquest.progress.v2` (progression + story-repo), `gitquest.sandbox.v1`
+(bac à sable, inchangé). La clé `gitquest.progress.v1` reste écrite en miroir
+minimal (`completed`, `lessonSlides`) pour les anciens builds et le rollback.
 
 ## 9. Hors périmètre MVP (prévu dans l'archi, non implémenté)
 
@@ -372,3 +374,101 @@ toujours accessible.
   explication. Rien ne bloque la suite.
 - Les cibles de graphe sont des `PredictionTarget` (`commit` avec hash complet,
   `branch` avec nom).
+
+## 13. Phase 4 — histoire continue « Nova »
+
+Le dépôt `src/story/` est **pur** (aucun import React/DOM/stockage) et le moteur
+n'importe jamais `story/`.
+
+### Chaîne de référence
+
+- `content/story/root.ts` + `content/story/0N.ts` déclarent, chapitre par
+  chapitre, `prelude` (commandes + garde + coéquipier), `slots` (signatures de
+  contenu) et `reference` (solution avec `{slotId}`).
+- `story/chain.ts` rejoue la chaîne avec le vrai moteur :
+  `checkpoint(n) = checkpoint(n-1) + prelude(n) + solution(n)`. Rien n'est écrit
+  à la main ; changer une solution casse le test de chaîne.
+- `story/checkpoints.ts` met le résultat en cache et expose
+  `entryState(missionId)` : `Mission.initialState` est cette valeur calculée.
+- `story/slots.ts` associe les commits du joueur aux slots **par contenu**
+  (fichiers + versions). Un commit peut remplir plusieurs slots ; il reste un
+  seul commit.
+- `story/display.ts` résout les `{slotId}` des textes depuis l'état réel du
+  joueur (jamais de hash littéral). `Prediction.resolve` fait de même pour les
+  libellés de prédiction.
+- `story/actor.ts` attribue les commits de prelude aux coéquipiers sans modifier
+  les commandes Git.
+- `story/journal.ts` ne stocke que missions, slots, chemins et raisons : jamais
+  de hashes, donc un recalage ne le rend jamais faux.
+
+### Session
+
+- Jeu normal : la mission part de `story.nova` (arbre réel, détours compris) et
+  le prelude est appliqué une seule fois (`appliedPreludes` + gardes).
+- Rejeu d'une mission dépassée : **copie isolée**, Nova n'est jamais écrite.
+- Rejeu de la dernière mission : recalage sur le checkpoint canonique, messages
+  du joueur réappliqués par slot (`buildChain(root, specs, messages)`).
+- Rechargement en pleine mission : `activeMission` (état + compteur + essais)
+  est restauré tel quel, sans rejouer le prelude.
+- `reset-mission` revient à l'entrée effective ; l'undo ne descend jamais
+  en dessous.
+
+### Progression
+
+`gitquest.progress.v2` = `{ version: 2, completed, lessonSlides, story }`.
+`story` contient `nova`, `activeMission`, `slots`, `slotGroups`, `journal`,
+`appliedPreludes`, `isolated`. Migration v1 → v2 : étoiles conservées (max),
+Nova positionné au checkpoint de la première mission non terminée.
+
+### Écran final
+
+`#/nova` (accessible après 4.3) : graphe en lecture seule, statistiques
+(commits, branches, merges, worktrees créés via le journal / actifs via l'état,
+orphelins), détail d'un commit (auteur, branche, mission d'origine), export PNG
+côté client et `git log --oneline --graph` copiable.
+
+### Fichiers préparés
+
+Toutes les missions sont jouables **sans écrire de fichier** : le working dir,
+l'index et les branches sont préparés par la chaîne de référence avec du contenu
+réaliste (notes internes, `feature.ts`, `main.ts`, trace de facturation,
+correctif de login, guide). Le joueur ne fait que des commandes Git.
+
+- 1.2 : l'index contient déjà v2 et le disque v3 ; il ne reste qu'à commiter.
+- 4.1 : le correctif est déjà commité sur `hotfix` ; la mission consiste à
+  monter le worktree pour le vérifier.
+- 4.2 : le guide est déjà commité sur `docs` ; idem.
+- Le briefing liste les fichiers déjà présents (`preparedFiles`) sans demander
+  d'écriture.
+
+### Boucle narrative
+
+Chaque mission a une intro en **dialogue** (personnages `lea`, `samir`, `ines`,
+`yanis` ou narrateur), un **épilogue** (`outcome`) affiché dans l'écran de
+réussite et une accroche vers la suivante (`teaser`).
+
+- `#/interlude/:chapterId` : transition entre chapitres, avec le bilan du
+  chapitre précédent (étoiles et messages personnels lus dans `story.slots`).
+  Le bouton « Continuer » des fins de chapitre y mène, puis au cours suivant.
+- Carte `#/` : carte « Dernier épisode » avec l'épilogue et le teaser de la
+  dernière mission terminée, et un accès direct à `#/nova`.
+- `#/nova` : « Le fil de l'histoire » (missions, étoiles, messages du joueur) et,
+  au clic sur un commit, l'auteur avec son rôle de coéquipier et la mission
+  d'origine.
+
+### Briefing et tolérance de contenu
+
+- Chaque mission s'ouvre sur un **briefing narratif** (`src/content/briefings.ts`),
+  affiché en surcouche et skippable (« Passer l'intro », `Entrer dans le dépôt`,
+  ou la première commande). Le texte vit dans le contenu, jamais dans le composant.
+- Quand le contenu d'un fichier n'est pas le concept de la mission (branche,
+  worktree, rescue), la validation vérifie sa **présence**, pas sa valeur
+  exacte : `notes.txt` (2.1), `exp.txt` (2.3), `bug.txt` (4.1),
+  `docs/GUIDE.md` (4.2). Les slots correspondants utilisent `present`.
+- Les missions dont le contenu est le concept (1.1, 1.2, 1.3) gardent des
+  vérifications exactes.
+
+### Isolation
+
+Le bac à sable (`gitquest.sandbox.v1`) et les mini-démos de cours n'importent
+rien de `story/` : Nova ne fuit ni dans l'un ni dans les autres.

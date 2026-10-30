@@ -4,6 +4,7 @@ import { HomeScreen } from './HomeScreen';
 import { missionSequence } from '../content';
 import { useProgressStore } from '../store/useProgressStore';
 import { useMissionDraftStore } from '../store/useMissionDraftStore';
+import { createEmptyStory } from '../store/useProgressStore';
 
 const allCompleted = Object.fromEntries(
   missionSequence.map((mission) => [mission.id, { stars: 3 as const }]),
@@ -11,7 +12,13 @@ const allCompleted = Object.fromEntries(
 
 describe('HomeScreen — point d’entrée de reprise', () => {
   beforeEach(() => {
-    useProgressStore.setState({ completed: {}, lessonSlides: {}, hydrated: true });
+    useProgressStore.setState({
+      completed: {},
+      lessonSlides: {},
+      draft: null,
+      story: createEmptyStory(),
+      hydrated: true,
+    });
     useMissionDraftStore.setState({ activeMission: null, draft: null, hydrated: true });
   });
 
@@ -104,5 +111,25 @@ describe('HomeScreen — point d’entrée de reprise', () => {
       'href',
       '#/mission/snapshot-fige',
     );
+  });
+
+  it('affiche l’épilogue de la dernière mission terminée', () => {
+    useProgressStore.setState({ completed: { 'trois-zones': { stars: 3 } }, hydrated: true });
+
+    render(<HomeScreen />);
+
+    expect(screen.getByLabelText('Dernier épisode')).toBeInTheDocument();
+    expect(screen.getAllByText('Les 3 zones').length).toBeGreaterThan(0);
+    expect(screen.getByText(/Le correctif de a\.txt est parti seul/i)).toBeInTheDocument();
+    expect(screen.getByText(/Le CTO veut maintenant prouver/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^Ton arbre Nova$/i })).toHaveAttribute(
+      'href',
+      '#/nova',
+    );
+  });
+
+  it('reste discret tant qu’aucune mission n’est terminée', () => {
+    render(<HomeScreen />);
+    expect(screen.queryByLabelText('Dernier épisode')).toBeNull();
   });
 });

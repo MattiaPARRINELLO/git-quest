@@ -10,6 +10,12 @@ interface MissionCompleteProps {
   readonly commandsUsed: number;
   readonly after: AfterMission;
   readonly onInspect: () => void;
+  /** Solution affichée, hashes résolus depuis l'état du joueur. */
+  readonly solution?: readonly string[];
+  /** Épilogue narratif de l'épisode. */
+  readonly outcome?: string;
+  /** Accroche vers la mission suivante. */
+  readonly teaser?: string;
 }
 
 export function MissionComplete({
@@ -18,6 +24,9 @@ export function MissionComplete({
   commandsUsed,
   after,
   onInspect,
+  solution = mission.solution,
+  outcome,
+  teaser,
 }: MissionCompleteProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4 backdrop-blur-sm">
@@ -77,13 +86,26 @@ export function MissionComplete({
           </p>
         )}
 
+        {outcome !== undefined && (
+          <p className="mt-3 border-l-2 border-accent/50 pl-3 text-xs leading-relaxed text-text">
+            {outcome}
+          </p>
+        )}
+
+        {teaser !== undefined && (
+          <p className="mt-2 pl-3 text-[11px] leading-relaxed text-muted">
+            <span className="font-semibold uppercase tracking-wider text-accent">À suivre · </span>
+            {teaser}
+          </p>
+        )}
+
         <div className="mt-4">
           <h3 className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted">
             <Icon name="book" size={12} />
             Solution de référence
           </h3>
           <ol className="mt-2 space-y-1">
-            {mission.solution.map((command, index) => (
+            {solution.map((command, index) => (
               <li
                 key={`${command}-${index}`}
                 className="flex items-baseline gap-2 rounded-lg border border-border bg-panel-2/50 px-2.5 py-1.5 font-mono text-[11px] text-accent-2"
@@ -104,7 +126,7 @@ export function MissionComplete({
               after.kind === 'mission'
                 ? routePaths.mission(after.mission.id)
                 : after.kind === 'lesson'
-                  ? routePaths.lesson(after.chapter.id)
+                  ? routePaths.interlude(after.chapter.id)
                   : routePaths.home
             }
             className="btn btn-accent justify-center px-3 py-2 text-sm"

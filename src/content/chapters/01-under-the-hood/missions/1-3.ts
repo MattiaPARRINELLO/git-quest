@@ -1,4 +1,3 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   check,
@@ -7,17 +6,10 @@ import {
   headFile,
   isWorkingTreeClean,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': 'version 1',
-    'src/app.ts': "export const app = 'nova';",
-  })
-  .write('README.md', 'version 2')
-  .write('notes.txt', 'notes de réunion')
-  .build();
+const initial = entryState('piege-am');
 
 export const mission13: Mission = {
   id: 'piege-am',
@@ -28,17 +20,17 @@ export const mission13: Mission = {
   story:
     "Un coéquipier affirme que « git commit -am » s’occupe de tout, sans jamais avoir à indexer quoi que ce soit. Vérifie ce que Git photographie vraiment avec ce réflexe.",
   situation: 'README.md est modifié et notes.txt vient d’apparaître dans le projet.',
-  objective: 'Commite README.md en version 2 et notes.txt, puis laisse un working dir propre.',
+  objective: 'Commite la nouvelle version du README et notes.txt, puis laisse un working dir propre.',
   steps: [
     {
       label: 'README v2 présent dans un commit',
       done: (state) =>
-        commitList(state).some((commit) => commit.snapshot['README.md'] === 'version 2'),
+        commitList(state).some((commit) => commit.snapshot['README.md'] === '# Nova — assistant de notes d’équipe. Démarrage : npm run dev.'),
     },
     {
       label: 'notes.txt présent dans un commit',
       done: (state) =>
-        commitList(state).some((commit) => commit.snapshot['notes.txt'] === 'notes de réunion'),
+        commitList(state).some((commit) => commit.snapshot['notes.txt'] === 'Notes de réunion : cache LRU, export CSV, hotfix login.'),
     },
     {
       label: 'Working dir propre',
@@ -53,8 +45,8 @@ export const mission13: Mission = {
   validate: (state) =>
     allOf(
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
-      check(headFile(state, 'README.md') === 'version 2', 'README.md doit finir en version 2.'),
-      check(headFile(state, 'notes.txt') === 'notes de réunion', 'notes.txt doit finir commité.'),
+      check(headFile(state, 'README.md') === '# Nova — assistant de notes d’équipe. Démarrage : npm run dev.', 'README.md doit finir dans sa nouvelle version.'),
+      check(headFile(state, 'notes.txt') === 'Notes de réunion : cache LRU, export CSV, hotfix login.', 'notes.txt doit finir commité.'),
       check(isWorkingTreeClean(state), 'Le working dir doit être propre à la fin.'),
     ),
   hints: [

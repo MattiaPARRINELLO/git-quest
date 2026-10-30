@@ -1,25 +1,32 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
-  branchFile,
-  branchTip,
   check,
-  commitCount,
   hasBranch,
   headBranch,
   headFile,
 } from '../../../../engine/validate';
+import type { Commit, RepoState } from '../../../../engine/types';
+import { entryState } from '../../../../story/checkpoints';
+import { branchUnchanged, commitDelta, commitsSince } from '../../../../story/preconditions';
+import { changeSetOf } from '../../../../story/slots';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': '# Projet Nova',
-    'src/app.ts': "export const app = 'nova';",
-  })
-  .build();
+const initial = entryState('branche-pointeur');
 
-const mainTip = initial.branches.main ?? '';
+/**
+ * Commit créé sur `experiment` qui introduit ou modifie notes.txt.
+ * La simple présence du fichier ne suffit pas : il existe déjà sur main depuis
+ * le chapitre 1, donc une branche créée sans commit ne doit rien valider.
+ */
+function notesCommit(state: RepoState, entry: RepoState): Commit | undefined {
+  return commitsSince(state, entry).find(
+    (commit) =>
+      commit.branch === 'experiment' &&
+      changeSetOf(state, commit).some(
+        (change) => change.path === 'notes.txt' && change.content !== null,
+      ),
+  );
+}
 
 export const mission21: Mission = {
   id: 'branche-pointeur',
@@ -30,48 +37,51 @@ export const mission21: Mission = {
   story:
     "L'équipe veut tester une idée de notes internes sans polluer main. Tu crées une branche experiment, tu y travailles, puis tu vérifies que main n'a pas bougé d'un millimètre. Une branche n'est qu'une étiquette : c'est le moment de le prouver.",
   situation: 'HEAD est sur main ; la branche experiment n’existe pas encore.',
-  objective: 'Crée la branche experiment, commite notes.txt dessus, et laisse main intacte.',
+  objective: 'notes.txt a été mis à jour avec de vraies notes : commite cette modification sur experiment, et laisse main intacte.',
   steps: [
     { label: 'Créer la branche experiment', done: (state) => hasBranch(state, 'experiment') },
     {
       label: 'Committer notes.txt sur experiment',
-      done: (state) => branchFile(state, 'experiment', 'notes.txt') === 'notes de la branche',
+      done: (state, ctx) => notesCommit(state, ctx?.entry ?? initial) !== undefined,
     },
     {
       label: 'Terminer sur experiment avec main inchangée',
-      done: (state) =>
-        headBranch(state) === 'experiment' && branchTip(state, 'main') === mainTip,
+      done: (state, ctx) => {
+        const entry = ctx?.entry ?? initial;
+        return headBranch(state) === 'experiment' && branchUnchanged(state, entry, 'main');
+      },
     },
   ],
   takeaway: 'Une branche est un pointeur : seule l’étiquette de HEAD avance au commit.',
   difficulty: 2,
-  par: 5,
+  par: 4,
   initialState: initial,
-  validate: (state) =>
-    allOf(
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    return allOf(
       check(headBranch(state) === 'experiment', 'HEAD doit être sur experiment.'),
       check(
-        branchFile(state, 'experiment', 'notes.txt') === 'notes de la branche',
-        'experiment doit contenir notes.txt.',
+        notesCommit(state, entry) !== undefined,
+        'Un nouveau commit sur experiment doit modifier notes.txt.',
       ),
-      check(branchTip(state, 'main') === mainTip, 'main ne doit pas bouger.'),
+      check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
       check(
-        headFile(state, 'notes.txt') === 'notes de la branche',
+        headFile(state, 'notes.txt') !== undefined,
         'Le HEAD de experiment doit voir notes.txt.',
       ),
-      check(commitCount(state) === 2, 'Un seul nouveau commit est attendu.'),
-    ),
+      check(commitDelta(state, entry) === 1, 'Un seul nouveau commit est attendu.'),
+    );
+  },
   hints: [
     'Créer une branche ne change pas HEAD : il faut ensuite y basculer.',
-    'Après le switch, crée notes.txt, indexe-le, puis commit.',
-    'git branch experiment, git switch experiment, edit notes.txt "notes de la branche", git add notes.txt, git commit -m "feat: notes expérimentales".',
+    'notes.txt est déjà modifié dans le working dir : après le switch, il ne reste qu’à l’indexer et le commiter.',
+    'git branch experiment, git switch experiment, git add notes.txt, git commit -m "docs: notes internes".',
   ],
   solution: [
     'git branch experiment',
     'git switch experiment',
-    'edit notes.txt "notes de la branche"',
     'git add notes.txt',
-    'git commit -m "feat: notes expérimentales"',
+    'git commit -m "docs: notes internes"',
   ],
   predictions: [
     {
@@ -90,13 +100,30 @@ export const mission21: Mission = {
         },
         {
           id: 'detached',
-          label: `Détaché sur le commit ${mainTip.slice(0, 7)}`,
-          target: { kind: 'commit', value: mainTip },
+          label: 'Détaché sur un commit',
         },
       ],
       correctOptionId: 'experiment',
       explanation:
         'switch et checkout de branche rattachent HEAD à l’étiquette : experiment, même si elle pointe encore sur le commit de main.',
+      resolve: (state) => {
+        const tip = state.branches.main ?? '';
+        return {
+          options: [
+            { id: 'main', label: 'Sur la branche main', target: { kind: 'branch', value: 'main' } },
+            {
+              id: 'experiment',
+              label: 'Sur la branche experiment',
+              target: { kind: 'branch', value: 'experiment' },
+            },
+            {
+              id: 'detached',
+              label: `Détaché sur le commit ${tip.slice(0, 7)}`,
+              target: { kind: 'commit', value: tip },
+            },
+          ],
+        };
+      },
     },
   ],
 };

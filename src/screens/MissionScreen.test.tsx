@@ -76,12 +76,7 @@ describe('MissionScreen', () => {
     render(<MissionScreen missionId="snapshot-fige" />);
 
     const input = await screen.findByRole('textbox', { name: /commande git/i });
-    for (const command of [
-      'edit app.ts "v2"',
-      'git add app.ts',
-      'edit app.ts "v3"',
-      'git commit -m "docs: v2"',
-    ]) {
+    for (const command of ['git commit -m "docs: v2"']) {
       await user.type(input, `${command}{Enter}`);
     }
 
@@ -127,7 +122,7 @@ describe('MissionScreen', () => {
       kind: 'branch',
       branch: 'feature',
     });
-    expect(screen.getByText(/0 \/ 6 commandes/i)).toBeInTheDocument();
+    expect(screen.getByText(/0 \/ 3 commandes/i)).toBeInTheDocument();
   });
 
   it('restaure le brouillon sans rejouer le prelude', async () => {

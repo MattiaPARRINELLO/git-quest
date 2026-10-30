@@ -2,10 +2,19 @@ import type { Commit, Head, RepoState, Worktree } from '../../engine/types';
 import { reachableCommits } from '../../engine/ops/diff';
 import { branchColor, ORPHAN_COLOR } from '../../lib/colors';
 
-export const X_SPACING = 132;
+export const X_SPACING = 148;
 export const ROW_HEIGHT = 78;
 export const PADDING_X = 48;
-export const PADDING_Y = 56;
+export const PADDING_Y = 72;
+/** Ligne de la branche principale : les autres alternent au-dessus et en dessous. */
+const LANE_CENTER_ROWS = 3;
+
+/** lane 0 = 0, lane 1 = -1 (haut), lane 2 = +1 (bas), lane 3 = -2, lane 4 = +2… */
+function laneOffset(lane: number): number {
+  if (lane === 0) return 0;
+  const magnitude = Math.ceil(lane / 2);
+  return lane % 2 === 1 ? -magnitude : magnitude;
+}
 
 export interface Point {
   readonly x: number;
@@ -23,6 +32,13 @@ export interface GraphNode {
   readonly files: readonly string[];
   readonly parents: readonly string[];
   readonly branch?: string;
+  /** Un worktree a son HEAD sur ce commit : le nœud est rempli. */
+  readonly head: boolean;
+  /** Le worktree actif (celui du terminal) est sur ce commit. */
+  readonly activeHead: boolean;
+  /** Au moins un HEAD détaché pointe ici. */
+  readonly detachedHead: boolean;
+  readonly headPaths: readonly string[];
 }
 
 export interface GraphEdge {
@@ -107,6 +123,15 @@ export function layoutGraph(state: RepoState): GraphLayout {
   const commits = sortedCommits(state);
   const connected = connectedHashes(state);
 
+  const headsByCommit = new Map<string, Worktree[]>();
+  for (const worktree of Object.values(state.worktrees)) {
+    const commit = headCommitOfHead(state, worktree.head);
+    if (commit === undefined) continue;
+    const list = headsByCommit.get(commit) ?? [];
+    list.push(worktree);
+    headsByCommit.set(commit, list);
+  }
+
   const laneByKey = new Map<string, number>();
   let laneCount = 0;
 
@@ -119,18 +144,24 @@ export function layoutGraph(state: RepoState): GraphLayout {
       laneByKey.set(key, lane);
     }
 
+    const heads = headsByCommit.get(commit.hash) ?? [];
+
     return {
       hash: commit.hash,
       shortHash: commit.hash.slice(0, 7),
       message: commit.message,
       // Index d'ordre de création : les commandes non-commit ne créent aucun espace.
       x: PADDING_X + creationIndex * X_SPACING,
-      y: PADDING_Y + lane * ROW_HEIGHT,
+      y: PADDING_Y + (LANE_CENTER_ROWS + laneOffset(lane)) * ROW_HEIGHT,
       lane,
       orphan: !connected.has(commit.hash),
       files: Object.keys(commit.snapshot).sort(),
       parents: commit.parents,
       ...(commit.branch === undefined ? {} : { branch: commit.branch }),
+      head: heads.length > 0,
+      activeHead: heads.some((worktree) => worktree.id === state.activeWorktree),
+      detachedHead: heads.some((worktree) => worktree.head.kind === 'detached'),
+      headPaths: heads.map((worktree) => worktree.path),
     };
   });
 
@@ -163,7 +194,7 @@ export function layoutGraph(state: RepoState): GraphLayout {
     const branch = laneBranch.get(index);
     return {
       index,
-      y: PADDING_Y + index * ROW_HEIGHT,
+      y: PADDING_Y + (LANE_CENTER_ROWS + laneOffset(index)) * ROW_HEIGHT,
       color: branch === undefined ? ORPHAN_COLOR : branchColor(branch),
       ...(branch === undefined ? {} : { branch }),
     };
@@ -183,25 +214,18 @@ export function layoutGraph(state: RepoState): GraphLayout {
     const node = nodeByHash.get(commitHash);
     if (!node) continue;
     names.sort();
+    // Collées au nœud, centrées dessus puis empilées vers le bas : on voit
+    // immédiatement à quel commit appartient chaque étiquette.
     names.forEach((name, index) => {
       const label: BranchLabel = {
         name,
         commit: commitHash,
-        x: node.x + 18,
-        y: node.y - 16 + (index - (names.length - 1) / 2) * 20,
+        x: node.x + 13,
+        y: node.y - 9 + index * 20,
         color: branchColor(name),
       };
       branchLabels.push(label);
     });
-  }
-
-  const headsByCommit = new Map<string, Worktree[]>();
-  for (const worktree of Object.values(state.worktrees)) {
-    const commit = headCommitOfHead(state, worktree.head);
-    if (commit === undefined) continue;
-    const list = headsByCommit.get(commit) ?? [];
-    list.push(worktree);
-    headsByCommit.set(commit, list);
   }
 
   const headMarkers: HeadMarker[] = [];
@@ -216,9 +240,9 @@ export function layoutGraph(state: RepoState): GraphLayout {
         commit: commitHash,
         branch,
         detached: branch === null,
-        x: node.x + 18,
-        // Sous les étiquettes de branches, décalés par worktree pour ne pas se chevaucher.
-        y: node.y + 30 + index * 20,
+        x: node.x + 14,
+        // Sous le hash du commit (y + 22) : jamais par-dessus.
+        y: node.y + 34 + index * 20,
         active: worktree.id === state.activeWorktree,
       });
     });

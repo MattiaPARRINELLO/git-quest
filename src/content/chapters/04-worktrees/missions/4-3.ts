@@ -1,31 +1,16 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   branchFile,
-  branchTip,
   check,
   hasBranch,
   headBranch,
   worktreePaths,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
+import { branchUnchanged } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': '# Projet Nova',
-    'src/app.ts': "export const app = 'nova';",
-    'bug.txt': 'bug critique',
-  })
-  .branch('hotfix')
-  .worktreeAdd('../gitquest-hotfix', { branch: 'hotfix' })
-  .activate('../gitquest-hotfix')
-  .commit('fix: bug critique', { 'bug.txt': 'corrigé' })
-  .activate('../gitquest')
-  .build();
-
-const mainTip = initial.branches.main ?? '';
-const hotfixTip = initial.branches.hotfix ?? '';
+const initial = entryState('menage-worktree');
 
 export const mission43: Mission = {
   id: 'menage-worktree',
@@ -52,7 +37,7 @@ export const mission43: Mission = {
       label: 'Conserver le correctif dans l’historique',
       done: (state) =>
         !worktreePaths(state).includes('~/gitquest-hotfix') &&
-        branchFile(state, 'hotfix', 'bug.txt') === 'corrigé',
+        branchFile(state, 'hotfix', 'bug.txt') !== undefined && branchFile(state, 'hotfix', 'bug.txt') !== branchFile(initial, 'main', 'bug.txt'),
     },
   ],
   takeaway:
@@ -60,19 +45,24 @@ export const mission43: Mission = {
   difficulty: 2,
   par: 1,
   initialState: initial,
-  validate: (state) =>
-    allOf(
-      check(worktreePaths(state).length === 1, 'Il doit rester un seul worktree.'),
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    return allOf(
       check(
         !worktreePaths(state).includes('~/gitquest-hotfix'),
         'Le worktree temporaire doit être supprimé.',
       ),
       check(hasBranch(state, 'hotfix'), 'La branche hotfix doit survivre.'),
-      check(branchTip(state, 'hotfix') === hotfixTip, 'La branche hotfix ne doit pas bouger.'),
-      check(branchTip(state, 'main') === mainTip, 'main ne doit pas bouger.'),
+      check(branchUnchanged(state, entry, 'hotfix'), 'La branche hotfix ne doit pas bouger.'),
+      check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
-      check(branchFile(state, 'hotfix', 'bug.txt') === 'corrigé', 'Le correctif doit rester dans l’historique.'),
-    ),
+      check(
+        branchFile(state, 'hotfix', 'bug.txt') !== undefined &&
+          branchFile(state, 'hotfix', 'bug.txt') !== branchFile(entry, 'main', 'bug.txt'),
+        'Le correctif doit rester dans l’historique.',
+      ),
+    );
+  },
   hints: [
     'La commande de nettoyage est git worktree remove <chemin>.',
     'Le worktree est propre : aucun --force n’est nécessaire, et il n’est pas le worktree actif.',
