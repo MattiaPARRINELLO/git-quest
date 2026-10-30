@@ -5,6 +5,7 @@ import type { AfterMission } from '../../content/index';
 import type { Mission } from '../../content/types';
 import { routePaths } from '../../router/useHashRoute';
 import { Icon } from '../ui/Icon';
+import { cn } from '../../lib/cn';
 
 interface MissionCompleteProps {
   readonly mission: Mission;
@@ -86,104 +87,104 @@ export function MissionComplete({
   useDialogKeyboard(dialog, { onCancel: onInspect });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg/85 p-4">
       <motion.div
         ref={dialog}
         tabIndex={-1}
-        initial={{ opacity: 0, scale: 0.94, y: 12 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="scrollbar-thin max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-panel p-5 shadow-2xl outline-none sm:p-6"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: [0.2, 0.7, 0.2, 1] }}
+        className="scrollbar-thin max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-xl border border-border bg-panel shadow-[var(--shadow)] outline-none"
         role="dialog"
         aria-modal="true"
         aria-label={`Mission ${mission.number} réussie`}
       >
-        <div className="flex items-center justify-between gap-2">
-          <span className="rounded-full border border-success/40 bg-success/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-success">
+        <header className="flex items-center justify-between gap-2 border-b border-border px-5 py-3">
+          <span className="flex items-center gap-2 text-[12px] text-success">
+            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-success" />
             Mission accomplie
           </span>
-          <button type="button" className="btn px-2 py-1 text-[11px]" onClick={onInspect}>
+          <button type="button" className="btn h-7 px-2 text-[11.5px]" onClick={onInspect}>
             Inspecter
           </button>
-        </div>
+        </header>
 
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-text">
-          {mission.number} — {mission.title}
-        </h2>
+        <div className="px-5 py-4">
+          <span className="font-mono text-[11px] text-muted">{mission.number}</span>
+          <h2 className="display mt-1 text-[28px] leading-[1.15] text-text">{mission.title}</h2>
 
-        <div className="mt-4 flex items-center justify-center gap-2 py-2 text-4xl" aria-label={`${stars} étoile(s) sur 3`}>
-          {[1, 2, 3].map((value) => (
-            <motion.span
-              key={value}
-              initial={{ opacity: 0, scale: 0.4, rotate: -20 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ delay: 0.12 * value, type: 'spring', stiffness: 220, damping: 15 }}
-              className={value <= stars ? 'text-warning' : 'text-muted/25'}
-            >
-              ★
-            </motion.span>
-          ))}
-        </div>
-
-        <p className="text-center text-xs text-muted">
-          {commandsUsed} commande{commandsUsed > 1 ? 's' : ''} utilisée{commandsUsed > 1 ? 's' : ''} · par{' '}
-          {mission.par}
-        </p>
-
-        {mission.takeaway && (
-          <div className="mt-3 rounded-xl border border-accent/25 bg-accent-soft px-3 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-accent">
-              Ce que tu dois remarquer
+          <div className="mt-3 flex items-center gap-4 border-y border-border py-2.5">
+            <div className="flex items-center gap-1" aria-label={`${stars} étoile(s) sur 3`}>
+              {[1, 2, 3].map((value) => (
+                <motion.span
+                  key={value}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.06 * value, duration: 0.22 }}
+                  className={cn('text-[20px] leading-none', value <= stars ? 'text-warning' : 'text-border-strong')}
+                >
+                  ★
+                </motion.span>
+              ))}
+            </div>
+            <p className="font-mono text-[11px] tabular-nums text-muted">
+              {commandsUsed} commande{commandsUsed > 1 ? 's' : ''} · par {mission.par}
             </p>
-            <p className="mt-1 text-xs leading-relaxed text-text">{mission.takeaway}</p>
           </div>
-        )}
 
-        {mission.successNote && (
-          <p className="mt-3 rounded-xl border border-success/25 bg-success/10 px-3 py-2 text-xs leading-relaxed text-success">
-            {mission.successNote}
-          </p>
-        )}
+          {mission.takeaway && (
+            <div className="mt-3 border-l-2 border-accent pl-3">
+              <p className="mono-meta">Ce que tu dois remarquer</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-text">{mission.takeaway}</p>
+            </div>
+          )}
 
-        {outcome !== undefined && (
-          <p className="mt-3 border-l-2 border-accent/50 pl-3 text-xs leading-relaxed text-text">
-            {outcome}
-          </p>
-        )}
+          {mission.successNote && (
+            <p className="mt-3 border-l-2 border-success/60 pl-3 text-[12.5px] leading-relaxed text-success">
+              {mission.successNote}
+            </p>
+          )}
 
-        {teaser !== undefined && (
-          <p className="mt-2 pl-3 text-[11px] leading-relaxed text-muted">
-            <span className="font-semibold uppercase tracking-wider text-accent">À suivre · </span>
-            {teaser}
-          </p>
-        )}
+          {outcome !== undefined && (
+            <p className="display mt-3 text-[15px] leading-7 text-text/85">{outcome}</p>
+          )}
 
-        <div className="mt-4">
-          <h3 className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted">
-            <Icon name="book" size={12} />
-            Solution de référence
-          </h3>
-          <ol className="mt-2 space-y-1">
-            {solution.map((command, index) => (
-              <li
-                key={`${command}-${index}`}
-                className="flex items-baseline gap-2 rounded-lg border border-border bg-panel-2/50 px-2.5 py-1.5 font-mono text-[11px] text-accent-2"
-              >
-                <span className="text-muted/60">{index + 1}.</span>
-                <span className="break-all">{command}</span>
-              </li>
-            ))}
-          </ol>
+          {teaser !== undefined && (
+            <p className="mt-2 text-[11.5px] leading-relaxed text-muted">
+              <span className="text-text">À suivre · </span>
+              {teaser}
+            </p>
+          )}
+
+          <div className="mt-4">
+            <h3 className="flex items-center gap-1.5 text-[11.5px] text-muted">
+              <Icon name="book" size={12} />
+              Solution de référence
+            </h3>
+            <ol className="mt-1.5 divide-y divide-border border-y border-border">
+              {solution.map((command, index) => (
+                <li
+                  key={`${command}-${index}`}
+                  className="flex items-baseline gap-3 py-1.5 font-mono text-[11.5px]"
+                >
+                  <span className="w-4 shrink-0 text-right text-[10px] tabular-nums text-muted/60">
+                    {index + 1}
+                  </span>
+                  <span className="break-all text-text">{command}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
 
-        <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <a href={routePaths.home} className="btn justify-center px-3 py-2 text-sm">
+        <div className="flex flex-col-reverse gap-2 border-t border-border px-5 py-3 sm:flex-row sm:justify-end">
+          <a href={routePaths.home} className="btn h-9 justify-center px-3 text-[13px]">
             Carte des chapitres
           </a>
           <a
             href={afterHref(after)}
             data-autofocus
-            className="btn btn-accent justify-center px-3 py-2 text-sm"
+            className="btn btn-accent h-9 justify-center px-3.5 text-[13px]"
           >
             Continuer
             <Icon name="arrow-right" size={15} />

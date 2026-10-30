@@ -112,10 +112,10 @@ function SnapshotDiagram() {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-panel px-3 py-2">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
-          Étape {step + 1}/3
+        <span className="font-mono text-[10.5px] tabular-nums text-muted">
+          Étape {step + 1} / 3
         </span>
-        <code className="font-mono text-[11px] text-accent-2">{current.command}</code>
+        <code className="font-mono text-[11px] text-text">{current.command}</code>
       </div>
 
       <Frame>

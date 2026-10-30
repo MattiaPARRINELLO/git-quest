@@ -8,3 +8,7 @@ dist/
 coverage/
 *.tsbuildinfo
 dev-dist/
+
+# Rendu vidéo (artefacts générés)
+unslop-story/*.mp4
+unslop-story/.story-frames/

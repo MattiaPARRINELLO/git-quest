@@ -144,19 +144,15 @@ export function Terminal({ onCommand }: TerminalProps) {
 
   return (
     <div
-      className="flex h-full min-h-0 flex-col bg-[#08090d] text-text"
+      className="flex h-full min-h-0 flex-col bg-bg text-text"
       onClick={() => inputRef.current?.focus()}
     >
       <div className="flex h-9 shrink-0 items-center justify-between border-b border-border px-3">
-        <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-muted">
-          <span className="flex gap-1">
-            <span className="h-2 w-2 rounded-full bg-danger/80" />
-            <span className="h-2 w-2 rounded-full bg-warning/80" />
-            <span className="h-2 w-2 rounded-full bg-success/80" />
-          </span>
+        <div className="flex items-center gap-2 text-[12px] text-muted">
+          <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
           Terminal
         </div>
-        <span className="hidden font-mono text-[10px] text-muted sm:inline">
+        <span className="hidden font-mono text-[10px] text-muted/70 sm:inline">
           ↑↓ historique · Tab complétion · Ctrl+L effacer
         </span>
       </div>

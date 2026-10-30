@@ -1,0 +1,31 @@
+@font-face{font-family:Inter;src:url(fonts/inter-latin-wght-normal.woff2) format("woff2");font-weight:100 900;font-display:block}
+@font-face{font-family:Mono;src:url(fonts/jetbrains-mono-latin-wght-normal.woff2) format("woff2");font-weight:100 800;font-display:block}
+@font-face{font-family:Newsreader;src:url(fonts/newsreader-latin-wght-normal.woff2) format("woff2");font-weight:200 800;font-display:block}
+
+:root{
+  --bg:#0a0b0f; --panel:#101218; --panel2:#151823; --border:#242838;
+  --text:#e8eaf2; --muted:#9096a8; --violet:#8b7cf6; --cyan:#22d3ee; --amber:#fbbf24;
+  --success:#34d399; --danger:#fb7185;
+  --branch:hsl(205 54% 62%);
+  --branch2:hsl(158 54% 62%);
+  --branch3:hsl(78 54% 62%);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:1440px;background:var(--bg)}
+body{font-family:Inter,system-ui,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+.screen{width:1000px;min-height:1000px;overflow:hidden}
+
+.top{height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);padding:0 24px;background:var(--panel)}
+.brand{display:flex;align-items:center;gap:9px}
+.mark{width:26px;height:26px;border-radius:9px;background:linear-gradient(135deg,#8b7cf6,#22d3ee);display:grid;place-items:center;box-shadow:0 8px 22px -8px rgba(139,124,246,.9)}
+.mark svg{display:block}
+.brandname{font-size:14px;font-weight:600;letter-spacing:-.01em;background:linear-gradient(90deg,#c4b5fd,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+.badge{font-size:9px;font-weight:700;padding:3px 7px;border-radius:999px;background:rgba(139,124,246,.18);color:#c4b5fd;border:1px solid rgba(139,124,246,.4)}
+.nav{display:flex;gap:4px;margin-left:10px;margin-right:auto}
+.navlink{font-size:12px;color:var(--muted);padding:5px 9px;border-radius:8px}
+.navlink.on{background:var(--panel2);color:var(--text)}
+.topright{display:flex;gap:6px}
+.ghostbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;border:1px solid var(--border);border-radius:999px;background:var(--panel2);color:var(--muted);font-size:12px;white-space:nowrap}
+.ghostbtn.small{height:26px;padding:0 9px;border-radius:8px;font-size:11px}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px}
+.mono{font-family:Mono;font-variant-numeric:tabular-nums}

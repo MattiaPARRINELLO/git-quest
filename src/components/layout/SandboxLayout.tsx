@@ -71,7 +71,7 @@ function MobileTabs() {
           <Icon name={item.icon} size={14} />
           {item.label}
           {item.id === 'graph' && unseen > 0 && tab !== 'graph' && (
-            <span className="ml-0.5 rounded-full bg-accent px-1.5 py-0.5 text-[9px] font-semibold leading-none text-white">
+            <span className="ml-0.5 rounded-full bg-accent px-1.5 py-0.5 text-[9px] font-medium leading-none text-on-accent">
               {unseen > 9 ? '9+' : unseen}
             </span>
           )}

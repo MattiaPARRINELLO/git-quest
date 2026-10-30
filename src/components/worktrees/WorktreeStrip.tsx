@@ -17,10 +17,11 @@ export function WorktreeStrip() {
       className="shrink-0 border-b border-border bg-panel px-3 py-2.5"
     >
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted">
+        <h2 className="flex items-center gap-2 text-[12px] font-medium text-text">
+          <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
           Worktrees
         </h2>
-        <span className="font-mono text-[10px] text-muted">
+        <span className="font-mono text-[10px] text-muted/70">
           cliquer = <span className="text-text">cd &lt;chemin&gt;</span>
         </span>
       </div>
@@ -45,7 +46,7 @@ export function WorktreeStrip() {
                 aria-pressed={active}
                 aria-label={`Aller au worktree ${worktree.path}`}
                 className={cn(
-                  'group flex min-w-[190px] max-w-[260px] flex-col gap-1 rounded-xl border px-3 py-2 text-left transition-colors',
+                  'group flex min-w-[190px] max-w-[260px] flex-col gap-1 rounded-lg border px-3 py-2 text-left transition-colors',
                   active
                     ? 'border-accent/70 bg-accent-soft'
                     : 'border-border bg-panel-2 hover:border-border-strong',

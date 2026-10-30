@@ -21,43 +21,48 @@ export function FinalScreen() {
 
   return (
     <div className="scrollbar-thin h-full overflow-y-auto">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
-        <section className="rounded-3xl border border-border bg-panel p-6 sm:p-9">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-            Parcours terminé
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-text sm:text-4xl">
-            Ton arbre Nova
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
-            Quinze missions plus tard, tu lis un dépôt Git comme une histoire : des commits,
-            des branches qui pointent, un HEAD qui avance et des worktrees qui travaillent en
-            parallèle. Voici l’arbre de Nova, avec un merge et un worktree de plus.
-          </p>
+      <div className="mx-auto max-w-[1000px] px-5 py-10 sm:px-8 sm:py-14">
+        <p className="flex items-center gap-2 text-[11.5px] text-muted">
+          <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
+          Parcours terminé
+        </p>
+        <h1 className="display mt-2 text-[42px] leading-[1.04] text-text">Ton arbre Nova</h1>
+        <p className="mt-3 max-w-[56ch] text-[14.5px] leading-7 text-muted">
+          Quinze missions plus tard, tu lis un dépôt Git comme une histoire : des commits,
+          des branches qui pointent, un HEAD qui avance et des worktrees qui travaillent en
+          parallèle. Voici l’arbre de Nova, avec un merge et un worktree de plus.
+        </p>
 
-          <div className="mt-6 h-[380px] overflow-hidden rounded-2xl border border-border bg-bg">
+        <div className="mt-7 overflow-hidden rounded-xl border border-border bg-panel">
+          <div className="h-[380px]">
             <CommitGraph state={state} batch={batch} />
           </div>
+        </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border/70 pt-4 text-xs text-muted">
-            <span>
-              <strong className="text-text">{done}</strong> / {totalMissions} missions
-            </span>
-            <span>
-              <strong className="text-text">{totalStars}</strong> / {totalMissions * 3} étoiles
-            </span>
+        <dl className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-2 border-t border-border pt-4">
+          <div className="flex items-baseline gap-2">
+            <dt className="mono-meta">Missions</dt>
+            <dd className="font-mono text-[15px] tabular-nums text-text">
+              {done} <span className="text-[12px] text-muted">/ {totalMissions}</span>
+            </dd>
           </div>
+          <div className="flex items-baseline gap-2">
+            <dt className="mono-meta">Étoiles</dt>
+            <dd className="font-mono text-[15px] tabular-nums text-text">
+              {totalStars} <span className="text-[12px] text-muted">/ {totalMissions * 3}</span>
+            </dd>
+          </div>
+        </dl>
 
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <a href={routePaths.home} className="btn px-3 py-2 text-sm">
-              Revoir la carte des chapitres
-            </a>
-            <a href={routePaths.sandbox} className="btn btn-accent px-3 py-2 text-sm">
-              <Icon name="terminal" size={14} />
-              Continuer dans le bac à sable
-            </a>
-          </div>
-        </section>
+        <div className="mt-6 flex flex-wrap items-center gap-2">
+          <a href={routePaths.home} className="btn h-9 px-3 text-[13px]">
+            Revoir la carte des chapitres
+          </a>
+          <a href={routePaths.sandbox} className="btn btn-accent h-9 gap-2 px-3.5 text-[13px]">
+            <Icon name="terminal" size={14} />
+            Continuer dans le bac à sable
+          </a>
+        </div>
       </div>
     </div>
   );

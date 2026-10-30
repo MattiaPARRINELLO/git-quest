@@ -1,19 +1,57 @@
 import { useMemo } from 'react';
-import { chapters, commandLineLesson, estimatedLessonMinutes, isMissionUnlocked, missionSequence } from '../content';
+import {
+  chapters,
+  commandLineLesson,
+  estimatedLessonMinutes,
+  isMissionUnlocked,
+  missionSequence,
+} from '../content';
 import { briefingFor } from '../content/briefings';
+import { scenario } from '../engine/scenario';
 import { resumeContext, resumeTarget } from '../app/resume';
 import { useProgressStore } from '../store/useProgressStore';
 import { useMissionDraftStore } from '../store/useMissionDraftStore';
 import { routePaths } from '../router/useHashRoute';
 import { branchColor } from '../lib/colors';
 import { Icon } from '../components/ui/Icon';
+import { CommitGraph } from '../components/graph/CommitGraph';
+import { cn } from '../lib/cn';
 
-function Stars({ count, max = 3 }: { readonly count: number; readonly max?: number }) {
+/** Trois repères pleins ou vides : la note se lit d'un coup d'œil. */
+function StarDots({
+  count,
+  max = 3,
+  className,
+}: {
+  readonly count: number;
+  readonly max?: number;
+  readonly className?: string;
+}) {
   return (
-    <span className="font-mono text-[11px] tracking-tight text-warning" aria-label={`${count} étoile(s) sur ${max}`}>
-      {'★'.repeat(count)}
-      <span className="text-muted/40">{'★'.repeat(Math.max(0, max - count))}</span>
+    <span
+      className={cn('inline-flex items-center gap-[3px]', className)}
+      aria-label={`${count} étoile${count > 1 ? 's' : ''} sur ${max}`}
+    >
+      {Array.from({ length: max }, (_, index) => (
+        <span
+          key={index}
+          className={cn(
+            'h-[5px] w-[5px] rounded-full',
+            index < count ? 'bg-warning' : 'bg-border-strong/60',
+          )}
+        />
+      ))}
     </span>
+  );
+}
+
+function LaneTick({ color }: { readonly color: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="h-3 w-[2px] shrink-0 rounded-full"
+      style={{ background: color }}
+    />
   );
 }
 
@@ -35,135 +73,183 @@ export function HomeScreen() {
   const percent = totalMissions === 0 ? 0 : Math.round((done / totalMissions) * 100);
   const prologueRead =
     (lessonSlides[commandLineLesson.id] ?? 0) >= commandLineLesson.slides.length - 1;
+  const preview = useMemo(
+    () =>
+      scenario()
+        .init()
+        .commit('docs: cadrage du projet', { 'README.md': '# Nova\n\nNotes partagées.' })
+        .branch('feature/notes')
+        .checkout('feature/notes')
+        .commit('feat: notes partagées', { 'src/notes.ts': 'export const notes = [];' })
+        .checkout('main')
+        .commit('fix: cache hors-ligne', { 'src/cache.ts': 'export const cache = new Map();' })
+        .run('git merge feature/notes')
+        .build(),
+    [],
+  );
+  const emptyBatch = useMemo(() => ({ id: 0, events: [] }), []);
 
   return (
     <div className="scrollbar-thin h-full overflow-y-auto">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
-        <section className="relative overflow-hidden rounded-3xl border border-border bg-panel p-6 sm:p-9">
-          <div
-            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-30 blur-3xl"
-            style={{ background: 'var(--accent)' }}
-          />
-          <div
-            className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full opacity-20 blur-3xl"
-            style={{ background: 'var(--accent-2)' }}
-          />
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-            Apprendre Git par la pratique
-          </p>
-          <h1 className="mt-3 max-w-2xl text-balance text-3xl font-semibold tracking-tight text-text sm:text-4xl">
-            Maîtrise Git en le voyant.
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
-            Cinq chapitres, quinze missions réalistes. Chaque commande se rejoue sous tes
-            yeux : le graphe, HEAD, l’index et les worktrees deviennent enfin lisibles.
-          </p>
+      <div className="mx-auto max-w-[1160px] px-5 py-9 sm:px-8 sm:py-12">
+        <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] lg:gap-12">
+          <div>
+            <p className="flex items-center gap-2 text-[11.5px] text-muted">
+              <LaneTick color="var(--accent)" />
+              Apprendre Git par la pratique
+            </p>
+            <h1 className="display mt-3 max-w-[20ch] text-[40px] leading-[1.04] text-text sm:text-[52px]">
+              Apprends Git en voyant le graphe.
+            </h1>
+            <p className="mt-4 max-w-[48ch] text-[15px] leading-7 text-muted">
+              Cinq chapitres, quinze missions réalistes. Chaque commande se rejoue sous tes
+              yeux : le graphe, HEAD, l’index et les worktrees deviennent enfin lisibles.
+            </p>
 
-          <div className="mt-6">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="mt-7 flex flex-wrap items-center gap-2">
               {hydrated ? (
                 <a
                   href={target.route}
-                  className="btn btn-accent min-w-56 justify-center px-3 py-2 text-sm"
+                  className="btn btn-accent h-9 min-w-60 justify-between px-3.5 text-[13px]"
                 >
                   {target.label}
                   <Icon name="arrow-right" size={15} />
                 </a>
               ) : (
                 <span
-                  className="btn btn-accent invisible min-w-56 justify-center px-3 py-2 text-sm"
+                  className="btn btn-accent invisible h-9 min-w-60 justify-between px-3.5 text-[13px]"
                   aria-hidden="true"
                 >
                   Chargement
                 </span>
               )}
-              <a href={routePaths.sandbox} className="btn px-3 py-2 text-sm">
+              <a href={routePaths.sandbox} className="btn h-9 gap-2 px-3 text-[13px]">
                 <Icon name="terminal" size={14} />
                 Ouvrir le bac à sable
               </a>
             </div>
-            <p className="mt-2 min-h-4 text-[11px] text-muted" aria-live="polite">
+            <p className="mt-2.5 min-h-4 text-[11.5px] text-muted" aria-live="polite">
               {hydrated ? context : '\u00a0'}
             </p>
           </div>
 
-          <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border/70 pt-4 text-xs text-muted">
-            <span>
-              <strong className="text-text">{done}</strong> / {totalMissions} missions
-            </span>
-            <span>
-              <strong className="text-text">{totalStars}</strong> / {totalMissions * 3} étoiles
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="h-1.5 w-28 overflow-hidden rounded-full bg-panel-3">
+          <div className="hidden overflow-hidden rounded-xl border border-border bg-panel lg:block">
+            <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5">
+              <div className="flex items-center gap-2">
+                <LaneTick color="var(--accent)" />
+                <span className="font-mono text-[11.5px] text-text">nova</span>
+                <span className="mono-meta">sur main</span>
+              </div>
+              <span className="mono-meta">4 commits · 2 branches</span>
+            </div>
+            <div className="h-[248px]">
+              <CommitGraph state={preview} batch={emptyBatch} preview bare />
+            </div>
+            <div className="flex items-center gap-4 border-t border-border px-4 py-2">
+              <span className="flex items-center gap-1.5 font-mono text-[10.5px] text-muted">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
+                main
+              </span>
+              <span className="flex items-center gap-1.5 font-mono text-[10.5px] text-muted">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--success)' }} />
+                feature/notes
+              </span>
+              <span className="ml-auto flex items-center gap-1.5 font-mono text-[10.5px] text-muted">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--warning)' }} />
+                merge
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <dl className="mt-9 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
+          <div className="bg-panel px-4 py-3.5">
+            <dt className="mono-meta">Missions</dt>
+            <dd className="mt-1 font-mono text-[22px] leading-none tabular-nums text-text">
+              {done}
+              <span className="text-[13px] text-muted"> / {totalMissions}</span>
+            </dd>
+          </div>
+          <div className="bg-panel px-4 py-3.5">
+            <dt className="mono-meta">Étoiles</dt>
+            <dd className="mt-1 font-mono text-[22px] leading-none tabular-nums text-text">
+              {totalStars}
+              <span className="text-[13px] text-muted"> / {totalMissions * 3}</span>
+            </dd>
+          </div>
+          <div className="col-span-2 bg-panel px-4 py-3.5 sm:col-span-1">
+            <dt className="mono-meta">Parcours</dt>
+            <dd className="mt-1.5 flex items-center gap-3">
+              <span className="h-1 flex-1 overflow-hidden rounded-full bg-panel-3">
                 <span
-                  className="block h-full rounded-full bg-accent transition-all"
+                  className="block h-full rounded-full bg-accent"
                   style={{ width: `${percent}%` }}
                 />
               </span>
-              {percent}%
-            </span>
+              <span className="font-mono text-[13px] tabular-nums text-text">{percent}%</span>
+            </dd>
           </div>
-        </section>
+        </dl>
 
         <section className="mt-4" aria-label="Prologue">
           <a
             href={routePaths.prologue}
-            className="group flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-panel px-4 py-3 transition-colors hover:border-border-strong"
+            className="group flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-panel px-4 py-3 transition-colors hover:border-border-strong"
           >
-            <span className="flex min-w-0 items-start gap-3">
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-accent/40 bg-accent/10 text-accent">
-                <Icon name="book" size={14} />
-              </span>
+            <span className="flex min-w-0 items-start gap-2.5">
+              <span aria-hidden="true" className="mt-1 h-3.5 w-[2px] shrink-0 rounded-full bg-accent" />
               <span className="min-w-0">
-                <span className="text-sm font-semibold text-text">Prologue · Lire une commande Git</span>
-                <span className="mt-0.5 block text-xs leading-relaxed text-muted">
+                <span className="text-[13px] font-medium text-text">
+                  Prologue · Lire une commande Git
+                </span>
+                <span className="mt-0.5 block text-[12px] leading-relaxed text-muted">
                   Options, guillemets, placeholders : décoder n’importe quelle commande avant de
                   commencer. {estimatedLessonMinutes(commandLineLesson)} min.
                 </span>
               </span>
             </span>
-            <span className="inline-flex shrink-0 items-center gap-1 text-xs text-accent">
+            <span className="inline-flex shrink-0 items-center gap-1 text-[12px] text-muted transition-colors group-hover:text-text">
               {prologueRead ? 'Relire' : 'Lire'}
-              <Icon name="arrow-right" size={13} />
+              <Icon name="arrow-right" size={12} />
             </span>
           </a>
         </section>
 
         {lastCompleted !== undefined && lastBriefing?.outcome !== undefined && (
           <section
-            className="mt-4 rounded-2xl border border-border bg-panel px-4 py-3"
+            className="mt-4 rounded-xl border border-border bg-panel px-4 py-3.5"
             aria-label="Dernier épisode"
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+              <p className="flex items-center gap-2 text-[11.5px] text-muted">
+                <LaneTick color="var(--accent)" />
                 Dernier épisode
               </p>
-              <a href={routePaths.nova} className="text-[11px] text-accent-2 hover:underline">
+              <a href={routePaths.nova} className="text-[11.5px] text-muted hover:text-text">
                 Ton arbre Nova
               </a>
             </div>
-            <p className="mt-1 text-sm text-text">
+            <p className="mt-1.5 text-[13px] text-text">
               <span className="font-mono text-[11px] text-muted">{lastCompleted.number}</span>{' '}
               <span className="font-medium">{lastCompleted.title}</span>
             </p>
-            <p className="mt-1 text-xs leading-relaxed text-muted">{lastBriefing.outcome}</p>
+            <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{lastBriefing.outcome}</p>
             {lastBriefing.teaser !== undefined && (
-              <p className="mt-1 text-[11px] leading-relaxed text-muted/80">
-                <span className="font-semibold uppercase tracking-wider text-accent">À suivre · </span>
+              <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted/85">
+                <span className="text-text">À suivre · </span>
                 {lastBriefing.teaser}
               </p>
             )}
           </section>
         )}
 
-        <section className="mt-8" aria-label="Chapitres">
-          <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-sm font-semibold text-text">Ta carte de progression</h2>
-            <span className="text-[11px] text-muted">Les missions se déverrouillent dans l’ordre.</span>
+        <section className="mt-10" aria-label="Chapitres">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-[15px] font-medium text-text">Ta carte de progression</h2>
+            <span className="text-[11.5px] text-muted">Les missions se déverrouillent dans l’ordre.</span>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {chapters.map((chapter) => {
               const chapterDone = chapter.missions.filter(
                 (mission) => completed[mission.id] !== undefined,
@@ -177,40 +263,43 @@ export function HomeScreen() {
               return (
                 <article
                   key={chapter.id}
-                  className="flex flex-col rounded-2xl border border-border bg-panel p-4"
+                  className="flex flex-col rounded-xl border border-border bg-panel p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border font-mono text-sm font-semibold"
-                        style={{ borderColor: `${color}66`, color, background: `${color}14` }}
-                      >
-                        {chapter.number}
-                      </span>
-                      <div>
-                        <h3 className="text-sm font-semibold text-text">{chapter.title}</h3>
-                        <p className="text-[11px] text-muted">{chapter.tagline}</p>
+                    <div className="flex min-w-0 items-start gap-2.5">
+                      <LaneTick color={color} />
+                      <div className="min-w-0">
+                        <span className="mono-meta">Chapitre {chapter.number}</span>
+                        <h3 className="mt-0.5 truncate text-[14px] font-medium text-text">
+                          {chapter.title}
+                        </h3>
                       </div>
                     </div>
-                    <Stars count={chapterStars} max={chapter.missions.length * 3} />
+                    <span className="mono-meta shrink-0 tabular-nums">
+                      {chapterStars} / {chapter.missions.length * 3}
+                    </span>
                   </div>
 
-                  <p className="mt-3 text-xs leading-relaxed text-muted">{chapter.description}</p>
+                  <p className="mt-2 text-[12px] text-muted">{chapter.tagline}</p>
+                  <p className="mt-2 text-[12.5px] leading-relaxed text-muted">
+                    {chapter.description}
+                  </p>
 
-                  <div className="mt-4 flex items-center justify-between gap-2 text-[11px] text-muted">
-                    <span>
-                      {chapterDone} / {chapter.missions.length} missions · {estimatedLessonMinutes(chapter.lesson)} min de cours
+                  <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-border pt-3">
+                    <span className="mono-meta">
+                      {chapterDone} / {chapter.missions.length} missions ·{' '}
+                      {estimatedLessonMinutes(chapter.lesson)} min de cours
                     </span>
                     <a
                       href={routePaths.lesson(chapter.id)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-text transition-colors hover:border-border-strong"
+                      className="btn h-7 gap-1.5 px-2 text-[11.5px]"
                     >
                       <Icon name="book" size={12} />
                       Cours
                     </a>
                   </div>
 
-                  <ul className="mt-3 space-y-1.5">
+                  <ul className="mt-2 space-y-0.5">
                     {chapter.missions.map((mission) => {
                       const unlocked = isMissionUnlocked(mission.id, completed);
                       const completion = completed[mission.id];
@@ -220,35 +309,36 @@ export function HomeScreen() {
                           {unlocked ? (
                             <a
                               href={routePaths.mission(mission.id)}
-                              className="group flex items-center justify-between gap-2 rounded-lg border border-transparent bg-panel-2/60 px-2.5 py-2 transition-colors hover:border-border-strong"
+                              className="group flex h-8 items-center justify-between gap-2 rounded-md px-1.5 transition-colors hover:bg-panel-2"
                             >
-                              <span className="flex min-w-0 items-center gap-2">
-                                <span className="font-mono text-[10px] text-muted">{mission.number}</span>
-                                <span className="truncate text-xs text-text">{mission.title}</span>
+                              <span className="flex min-w-0 items-center gap-2.5">
+                                <span className="font-mono text-[10.5px] text-muted">
+                                  {mission.number}
+                                </span>
+                                <span className="truncate text-[12.5px] text-text">{mission.title}</span>
                               </span>
-                              <span className="flex items-center gap-2">
+                              <span className="flex shrink-0 items-center gap-2">
                                 {completion ? (
-                                  <Stars count={completion.stars} />
+                                  <StarDots count={completion.stars} />
                                 ) : (
-                                  <span className="font-mono text-[10px] text-muted">à faire</span>
+                                  <span className="mono-meta">à faire</span>
                                 )}
                                 <Icon
                                   name="arrow-right"
-                                  size={13}
+                                  size={12}
                                   className="text-muted transition-transform group-hover:translate-x-0.5"
                                 />
                               </span>
                             </a>
                           ) : (
-                            <div
-                              className="flex items-center justify-between gap-2 rounded-lg border border-transparent px-2.5 py-2 opacity-55"
-                              aria-disabled="true"
-                            >
-                              <span className="flex min-w-0 items-center gap-2">
-                                <span className="font-mono text-[10px] text-muted">{mission.number}</span>
-                                <span className="truncate text-xs text-muted">{mission.title}</span>
+                            <div className="flex h-8 items-center justify-between gap-2 px-1.5 opacity-55">
+                              <span className="flex min-w-0 items-center gap-2.5">
+                                <span className="font-mono text-[10.5px] text-muted">
+                                  {mission.number}
+                                </span>
+                                <span className="truncate text-[12.5px] text-muted">{mission.title}</span>
                               </span>
-                              <Icon name="lock" size={13} className="shrink-0 text-muted" />
+                              <Icon name="lock" size={12} className="shrink-0 text-muted" />
                             </div>
                           )}
                         </li>
@@ -261,8 +351,8 @@ export function HomeScreen() {
           </div>
         </section>
 
-        <footer className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[11px] text-muted">
-          <span>GitQuest — progress sauvegardée localement.</span>
+        <footer className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[11.5px] text-muted">
+          <span>GitQuest — progression enregistrée sur cet appareil.</span>
           <a href={routePaths.sandbox} className="inline-flex items-center gap-1 hover:text-text">
             Terminal libre <Icon name="arrow-right" size={12} />
           </a>
