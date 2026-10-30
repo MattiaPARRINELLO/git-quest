@@ -46,6 +46,7 @@ export function useHashRoute(): Route {
 export const routePaths = {
   home: '#/',
   sandbox: '#/sandbox',
+  final: '#/final',
   lesson: (chapterId: string) => `#/chapter/${encodeURIComponent(chapterId)}/lesson`,
   mission: (missionId: string) => `#/mission/${encodeURIComponent(missionId)}`,
 };
