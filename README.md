@@ -38,7 +38,7 @@ En local, servir via Portless : `portless gitquest npm run dev` puis
   commandes (`par` = longueur de la solution).
 - **Missions verrouillées** tant que la précédente n'est pas terminée ; le bac à
   sable reste toujours accessible.
-- **Prédictions** sur 1.2, 1.3, 2.2, 3.1, 3.2, 5.1, 5.2 et 5.3 : l'exécution est suspendue, on répond en
+- **Prédictions** sur 1.1–3.2 et 5.1–5.3 : l'exécution est suspendue, on répond en
   cliquant un commit/une étiquette du graphe ou un bouton, puis la commande
   s'exécute et le feedback explique.
 - **Progression** persistée localement (missions terminées, étoiles, slide de cours)
