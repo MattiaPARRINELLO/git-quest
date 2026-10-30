@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useDialogKeyboard } from '../../hooks/useDialogKeyboard';
 import type { Mission } from '../../content/types';
 import type { BriefingLine, MissionBriefing as Briefing } from '../../content/briefings';
 import type { PreparedFile } from '../../lib/prepared-files';
@@ -62,13 +64,18 @@ function DialogueLine({ line }: { readonly line: BriefingLine }) {
  * « Passer l’intro » ou la première commande la referme.
  */
 export function MissionBriefing({ mission, briefing, prepared = [], onClose }: MissionBriefingProps) {
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogKeyboard(dialog, { onConfirm: onClose, onCancel: onClose });
+
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-bg/80 p-4 backdrop-blur-sm">
       <motion.div
+        ref={dialog}
+        tabIndex={-1}
         initial={{ opacity: 0, y: 14, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="scrollbar-thin max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-panel p-5 shadow-2xl sm:p-6"
+        className="scrollbar-thin max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-panel p-5 shadow-2xl outline-none sm:p-6"
         role="dialog"
         aria-modal="true"
         aria-label={`Briefing ${mission.number}`}
@@ -111,6 +118,7 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
           </button>
           <button
             type="button"
+            data-autofocus
             className="btn btn-accent justify-center px-3 py-2 text-sm"
             onClick={onClose}
           >
@@ -118,6 +126,10 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
             <Icon name="arrow-right" size={15} />
           </button>
         </div>
+
+        <p className="mt-3 text-center text-[10px] text-muted/80" aria-hidden="true">
+          Entrée pour entrer · Échap pour passer l’intro
+        </p>
       </motion.div>
     </div>
   );

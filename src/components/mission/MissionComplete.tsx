@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useDialogKeyboard } from '../../hooks/useDialogKeyboard';
 import type { AfterMission } from '../../content/index';
 import type { Mission } from '../../content/types';
 import { routePaths } from '../../router/useHashRoute';
@@ -80,13 +82,18 @@ export function MissionComplete({
   outcome,
   teaser,
 }: MissionCompleteProps) {
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogKeyboard(dialog, { onCancel: onInspect });
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4 backdrop-blur-sm">
       <motion.div
+        ref={dialog}
+        tabIndex={-1}
         initial={{ opacity: 0, scale: 0.94, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="scrollbar-thin max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-panel p-5 shadow-2xl sm:p-6"
+        className="scrollbar-thin max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-panel p-5 shadow-2xl outline-none sm:p-6"
         role="dialog"
         aria-modal="true"
         aria-label={`Mission ${mission.number} réussie`}
@@ -175,12 +182,17 @@ export function MissionComplete({
           </a>
           <a
             href={afterHref(after)}
+            data-autofocus
             className="btn btn-accent justify-center px-3 py-2 text-sm"
           >
             Continuer
             <Icon name="arrow-right" size={15} />
           </a>
         </div>
+
+        <p className="mt-3 text-center text-[10px] text-muted/80" aria-hidden="true">
+          Entrée pour continuer · Échap pour rester dans le dépôt
+        </p>
       </motion.div>
     </div>
   );

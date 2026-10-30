@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent, ReactNode, WheelEvent as ReactWheelEvent } from 'react';
+import type {
+  KeyboardEvent as ReactKeyboardEvent,
+  PointerEvent as ReactPointerEvent,
+  ReactNode,
+  WheelEvent as ReactWheelEvent,
+} from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { RepoState, GitEvent } from '../../engine/types';
 import { branchColor } from '../../lib/colors';
@@ -192,6 +197,45 @@ export function CommitGraph({
     setView((current) => ({ ...current, scale: clampScale(current.scale * factor) }));
   };
 
+  /** Déplacement et zoom au clavier, sans dépendre de la molette ou du glisser. */
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    const step = event.shiftKey ? 80 : 24;
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      setView((current) => ({ ...current, x: current.x + step }));
+      return;
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      setView((current) => ({ ...current, x: current.x - step }));
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setView((current) => ({ ...current, y: current.y + step }));
+      return;
+    }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setView((current) => ({ ...current, y: current.y - step }));
+      return;
+    }
+    if (event.key === '+' || event.key === '=') {
+      event.preventDefault();
+      zoomBy(1.15);
+      return;
+    }
+    if (event.key === '-' || event.key === '_') {
+      event.preventDefault();
+      zoomBy(0.87);
+      return;
+    }
+    if (event.key === '0') {
+      event.preventDefault();
+      centerOn(activeHeadNode);
+    }
+  };
+
   const tooltipStyle = hovered
     ? {
         left: view.x + hovered.x * view.scale,
@@ -240,6 +284,9 @@ export function CommitGraph({
 
       <div
         ref={containerRef}
+        tabIndex={0}
+        role="group"
+        aria-label="Graphe des commits — flèches pour déplacer, + et − pour zoomer, 0 pour recentrer"
         className="relative h-full w-full cursor-grab touch-none active:cursor-grabbing"
         onWheel={onWheel}
         onPointerDown={onPointerDown}
@@ -247,6 +294,7 @@ export function CommitGraph({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onPointerLeave={endDrag}
+        onKeyDown={onKeyDown}
       >
         <svg
           width="100%"
@@ -415,6 +463,8 @@ function CommitNodeView({
       transition={{ duration, delay }}
       onMouseEnter={() => onHover(node)}
       onMouseLeave={() => onHover(null)}
+      onFocus={() => onHover(node)}
+      onBlur={() => onHover(null)}
       onPointerDown={
         onSelect === undefined ? undefined : (event) => event.stopPropagation()
       }

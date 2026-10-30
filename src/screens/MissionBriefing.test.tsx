@@ -96,6 +96,26 @@ describe('briefing narratif de mission', () => {
     });
   });
 
+  it('se valide avec Entrée et se passe avec Échap', async () => {
+    const user = userEvent.setup();
+    const first = render(<MissionScreen missionId="trois-zones" />);
+
+    await screen.findByRole('dialog', { name: /Briefing 1\.1/i });
+    expect(document.activeElement).toBe(
+      screen.getByRole('button', { name: /Entrer dans le dépôt/i }),
+    );
+
+    await user.keyboard('{Enter}');
+    expect(screen.queryByRole('dialog', { name: /Briefing 1\.1/i })).toBeNull();
+
+    first.unmount();
+
+    render(<MissionScreen missionId="trois-zones" />);
+    await screen.findByRole('dialog', { name: /Briefing 1\.1/i });
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog', { name: /Briefing 1\.1/i })).toBeNull();
+  });
+
   it('2.1 présente Léa et le fichier déjà prêt', async () => {
     useProgressStore.setState({
       completed: {
