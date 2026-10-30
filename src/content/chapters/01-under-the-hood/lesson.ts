@@ -21,6 +21,17 @@ export const lesson01: Lesson = {
       note: 'Modifier un fichier après le commit ne change jamais la photo déjà prise.',
     },
     {
+      kind: 'text',
+      title: 'Pourquoi -m ?',
+      paragraphs: [
+        'Un commit porte toujours un message : c’est la trace écrite de la photo dans l’historique. Git le demande au moment de commiter.',
+        'Sans -m, Git ouvre un éditeur de texte et attend que tu écrives le message. -m, abréviation de --message, le fournit directement dans la commande.',
+        'Le texte doit être entre guillemets dès qu’il contient des espaces ; sinon Git prend les mots suivants pour des noms de fichiers, pas pour la suite du message.',
+      ],
+      command: 'git commit -m "docs: première version"',
+      note: '-m et --message sont équivalents : une option courte, une option longue.',
+    },
+    {
       kind: 'diagram',
       title: 'Du disque au snapshot',
       diagram: 'commit-snapshot',

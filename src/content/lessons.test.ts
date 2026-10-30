@@ -19,10 +19,10 @@ describe('leçons', () => {
     });
   }
 
-  it('le chapitre 1 affiche 5 min avec ses 8 slides', () => {
+  it('le chapitre 1 affiche 5 min avec ses 9 slides', () => {
     const chapter = chapters[0];
     if (!chapter) throw new Error('chapitre 1 attendu');
-    expect(chapter.lesson.slides).toHaveLength(8);
+    expect(chapter.lesson.slides).toHaveLength(9);
     expect(estimatedLessonMinutes(chapter.lesson)).toBe(5);
   });
 });

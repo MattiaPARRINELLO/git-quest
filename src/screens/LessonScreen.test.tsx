@@ -18,11 +18,12 @@ describe('LessonScreen', () => {
     const next = screen.getByRole('button', { name: /^Suivant$/ });
     await user.click(next);
     await user.click(screen.getByRole('button', { name: /^Suivant$/ }));
+    await user.click(screen.getByRole('button', { name: /^Suivant$/ }));
 
     await waitFor(() => {
       expect(screen.getByText('Les 3 zones : disque, index, commit')).toBeInTheDocument();
     });
-    expect(useProgressStore.getState().lessonSlides['under-the-hood']).toBe(2);
+    expect(useProgressStore.getState().lessonSlides['under-the-hood']).toBe(3);
 
     first.unmount();
     render(<LessonScreen chapterId="under-the-hood" />);
