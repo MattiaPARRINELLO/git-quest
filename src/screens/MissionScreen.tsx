@@ -6,6 +6,8 @@ import { PredictionFeedback, PredictionOverlay } from '../components/mission/Pre
 import { SandboxLayout } from '../components/layout/SandboxLayout';
 import { afterMission, findMission, isMissionUnlocked } from '../content';
 import type { Mission, Prediction } from '../content/types';
+import type { RepoState } from '../engine/types';
+import type { MissionDraft } from '../story/types';
 import type { TerminalEntry } from '../store/useRepoStore';
 import { useRepoStore } from '../store/useRepoStore';
 import { useProgressStore } from '../store/useProgressStore';
@@ -35,6 +37,20 @@ function introEntries(mission: Mission): TerminalEntry[] {
   ];
 }
 
+/**
+ * Un brouillon n'est repris que s'il a été écrit pour la même version du
+ * contenu de mission. Un changement de `initialState` l'invalide.
+ */
+function sameEntry(a: RepoState, b: RepoState): boolean {
+  return (
+    a.nextId === b.nextId &&
+    a.clock === b.clock &&
+    Object.keys(a.commits).length === Object.keys(b.commits).length &&
+    a.branches.main === b.branches.main &&
+    a.activeWorktree === b.activeWorktree
+  );
+}
+
 export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const mission = findMission(missionId);
   const completedMissions = useProgressStore((store) => store.completed);
@@ -57,14 +73,20 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     );
     if (!unlocked) return;
 
-    useRepoStore.getState().startMission(mission.initialState, introEntries(mission));
-    setCommandsUsed(0);
-    setHintsUsed(0);
+    const saved = useProgressStore.getState().draft;
+    const resumable =
+      saved !== null && saved.missionId === mission.id && sameEntry(saved.entry, mission.initialState);
+
+    useRepoStore
+      .getState()
+      .startMission(resumable ? saved.state : mission.initialState, introEntries(mission));
+    setCommandsUsed(resumable ? saved.commandsUsed : 0);
+    setHintsUsed(resumable ? saved.hintsUsed : 0);
     setCompleted(null);
     setPendingPrediction(null);
     setAnswered(new Set());
     setFeedback(null);
-    attemptedCommands.current = [];
+    attemptedCommands.current = resumable ? [...saved.attempts] : [];
     useUiStore.getState().setMobileTab('terminal');
 
     return () => {
@@ -104,6 +126,18 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
 
   const isCompleted = completed !== null;
 
+  const persistDraft = (usedCommands: number, usedHints: number): void => {
+    const draft: MissionDraft = {
+      missionId: mission.id,
+      entry: mission.initialState,
+      state: useRepoStore.getState().state,
+      commandsUsed: usedCommands,
+      hintsUsed: usedHints,
+      attempts: attemptedCommands.current,
+    };
+    useProgressStore.getState().saveDraft(draft);
+  };
+
   const finish = (used: number): void => {
     if (isCompleted) return;
     const stars = starsFor(used, mission.par);
@@ -111,6 +145,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     setFeedback(null);
     setPendingPrediction(null);
     completeMission(mission.id, stars);
+    useProgressStore.getState().clearDraft();
   };
 
   const run = (input: string): void => {
@@ -119,13 +154,19 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     if (!result) return;
     const used = result.scored ? commandsUsed + 1 : commandsUsed;
     if (result.scored) setCommandsUsed(used);
+    let succeeded = false;
     if (!result.error && result.events.length > 0) {
       const stateOk = mission.validate(result.state, { entry: mission.initialState }).ok;
       const attemptOk = mission.validateAttempt
         ? mission.validateAttempt(attemptedCommands.current).ok
         : true;
-      if (stateOk && attemptOk) finish(used);
+      if (stateOk && attemptOk) {
+        finish(used);
+        succeeded = true;
+      }
     }
+    // Brouillon persisté après chaque commande qui modifie le dépôt.
+    if (!succeeded && result.events.length > 0) persistDraft(used, hintsUsed);
   };
 
   const handleCommand = (input: string): void => {
@@ -144,6 +185,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
           : `Indice ${next}/${mission.hints.length} : ${mission.hints[next - 1] ?? ''}`,
         'warning',
       );
+      persistDraft(commandsUsed, next);
       return;
     }
 
@@ -155,6 +197,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
       setAnswered(new Set());
       setFeedback(null);
       attemptedCommands.current = [];
+      persistDraft(0, 0);
       return;
     }
 
