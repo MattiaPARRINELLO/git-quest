@@ -57,7 +57,7 @@ describe('resumeTarget — point d’entrée de l’accueil', () => {
 
   it('2 — ne reprend pas un cours déjà terminé', () => {
     expect(
-      resumeTarget({ completed: { 'trois-zones': { stars: 3 } }, lessonSlides: { 'under-the-hood': 7 } }),
+      resumeTarget({ completed: { 'trois-zones': { stars: 3 } }, lessonSlides: { 'under-the-hood': 8 } }),
     ).toEqual({ label: 'Continuer : mission 1.2', route: '#/mission/snapshot-fige' });
   });
 
@@ -92,7 +92,7 @@ describe('resumeTarget — point d’entrée de l’accueil', () => {
   it('expose une ligne de contexte discrète', () => {
     expect(resumeContext(catchUpToChapterTwo)).toBe('Chapitre 2 · Les branches · 0/3 missions');
     expect(resumeContext(empty)).toBe('Chapitre 1 · Sous le capot · 0/3 missions');
-    expect(resumeContext(allCompleted)).toBe('Terminé · 12/12 missions');
+    expect(resumeContext(allCompleted)).toBe('Terminé · 15/15 missions');
   });
 
   it('progression v1 migrée : la cible suit l’id réel de la mission', async () => {

@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useDialogKeyboard } from '../../hooks/useDialogKeyboard';
 import type { Mission } from '../../content/types';
 import type { BriefingLine, MissionBriefing as Briefing } from '../../content/briefings';
 import type { PreparedFile } from '../../lib/prepared-files';
@@ -62,13 +64,18 @@ function DialogueLine({ line }: { readonly line: BriefingLine }) {
  * « Passer l’intro » ou la première commande la referme.
  */
 export function MissionBriefing({ mission, briefing, prepared = [], onClose }: MissionBriefingProps) {
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogKeyboard(dialog, { onConfirm: onClose, onCancel: onClose });
+
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-bg/85 p-4">
       <motion.div
+        ref={dialog}
+        tabIndex={-1}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.24, ease: [0.2, 0.7, 0.2, 1] }}
-        className="scrollbar-thin max-h-[86vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-panel shadow-[var(--shadow)]"
+        className="scrollbar-thin max-h-[86vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-panel shadow-[var(--shadow)] outline-none"
         role="dialog"
         aria-modal="true"
         aria-label={`Briefing ${mission.number}`}
@@ -123,6 +130,7 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
           </button>
           <button
             type="button"
+            data-autofocus
             className="btn btn-accent h-9 justify-center px-3.5 text-[13px]"
             onClick={onClose}
           >
@@ -130,6 +138,10 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
             <Icon name="arrow-right" size={15} />
           </button>
         </div>
+
+        <p className="mt-3 text-center text-[10px] text-muted/80" aria-hidden="true">
+          Entrée pour entrer · Échap pour passer l’intro
+        </p>
       </motion.div>
     </div>
   );

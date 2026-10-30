@@ -108,13 +108,24 @@ Un commit en HEAD détaché produit `commit-created` + `head-moved`.
 | Domaine | Commandes |
 | --- | --- |
 | Dépôt | `git init`, `git status` |
-| Index / commits | `git add`, `git commit -m`, `git commit -am`, `git log --oneline --graph` |
+| Index / commits | `git add`, `git commit -m`, `git commit -am`, `git commit -m "msg" <chemins>`, `git log --oneline --graph` |
 | Branches | `git branch [<nom> [<start>]]`, `-d`, `-D`, `git switch`, `git switch -c [<nom> [<start>]]`, `git checkout` |
 | Fusion | `git merge` (fast-forward et merge commit) |
 | Fichiers | `git rm` (working dir + index) |
 | Worktrees | `git worktree add` (+ `-b`), `git worktree list`, `git worktree remove` |
 | Shell simulé | `touch`, `edit`, `rm` (working dir seul), `ls`, `cd` |
 | Applicatif | `explain`, `undo`, `hint`, `reset-mission` (hors moteur) |
+
+### Commit ciblé
+
+`git commit -m "msg" <chemins>` photographie le contenu du disque pour les chemins
+donnés seulement, sans passer par `git add` : les autres modifications indexées
+restent hors du commit et restent dans l'index. Les répertoires sont acceptés comme
+pour `git add`. `-a` et un chemin ensemble sont refusés (message Git réel).
+
+Écart assumé : quand **aucun** chemin demandé n'existe, le moteur renvoie
+`commit-message-not-quoted` — c'est presque toujours un message non quoté
+(`git commit -m feat: login`). Git, lui, renvoie une erreur de pathspec.
 
 ### Worktrees
 
@@ -308,6 +319,7 @@ rechargement hors ligne.
 ### Routes
 
 - `#/` : carte des chapitres (`HomeScreen`).
+- `#/prologue` : `PrologueScreen`, leçon de syntaxe commune (`LessonDeck`).
 - `#/chapter/:id/lesson` : `LessonScreen`.
 - `#/mission/:id` : `MissionScreen` (réutilise `SandboxLayout`).
 - `#/sandbox` : bac à sable libre (inchangé).

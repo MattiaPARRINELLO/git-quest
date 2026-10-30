@@ -6,6 +6,12 @@ export interface StageResult {
   readonly staged: readonly string[];
 }
 
+export interface StagePathsResult extends StageResult {
+  /** Chemins couverts par les chemins demandés, même sans changement d'index. */
+  readonly matched: readonly string[];
+  readonly unmatched: readonly string[];
+}
+
 function stageOne(
   index: Record<string, string>,
   workingDir: FileTree,
@@ -27,15 +33,17 @@ function stageOne(
 export function stagePaths(
   worktree: Worktree,
   targets: readonly string[],
-): { readonly worktree: Worktree; readonly staged: readonly string[]; readonly unmatched: readonly string[] } {
+): StagePathsResult {
   const index: Record<string, string> = { ...worktree.index };
   const staged = new Set<string>();
+  const matched = new Set<string>();
   const unmatched: string[] = [];
 
   for (const target of targets) {
     if (target === '.' || target === './') {
       const paths = new Set([...Object.keys(worktree.workingDir), ...Object.keys(worktree.index)]);
       for (const path of paths) {
+        matched.add(path);
         if (stageOne(index, worktree.workingDir, path)) staged.add(path);
       }
       continue;
@@ -54,6 +62,7 @@ export function stagePaths(
       continue;
     }
     for (const path of new Set(paths)) {
+      matched.add(path);
       if (stageOne(index, worktree.workingDir, path)) staged.add(path);
     }
   }
@@ -61,6 +70,7 @@ export function stagePaths(
   return {
     worktree: { ...worktree, index },
     staged: [...staged].sort(),
+    matched: [...matched].sort(),
     unmatched,
   };
 }

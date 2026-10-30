@@ -9,6 +9,7 @@ describe('routeur par hash', () => {
   it('conserve les routes existantes', () => {
     expect(parseRoute('#/')).toEqual({ name: 'home' });
     expect(parseRoute('#/sandbox')).toEqual({ name: 'sandbox' });
+    expect(parseRoute(routePaths.prologue)).toEqual({ name: 'prologue' });
     expect(parseRoute('#/chapter/branches/lesson')).toEqual({
       name: 'lesson',
       chapterId: 'branches',

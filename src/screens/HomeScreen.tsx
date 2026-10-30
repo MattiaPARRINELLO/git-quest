@@ -1,5 +1,11 @@
 import { useMemo } from 'react';
-import { chapters, estimatedLessonMinutes, isMissionUnlocked, missionSequence } from '../content';
+import {
+  chapters,
+  commandLineLesson,
+  estimatedLessonMinutes,
+  isMissionUnlocked,
+  missionSequence,
+} from '../content';
 import { briefingFor } from '../content/briefings';
 import { scenario } from '../engine/scenario';
 import { resumeContext, resumeTarget } from '../app/resume';
@@ -65,6 +71,8 @@ export function HomeScreen() {
   const lastBriefing = lastCompleted === undefined ? undefined : briefingFor(lastCompleted.id);
   const done = Object.keys(completed).length;
   const percent = totalMissions === 0 ? 0 : Math.round((done / totalMissions) * 100);
+  const prologueRead =
+    (lessonSlides[commandLineLesson.id] ?? 0) >= commandLineLesson.slides.length - 1;
   const preview = useMemo(
     () =>
       scenario()
@@ -94,7 +102,7 @@ export function HomeScreen() {
               Apprends Git en voyant le graphe.
             </h1>
             <p className="mt-4 max-w-[48ch] text-[15px] leading-7 text-muted">
-              Quatre chapitres, douze missions réalistes. Chaque commande se rejoue sous tes
+              Cinq chapitres, quinze missions réalistes. Chaque commande se rejoue sous tes
               yeux : le graphe, HEAD, l’index et les worktrees deviennent enfin lisibles.
             </p>
 
@@ -182,6 +190,30 @@ export function HomeScreen() {
             </dd>
           </div>
         </dl>
+
+        <section className="mt-4" aria-label="Prologue">
+          <a
+            href={routePaths.prologue}
+            className="group flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-panel px-4 py-3 transition-colors hover:border-border-strong"
+          >
+            <span className="flex min-w-0 items-start gap-2.5">
+              <span aria-hidden="true" className="mt-1 h-3.5 w-[2px] shrink-0 rounded-full bg-accent" />
+              <span className="min-w-0">
+                <span className="text-[13px] font-medium text-text">
+                  Prologue · Lire une commande Git
+                </span>
+                <span className="mt-0.5 block text-[12px] leading-relaxed text-muted">
+                  Options, guillemets, placeholders : décoder n’importe quelle commande avant de
+                  commencer. {estimatedLessonMinutes(commandLineLesson)} min.
+                </span>
+              </span>
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-1 text-[12px] text-muted transition-colors group-hover:text-text">
+              {prologueRead ? 'Relire' : 'Lire'}
+              <Icon name="arrow-right" size={12} />
+            </span>
+          </a>
+        </section>
 
         {lastCompleted !== undefined && lastBriefing?.outcome !== undefined && (
           <section

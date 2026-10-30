@@ -28,7 +28,7 @@ export function FinalScreen() {
         </p>
         <h1 className="display mt-2 text-[42px] leading-[1.04] text-text">Ton arbre Nova</h1>
         <p className="mt-3 max-w-[56ch] text-[14.5px] leading-7 text-muted">
-          Douze missions plus tard, tu lis un dépôt Git comme une histoire : des commits,
+          Quinze missions plus tard, tu lis un dépôt Git comme une histoire : des commits,
           des branches qui pointent, un HEAD qui avance et des worktrees qui travaillent en
           parallèle. Voici l’arbre de Nova, avec un merge et un worktree de plus.
         </p>

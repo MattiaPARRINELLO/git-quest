@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 export type Route =
   | { readonly name: 'home' }
   | { readonly name: 'sandbox' }
+  | { readonly name: 'prologue' }
   | { readonly name: 'lesson'; readonly chapterId: string }
   | { readonly name: 'mission'; readonly missionId: string }
   | { readonly name: 'nova' }
@@ -16,6 +17,7 @@ export function parseRoute(hash: string): Route {
 
   if (parts.length === 0) return { name: 'home' };
   if (parts[0] === 'sandbox') return { name: 'sandbox' };
+  if (parts[0] === 'prologue') return { name: 'prologue' };
   if (parts[0] === 'nova') return { name: 'nova' };
   if (parts[0] === 'final') return { name: 'final' };
   if (parts[0] === 'interlude' && parts[1]) {
@@ -54,6 +56,7 @@ export function useHashRoute(): Route {
 export const routePaths = {
   home: '#/',
   sandbox: '#/sandbox',
+  prologue: '#/prologue',
   nova: '#/nova',
   final: '#/final',
   interlude: (chapterId: string) => `#/interlude/${encodeURIComponent(chapterId)}`,

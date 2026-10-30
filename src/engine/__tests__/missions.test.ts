@@ -5,9 +5,9 @@ import { findForbiddenCommand, findPrediction } from '../../app/mission';
 import { runAll } from './helpers';
 
 describe('missions (contenu réel)', () => {
-  it('contient 4 chapitres et 12 missions', () => {
-    expect(allMissions).toHaveLength(12);
-    expect(new Set(allMissions.map((mission) => mission.chapterId)).size).toBe(4);
+  it('contient 5 chapitres et 15 missions', () => {
+    expect(allMissions).toHaveLength(15);
+    expect(new Set(allMissions.map((mission) => mission.chapterId)).size).toBe(5);
   });
 
   for (const mission of allMissions) {

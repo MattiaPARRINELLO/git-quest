@@ -58,12 +58,13 @@ describe('chaîne Nova (contenu réel)', () => {
     expect(second?.after.commits[secondTip]?.message).not.toBe('fix: mon correctif à moi');
   });
 
-  it('produit l’arbre final attendu après les 12 missions', () => {    const last = chain[chain.length - 1];
+  it('produit l’arbre final attendu après les 15 missions', () => {
+    const last = chain[chain.length - 1];
     if (!last) throw new Error('chaîne vide');
-    expect(chain).toHaveLength(12);
+    expect(chain).toHaveLength(15);
 
     const branches = Object.keys(last.after.branches).sort();
-    expect(branches).toEqual(['docs', 'feature', 'hotfix', 'main', 'sauvetage']);
+    expect(branches).toEqual(['docs', 'docs-final', 'feature', 'hotfix', 'main', 'sauvetage']);
 
     const worktreePaths = Object.values(last.after.worktrees)
       .map((worktree) => worktree.path)

@@ -1,5 +1,6 @@
 import type {
   ExecuteResult,
+  FileTree,
   GitEvent,
   ParsedCommand,
   RepoState,
@@ -8,7 +9,7 @@ import type {
 import { gitError } from '../errors';
 import { DEFAULT_AUTHOR, hashFor, timestampFor } from '../hashes';
 import { diffTrees, worktreeStatus } from '../ops/diff';
-import { stageAllTracked } from '../ops/index';
+import { stageAllTracked, stagePaths } from '../ops/index';
 import {
   activeWorktree,
   headCommitOf,
@@ -43,7 +44,50 @@ export function gitCommit(state: RepoState, command: CommitCommand): ExecuteResu
 
   const headHash = headCommitOf(baseState, worktree.head);
   const headSnapshot = snapshotOf(baseState, headHash);
-  const changes = diffTrees(headSnapshot, worktree.index);
+
+  // `git commit <chemins>` photographie le contenu du disque pour ces chemins
+  // seulement : les autres modifications indexées restent en dehors du commit.
+  let commitSnapshot: FileTree = worktree.index;
+  const pathspecs = command.paths ?? [];
+  if (pathspecs.length > 0) {
+    const staged = stagePaths(worktree, pathspecs);
+    if (staged.unmatched.length > 0) {
+      // Un chemin inconnu vient presque toujours d'un message non quoté :
+      // `git commit -m feat: login` traite `login` comme un chemin.
+      if (staged.unmatched.length === pathspecs.length) {
+        return failure(
+          state,
+          gitError(
+            'commit-message-not-quoted',
+            `error: pathspec '${staged.unmatched[0] ?? ''}' did not match any file(s) known to git`,
+          ),
+        );
+      }
+      return failure(
+        state,
+        gitError(
+          'pathspec-no-match',
+          `error: pathspec '${staged.unmatched[0] ?? ''}' did not match any file(s) known to git`,
+        ),
+      );
+    }
+
+    worktree = staged.worktree;
+    baseState = {
+      ...baseState,
+      worktrees: { ...baseState.worktrees, [worktree.id]: worktree },
+    };
+
+    const snapshot: Record<string, string> = { ...headSnapshot };
+    for (const path of staged.matched) {
+      const content = worktree.index[path];
+      if (content === undefined) delete snapshot[path];
+      else snapshot[path] = content;
+    }
+    commitSnapshot = snapshot;
+  }
+
+  const changes = diffTrees(headSnapshot, commitSnapshot);
 
   if (changes.length === 0) {
     const status = worktreeStatus(baseState, worktree);
@@ -79,7 +123,7 @@ export function gitCommit(state: RepoState, command: CommitCommand): ExecuteResu
         hash,
         parents: headHash === undefined ? [] : [headHash],
         message: command.message,
-        snapshot: worktree.index,
+        snapshot: commitSnapshot,
         author: DEFAULT_AUTHOR,
         timestamp: timestampFor(baseState.clock + 1),
         ...(branch === undefined ? {} : { branch }),
