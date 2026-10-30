@@ -1,4 +1,3 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   check,
@@ -7,18 +6,11 @@ import {
   indexFile,
   workingFile,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
 import { commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'a.txt': 'version 1',
-    'b.txt': 'version 1',
-  })
-  .write('a.txt', 'version 2')
-  .write('b.txt', 'version 2')
-  .build();
+const initial = entryState('trois-zones');
 
 export const mission11: Mission = {
   id: 'trois-zones',

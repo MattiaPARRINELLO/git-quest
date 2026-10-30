@@ -1,4 +1,3 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   check,
@@ -7,17 +6,10 @@ import {
   headFile,
   isWorkingTreeClean,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': 'version 1',
-    'src/app.ts': "export const app = 'nova';",
-  })
-  .write('README.md', 'version 2')
-  .write('notes.txt', 'notes de réunion')
-  .build();
+const initial = entryState('piege-am');
 
 export const mission13: Mission = {
   id: 'piege-am',

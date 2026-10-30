@@ -1,4 +1,3 @@
-import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   check,
@@ -7,15 +6,11 @@ import {
   indexFile,
   workingFile,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
 import { commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'app.ts': 'v1',
-  })
-  .build();
+const initial = entryState('snapshot-fige');
 
 export const mission12: Mission = {
   id: 'snapshot-fige',

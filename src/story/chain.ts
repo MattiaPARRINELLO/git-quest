@@ -34,6 +34,8 @@ export interface ChainEntry {
   readonly entry: RepoState;
   /** Sortie canonique : entrée + solution de référence. */
   readonly after: RepoState;
+  /** Commandes réellement exécutées, placeholders résolus. */
+  readonly commands: readonly string[];
   readonly table: SlotTable;
 }
 
@@ -94,18 +96,30 @@ export function resolveTemplate(
 }
 
 /** Rejoue une solution de référence, placeholders résolus à chaque étape. */
+export function runReferenceDetailed(
+  entry: RepoState,
+  reference: readonly string[],
+  table: SlotTable,
+  slots: readonly SlotDefinition[],
+): { state: RepoState; commands: string[] } {
+  let current = entry;
+  const commands: string[] = [];
+  for (const template of reference) {
+    const command = resolveTemplate(template, current, entry, table, slots);
+    commands.push(command);
+    current = run(current, command);
+  }
+  return { state: current, commands };
+}
+
+/** Rejoue une solution de référence, placeholders résolus à chaque étape. */
 export function runReference(
   entry: RepoState,
   reference: readonly string[],
   table: SlotTable,
   slots: readonly SlotDefinition[],
 ): RepoState {
-  let current = entry;
-  for (const template of reference) {
-    const command = resolveTemplate(template, current, entry, table, slots);
-    current = run(current, command);
-  }
-  return current;
+  return runReferenceDetailed(entry, reference, table, slots).state;
 }
 
 /**
@@ -122,13 +136,18 @@ export function buildChain(
   for (const mission of missions) {
     const entry = applyPrelude(checkpoint, mission.prelude);
     const previousTable = chain.length === 0 ? {} : chain[chain.length - 1]?.table ?? {};
-    const after = runReference(entry, mission.reference, previousTable, mission.slots);
+    const { state: after, commands } = runReferenceDetailed(
+      entry,
+      mission.reference,
+      previousTable,
+      mission.slots,
+    );
     const groups = associateSlots(after, entry, mission.slots);
     const table: SlotTable = {
       ...previousTable,
       ...buildSlotTable(mission.slots, groups),
     };
-    chain.push({ missionId: mission.missionId, entry, after, table });
+    chain.push({ missionId: mission.missionId, entry, after, commands, table });
     checkpoint = after;
   }
 
