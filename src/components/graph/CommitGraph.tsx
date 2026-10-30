@@ -154,8 +154,21 @@ export function CommitGraph({
     });
   };
 
+  /**
+   * Éléments interactifs posés au-dessus du graphe (toolbar, prédiction,
+   * feedback). Un pointerdown dessus ne doit jamais démarrer le déplacement :
+   * `setPointerCapture` redirigerait le pointerup vers le graphe et le bouton
+   * ne recevrait aucun `click`.
+   */
+  const INTERACTIVE_SELECTOR =
+    'button, a, input, textarea, select, [role="alertdialog"], [role="dialog"], [data-no-pan]';
+
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
+    const target = event.target;
+    if (target instanceof Element && target.closest(INTERACTIVE_SELECTOR) !== null) {
+      return;
+    }
     dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
     if (typeof event.currentTarget.setPointerCapture === 'function') {
       event.currentTarget.setPointerCapture(event.pointerId);
