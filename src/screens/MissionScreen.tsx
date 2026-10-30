@@ -8,6 +8,7 @@ import { afterMission, findMission, isMissionUnlocked } from '../content';
 import type { Mission, Prediction } from '../content/types';
 import type { TerminalEntry } from '../store/useRepoStore';
 import { useRepoStore } from '../store/useRepoStore';
+import { useMissionDraftStore } from '../store/useMissionDraftStore';
 import { useProgressStore } from '../store/useProgressStore';
 import { useUiStore } from '../store/useUiStore';
 import { routePaths } from '../router/useHashRoute';
@@ -41,13 +42,47 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const completeMission = useProgressStore((store) => store.completeMission);
   const repoState = useRepoStore((store) => store.state);
 
-  const [commandsUsed, setCommandsUsed] = useState(0);
-  const [hintsUsed, setHintsUsed] = useState(0);
+  const [commandsUsed, setCommandsUsedState] = useState(0);
+  const [hintsUsed, setHintsUsedState] = useState(0);
   const [completed, setCompleted] = useState<Completion | null>(null);
   const [pendingPrediction, setPendingPrediction] = useState<PendingPrediction | null>(null);
-  const [answered, setAnswered] = useState<Set<Prediction>>(new Set());
+  const [answered, setAnsweredState] = useState<Set<string>>(new Set());
   const attemptedCommands = useRef<string[]>([]);
+  const commandsUsedRef = useRef(0);
+  const hintsUsedRef = useRef(0);
+  const answeredRef = useRef<Set<string>>(new Set());
   const [feedback, setFeedback] = useState<{ correct: boolean; explanation: string } | null>(null);
+
+  const setCommandsUsed = (value: number): void => {
+    commandsUsedRef.current = value;
+    setCommandsUsedState(value);
+  };
+
+  const setHintsUsed = (value: number): void => {
+    hintsUsedRef.current = value;
+    setHintsUsedState(value);
+  };
+
+  const setAnswered = (value: Set<string>): void => {
+    answeredRef.current = value;
+    setAnsweredState(value);
+  };
+
+  const persistDraft = (): void => {
+    if (!mission) return;
+    const repo = useRepoStore.getState();
+    if (repo.mode !== 'mission') return;
+    useMissionDraftStore.getState().save({
+      missionId: mission.id,
+      state: repo.state,
+      entries: repo.entries,
+      commandHistory: repo.commandHistory,
+      commandsUsed: commandsUsedRef.current,
+      hintsUsed: hintsUsedRef.current,
+      attempted: attemptedCommands.current,
+      answeredQuestions: [...answeredRef.current],
+    });
+  };
 
   useEffect(() => {
     if (!mission) return;
@@ -57,15 +92,30 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     );
     if (!unlocked) return;
 
-    useRepoStore.getState().startMission(mission.initialState, introEntries(mission));
-    setCommandsUsed(0);
-    setHintsUsed(0);
+    const draft = useMissionDraftStore.getState().draft;
+    const restored = draft !== null && draft.missionId === mission.id ? draft : null;
+
+    if (restored) {
+      useRepoStore
+        .getState()
+        .startMission(restored.state, restored.entries, restored.commandHistory);
+      setCommandsUsed(restored.commandsUsed);
+      setHintsUsed(restored.hintsUsed);
+      attemptedCommands.current = [...restored.attempted];
+      setAnswered(new Set(restored.answeredQuestions));
+    } else {
+      useRepoStore.getState().startMission(mission.initialState, introEntries(mission));
+      setCommandsUsed(0);
+      setHintsUsed(0);
+      attemptedCommands.current = [];
+      setAnswered(new Set());
+    }
+
     setCompleted(null);
     setPendingPrediction(null);
-    setAnswered(new Set());
     setFeedback(null);
-    attemptedCommands.current = [];
     useUiStore.getState().setMobileTab('terminal');
+    persistDraft();
 
     return () => {
       useRepoStore.getState().endMission();
@@ -111,21 +161,26 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     setFeedback(null);
     setPendingPrediction(null);
     completeMission(mission.id, stars);
+    useMissionDraftStore.getState().clear();
   };
 
   const run = (input: string): void => {
     attemptedCommands.current = [...attemptedCommands.current, normalizeCommand(input)];
     const result = useRepoStore.getState().execute(input);
     if (!result) return;
-    const used = result.scored ? commandsUsed + 1 : commandsUsed;
+    const used = result.scored ? commandsUsedRef.current + 1 : commandsUsedRef.current;
     if (result.scored) setCommandsUsed(used);
     if (!result.error && result.events.length > 0) {
       const stateOk = mission.validate(result.state).ok;
       const attemptOk = mission.validateAttempt
         ? mission.validateAttempt(attemptedCommands.current).ok
         : true;
-      if (stateOk && attemptOk) finish(used);
+      if (stateOk && attemptOk) {
+        finish(used);
+        return;
+      }
     }
+    persistDraft();
   };
 
   const handleCommand = (input: string): void => {
@@ -134,16 +189,18 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     const normalized = normalizeCommand(input);
 
     if (normalized === 'hint') {
-      const next = Math.min(mission.hints.length, hintsUsed + 1);
+      const currentHints = hintsUsedRef.current;
+      const next = Math.min(mission.hints.length, currentHints + 1);
       setHintsUsed(next);
       const store = useRepoStore.getState();
       store.appendCommand(input);
       store.appendOutput(
-        next === hintsUsed && next === mission.hints.length
+        next === currentHints && next === mission.hints.length
           ? 'Tous les indices sont déjà révélés.'
           : `Indice ${next}/${mission.hints.length} : ${mission.hints[next - 1] ?? ''}`,
         'warning',
       );
+      persistDraft();
       return;
     }
 
@@ -155,6 +212,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
       setAnswered(new Set());
       setFeedback(null);
       attemptedCommands.current = [];
+      persistDraft();
       return;
     }
 
@@ -163,11 +221,12 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
       const store = useRepoStore.getState();
       store.appendCommand(input);
       store.appendOutput(forbidden.message, 'error');
+      persistDraft();
       return;
     }
 
     const prediction = findPrediction(mission, input, useRepoStore.getState().state);
-    if (prediction && !answered.has(prediction)) {
+    if (prediction && !answered.has(prediction.question)) {
       setPendingPrediction({ prediction, input });
       useUiStore.getState().setMobileTab('graph');
       return;
@@ -179,7 +238,9 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const answerPrediction = (optionId: string): void => {
     if (!pendingPrediction) return;
     const { prediction, input } = pendingPrediction;
-    setAnswered((current) => new Set(current).add(prediction));
+    const next = new Set(answeredRef.current);
+    next.add(prediction.question);
+    setAnswered(next);
     setPendingPrediction(null);
     setFeedback({
       correct: optionId === prediction.correctOptionId,
@@ -191,7 +252,9 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const skipPrediction = (): void => {
     if (!pendingPrediction) return;
     const { prediction, input } = pendingPrediction;
-    setAnswered((current) => new Set(current).add(prediction));
+    const next = new Set(answeredRef.current);
+    next.add(prediction.question);
+    setAnswered(next);
     setPendingPrediction(null);
     run(input);
   };
@@ -242,7 +305,10 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
             state={repoState}
             commandsUsed={commandsUsed}
             hintsUsed={hintsUsed}
-            onHint={() => setHintsUsed((current) => Math.min(mission.hints.length, current + 1))}
+            onHint={() => {
+              setHintsUsed(Math.min(mission.hints.length, hintsUsedRef.current + 1));
+              persistDraft();
+            }}
             onSuggest={(command) => useUiStore.getState().prefillCommand(command)}
           />
         }

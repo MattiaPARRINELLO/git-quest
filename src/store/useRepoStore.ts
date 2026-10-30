@@ -40,7 +40,7 @@ export interface RepoStore {
   execute(input: string): RoutedResult | null;
   appendCommand(input: string): void;
   appendOutput(text: string, tone?: OutputTone): void;
-  startMission(state: RepoState, entries: readonly TerminalEntry[]): void;
+  startMission(state: RepoState, entries: readonly TerminalEntry[], commandHistory?: readonly string[]): void;
   endMission(): void;
   clearTerminal(): void;
   resetSandbox(): void;
@@ -191,7 +191,7 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
     persist();
   },
 
-  startMission(state, entries) {
+  startMission(state, entries, commandHistory = []) {
     const current = get();
     if (current.mode === 'sandbox') {
       sandboxBackup = {
@@ -209,7 +209,7 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
       state,
       history: [],
       entries: [...entries],
-      commandHistory: [],
+      commandHistory: [...commandHistory],
       lastEvents: { id: current.lastEvents.id + 1, events: [] },
       nextEntryId: maxId + 1,
     });

@@ -1,5 +1,8 @@
+import { useMemo } from 'react';
 import { chapters, estimatedLessonMinutes, isMissionUnlocked } from '../content';
+import { resumeContext, resumeTarget } from '../app/resume';
 import { useProgressStore } from '../store/useProgressStore';
+import { useMissionDraftStore } from '../store/useMissionDraftStore';
 import { routePaths } from '../router/useHashRoute';
 import { branchColor } from '../lib/colors';
 import { Icon } from '../components/ui/Icon';
@@ -15,6 +18,14 @@ function Stars({ count, max = 3 }: { readonly count: number; readonly max?: numb
 
 export function HomeScreen() {
   const completed = useProgressStore((store) => store.completed);
+  const lessonSlides = useProgressStore((store) => store.lessonSlides);
+  const progressHydrated = useProgressStore((store) => store.hydrated);
+  const activeMission = useMissionDraftStore((store) => store.activeMission);
+  const draftHydrated = useMissionDraftStore((store) => store.hydrated);
+  const hydrated = progressHydrated && draftHydrated;
+  const progress = useMemo(() => ({ completed, lessonSlides }), [completed, lessonSlides]);
+  const target = useMemo(() => resumeTarget(progress, activeMission), [progress, activeMission]);
+  const context = useMemo(() => resumeContext(progress, activeMission), [progress, activeMission]);
   const totalMissions = chapters.reduce((sum, chapter) => sum + chapter.missions.length, 0);
   const totalStars = Object.values(completed).reduce((sum, item) => sum + item.stars, 0);
   const done = Object.keys(completed).length;
@@ -43,15 +54,32 @@ export function HomeScreen() {
             yeux : le graphe, HEAD, l’index et les worktrees deviennent enfin lisibles.
           </p>
 
-          <div className="mt-6 flex flex-wrap items-center gap-2">
-            <a href={routePaths.lesson(chapters[0]?.id ?? '')} className="btn btn-accent px-3 py-2 text-sm">
-              Commencer le chapitre 1
-              <Icon name="arrow-right" size={15} />
-            </a>
-            <a href={routePaths.sandbox} className="btn px-3 py-2 text-sm">
-              <Icon name="terminal" size={14} />
-              Ouvrir le bac à sable
-            </a>
+          <div className="mt-6">
+            <div className="flex flex-wrap items-center gap-2">
+              {hydrated ? (
+                <a
+                  href={target.route}
+                  className="btn btn-accent min-w-56 justify-center px-3 py-2 text-sm"
+                >
+                  {target.label}
+                  <Icon name="arrow-right" size={15} />
+                </a>
+              ) : (
+                <span
+                  className="btn btn-accent invisible min-w-56 justify-center px-3 py-2 text-sm"
+                  aria-hidden="true"
+                >
+                  Chargement
+                </span>
+              )}
+              <a href={routePaths.sandbox} className="btn px-3 py-2 text-sm">
+                <Icon name="terminal" size={14} />
+                Ouvrir le bac à sable
+              </a>
+            </div>
+            <p className="mt-2 min-h-4 text-[11px] text-muted" aria-live="polite">
+              {hydrated ? context : '\u00a0'}
+            </p>
           </div>
 
           <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border/70 pt-4 text-xs text-muted">
