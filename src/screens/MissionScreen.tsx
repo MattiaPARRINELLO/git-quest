@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { findForbiddenCommand, findPrediction, missionText, normalizeCommand, resolvePrediction, starsFor } from '../app/mission';
 import { MissionComplete } from '../components/mission/MissionComplete';
+import { MissionBriefing } from '../components/mission/MissionBriefing';
 import { MissionPanel } from '../components/mission/MissionPanel';
 import { PredictionFeedback, PredictionOverlay } from '../components/mission/PredictionOverlay';
 import { SandboxLayout } from '../components/layout/SandboxLayout';
 import { afterMission, findMission, isMissionUnlocked } from '../content';
+import { briefingFor } from '../content/briefings';
 import type { Mission, Prediction } from '../content/types';
 import type { RepoState } from '../engine/types';
 import type { MissionDraft } from '../story/types';
@@ -81,6 +83,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const detachedNoticeRef = useRef<string | null>(null);
   const [feedback, setFeedback] = useState<{ correct: boolean; explanation: string } | null>(null);
   const [isolatedMode, setIsolatedMode] = useState(false);
+  const [showBriefing, setShowBriefing] = useState(false);
 
   useEffect(() => {
     if (!mission) return;
@@ -104,6 +107,12 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     entryRef.current = start.state;
     useRepoStore.getState().startMission(start.state, introEntries(mission, start));
     setIsolatedMode(start.isolated);
+    setShowBriefing(
+      !resumable &&
+        !start.isolated &&
+        !start.recalaged &&
+        briefingFor(mission.id) !== undefined,
+    );
     setCommandsUsed(resumable ? saved.commandsUsed : 0);
     setHintsUsed(resumable ? saved.hintsUsed : 0);
     setCompleted(null);
@@ -150,6 +159,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   }
 
   const isCompleted = completed !== null;
+  const briefing = briefingFor(mission.id);
 
   const persistDraft = (usedCommands: number, usedHints: number): void => {
     const draft: MissionDraft = {
@@ -201,6 +211,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
 
   const handleCommand = (input: string): void => {
     if (isCompleted) return;
+    setShowBriefing(false);
     setFeedback(null);
     const normalized = normalizeCommand(input);
 
@@ -359,6 +370,14 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
           ? {}
           : { onSelectCommit: selectCommit, onSelectBranch: selectBranch })}
       />
+
+      {showBriefing && briefing !== undefined && (
+        <MissionBriefing
+          mission={mission}
+          briefing={briefing}
+          onClose={() => setShowBriefing(false)}
+        />
+      )}
 
       {completed && (
         <MissionComplete

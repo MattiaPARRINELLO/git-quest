@@ -427,6 +427,18 @@ Nova positionné au checkpoint de la première mission non terminée.
 orphelins), détail d'un commit (auteur, branche, mission d'origine), export PNG
 côté client et `git log --oneline --graph` copiable.
 
+### Briefing et tolérance de contenu
+
+- Chaque mission s'ouvre sur un **briefing narratif** (`src/content/briefings.ts`),
+  affiché en surcouche et skippable (« Passer l'intro », `Entrer dans le dépôt`,
+  ou la première commande). Le texte vit dans le contenu, jamais dans le composant.
+- Quand le contenu d'un fichier n'est pas le concept de la mission (branche,
+  worktree, rescue), la validation vérifie sa **présence**, pas sa valeur
+  exacte : `notes.txt` (2.1), `exp.txt` (2.3), `bug.txt` (4.1),
+  `docs/GUIDE.md` (4.2). Les slots correspondants utilisent `present`.
+- Les missions dont le contenu est le concept (1.1, 1.2, 1.3) gardent des
+  vérifications exactes.
+
 ### Isolation
 
 Le bac à sable (`gitquest.sandbox.v1`) et les mini-démos de cours n'importent

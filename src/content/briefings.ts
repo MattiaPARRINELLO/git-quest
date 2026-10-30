@@ -1,0 +1,111 @@
+/**
+ * Briefing narratif de chaque mission, affiché au démarrage et skippable.
+ * Données pures : aucun texte d'histoire dans un composant.
+ */
+export interface MissionBriefing {
+  readonly title: string;
+  readonly paragraphs: readonly string[];
+}
+
+export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
+  'trois-zones': {
+    title: 'Nova, acte I : le correctif qui n’attend pas',
+    paragraphs: [
+      'Nova est l’assistant de notes de l’équipe. Ce matin, deux fichiers ont été modifiés dans le dépôt : a.txt et b.txt.',
+      'Le lead veut livrer uniquement le correctif de a.txt pour la release de midi. b.txt peut attendre demain.',
+      'À toi de jouer : prépare une photo qui ne contient que a.txt, sans embarquer le reste du chantier.',
+    ],
+  },
+  'snapshot-fige': {
+    title: 'Nova, acte I : la photo ne bouge plus',
+    paragraphs: [
+      'Le CTO doute : « si je modifie un fichier après l’avoir indexé, le commit prend quelle version ? »',
+      'Il te demande de le prouver sur app.ts : prépare v2, indexe-la, réécris v3 sur le disque, puis commite.',
+      'La photo du commit doit rester figée sur v2, même si le fichier a changé depuis.',
+    ],
+  },
+  'piege-am': {
+    title: 'Nova, acte I : le raccourci qui trahit',
+    paragraphs: [
+      'Un coéquipier jure que « git commit -am » s’occupe de tout, sans jamais indexer.',
+      'Pendant ce temps, un ADR vient d’arriver dans le projet et README.md a été retouché.',
+      'Vérifie ce que -am photographie vraiment, et livre les deux fichiers sans laisser de travail sale.',
+    ],
+  },
+  'branche-pointeur': {
+    title: 'Nova, acte II : une idée à part',
+    paragraphs: [
+      'L’équipe veut tester des notes internes sans polluer main. On te confie l’exploration.',
+      'Crée une branche experiment, travaille dessus, puis prouve que main n’a pas bougé d’un millimètre.',
+      'Le contenu de notes.txt est libre : seule l’étiquette de branche compte ici.',
+    ],
+  },
+  'qui-avance': {
+    title: 'Nova, acte II : deux chantiers en parallèle',
+    paragraphs: [
+      'La facturation part sur sa propre branche pendant que la configuration avance sur main.',
+      'Personne ne veut écraser le travail de l’autre : chaque commit doit déplacer la bonne étiquette.',
+      'Fais diverger les deux lignes, puis reviens sur main pour vérifier qui a bougé.',
+    ],
+  },
+  'commit-perdu': {
+    title: 'Nova, acte II : l’expérience qui s’échappe',
+    paragraphs: [
+      'Une régression est apparue dans la facturation. Tu remontes le temps sur un ancien commit pour enquêter.',
+      'Tu y commites une expérience… puis tu reviens sur main. Git t’avertit : ce commit n’est plus relié à rien.',
+      'Sauve-le dans une branche avant qu’il ne disparaisse. C’est exactement le genre d’oubli que Git ne pardonne pas.',
+    ],
+  },
+  'avance-rapide': {
+    title: 'Nova, acte III : livrer sans cérémonie',
+    paragraphs: [
+      'L’export CSV est terminé et main n’a pas bougé depuis. Le release manager veut livrer ce soir.',
+      'Ici, aucune divergence : Git peut faire glisser l’étiquette main vers le travail déjà fait.',
+      'Livre la fonctionnalité sans créer de commit de fusion inutile.',
+    ],
+  },
+  'merge-commit': {
+    title: 'Nova, acte III : le point de convergence',
+    paragraphs: [
+      'Cette fois, main et feature ont toutes les deux avancé : notifications d’un côté, configuration de l’autre.',
+      'Git ne doit pas choisir un camp : il lui faut un point de convergence qui relie les deux lignes.',
+      'Fusionne, puis vérifie que le commit de fusion a bien deux parents et garde tout le monde.',
+    ],
+  },
+  'menage-branches': {
+    title: 'Nova, acte III : le placard mal rangé',
+    paragraphs: [
+      'Inès est partie en laissant deux branches derrière elle. feature-login est déjà fusionnée ; experiment contient un test jamais intégré.',
+      'Le lead veut un nettoyage propre, pas un ménage à l’aveugle : commence par constater le refus de -d sur experiment.',
+      'Ensuite, choisis consciemment : fusionner, ou forcer la suppression en assumant la perte.',
+    ],
+  },
+  'hotfix-worktree': {
+    title: 'Nova, acte IV : le bug de prod',
+    paragraphs: [
+      'Tu es en pleine refonte sur feature, avec des modifications non commitées dans app.ts. Un bug critique tombe en prod.',
+      'Réflexe naturel : git switch main. Mais main a aussi touché app.ts, et Git refuse d’écraser ton travail.',
+      'Pas de stash, pas de commit bricolé : monte un second espace de travail relié au même dépôt et corrige sans toucher au WIP.',
+    ],
+  },
+  'deux-worktrees': {
+    title: 'Nova, acte IV : deux casquettes',
+    paragraphs: [
+      'La doc doit avancer pendant que tu réécris le README sur main. Impossible de tout faire dans le même working dir.',
+      'Yanis a repris ta refonte : il a commité ton WIP sur feature, rien n’est perdu, et tu peux maintenant passer sur main.',
+      'Monte un worktree dédié à la branche docs et avance dessus sans interrompre ton travail en cours.',
+    ],
+  },
+  'menage-worktree': {
+    title: 'Nova, acte IV : ranger le chantier',
+    paragraphs: [
+      'Le hotfix est livré, la branche hotfix reste utile pour l’historique, mais le worktree temporaire traîne sur le disque.',
+      'Git refuse de supprimer un worktree sale. Celui-ci est propre : tu peux ranger sans risque.',
+      'Supprime l’espace de travail, garde la branche et le correctif.',
+    ],
+  },
+};
+
+export function briefingFor(missionId: string): MissionBriefing | undefined {
+  return missionBriefings[missionId];
+}
