@@ -2,8 +2,11 @@
 
 Chaque fichier `*.html` est une story autonome : la page avant la refonte, puis
 4 passes CSS (Espacement, Couleur, Typographie et copie, Détails) qui la
-transforment en page actuelle. Le crédit `unslop by @heydamir` est ajouté par le
-script de rendu.
+transforment en page actuelle.
+
+La méthode vient d'**unslop**, créé par Damir Sokolovsky ([@heydamir](https://x.com/heydamir)),
+sous licence CC BY 4.0 : cette attribution est conservée ici. `render.mjs` est la
+variante locale du renderer, sans la pastille de crédit incrustée dans les vidéos.
 
 | Page | Story | Vidéo |
 | --- | --- | --- |
@@ -16,7 +19,7 @@ script de rendu.
 Les vidéos sont des artefacts générés, ignorés par Git. Pour les regénérer :
 
 ```bash
-node ~/.config/opencode/skills/unslop/scripts/story.mjs unslop-story/accueil.html unslop-story/accueil.mp4
+node unslop-story/render.mjs unslop-story/accueil.html unslop-story/accueil.mp4
 ```
 
 Prérequis : `playwright` (navigateur Chromium) et `ffmpeg`. Le dossier
