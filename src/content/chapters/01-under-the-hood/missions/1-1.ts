@@ -2,12 +2,12 @@ import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   check,
-  commitCount,
   headBranch,
   headFile,
   indexFile,
   workingFile,
 } from '../../../../engine/validate';
+import { commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
 const initial = scenario()
@@ -51,10 +51,11 @@ export const mission11: Mission = {
   difficulty: 1,
   par: 2,
   initialState: initial,
-  validate: (state) =>
-    allOf(
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    return allOf(
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
-      check(commitCount(state) === 2, 'Un seul nouveau commit est attendu.'),
+      check(commitDelta(state, entry) === 1, 'Un seul nouveau commit est attendu.'),
       check(headFile(state, 'a.txt') === 'version 2', 'Le commit doit contenir a.txt en version 2.'),
       check(headFile(state, 'b.txt') === 'version 1', 'Le commit ne doit pas contenir b.txt modifié.'),
       check(
@@ -65,7 +66,8 @@ export const mission11: Mission = {
         workingFile(state, 'b.txt') === 'version 2',
         'b.txt doit rester modifié dans le working dir.',
       ),
-    ),
+    );
+  },
   hints: [
     'Un commit photographie l’index, pas tout le working dir. Il faut choisir quoi indexer.',
     'Ajoute seulement a.txt à l’index, puis commit : b.txt restera modifié sur le disque.',

@@ -76,9 +76,19 @@ export interface ForbiddenCommand {
   readonly message: string;
 }
 
+/**
+ * Contexte de validation : l'état d'entrée effectif de la mission (prelude
+ * inclus). Les validations relatives s'y comparent au lieu d'utiliser des
+ * valeurs absolues.
+ */
+export interface ValidationContext {
+  readonly entry: RepoState;
+  readonly commands?: readonly string[];
+}
+
 export interface MissionStep {
   readonly label: string;
-  readonly done: (state: RepoState) => boolean;
+  readonly done: (state: RepoState, ctx?: ValidationContext) => boolean;
 }
 
 export interface Mission {
@@ -96,7 +106,7 @@ export interface Mission {
   readonly difficulty: 1 | 2 | 3;
   readonly par: number;
   readonly initialState: RepoState;
-  readonly validate: (state: RepoState) => ValidationResult;
+  readonly validate: (state: RepoState, ctx?: ValidationContext) => ValidationResult;
   /** Garde-fou de parcours (ex. avoir tenté -d avant de forcer). */
   readonly validateAttempt?: (commands: readonly string[]) => ValidationResult;
   readonly hints: readonly [string, string, string];

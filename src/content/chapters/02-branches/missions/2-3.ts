@@ -4,10 +4,11 @@ import {
   branchFile,
   branchTip,
   check,
-  commitCount,
   headBranch,
   isHeadDetached,
 } from '../../../../engine/validate';
+import type { Commit, RepoState } from '../../../../engine/types';
+import { branchUnchanged, commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
 const base = scenario()
@@ -37,11 +38,21 @@ const orphan = Object.values(simulated.commits).find(
 );
 if (!orphan) throw new Error('Contenu invalide : commit orphelin absent');
 
-const mainTip = base.branches.main ?? '';
-const featureTip = base.branches.feature ?? '';
-const initialCount = Object.keys(base.commits).length;
 const oldShort = oldest.hash.slice(0, 7);
 const orphanShort = orphan.hash.slice(0, 7);
+
+/**
+ * Commit sauvé : créé pendant la mission (absent de l'entrée) et porteur du
+ * fichier d'expérience. On ne compare jamais un hash figé.
+ */
+function rescuedCommit(state: RepoState, entry: RepoState): Commit | undefined {
+  const tip = branchTip(state, 'sauvetage');
+  if (tip === undefined) return undefined;
+  const commit = state.commits[tip];
+  if (commit === undefined) return undefined;
+  if (entry.commits[tip] !== undefined) return undefined;
+  return commit.snapshot['exp.txt'] === 'expérience' ? commit : undefined;
+}
 
 export const mission23: Mission = {
   id: 'commit-perdu',
@@ -56,21 +67,23 @@ export const mission23: Mission = {
   steps: [
     {
       label: 'Passer par un HEAD détaché sur l’ancien commit',
-      done: (state) =>
-        isHeadDetached(state) || commitCount(state) === initialCount + 1,
+      done: (state, ctx) => {
+        const entry = ctx?.entry ?? base;
+        return isHeadDetached(state) || commitDelta(state, entry) === 1;
+      },
     },
     {
       label: 'Créer le commit expérimental',
-      done: (state) => commitCount(state) === initialCount + 1,
+      done: (state, ctx) => commitDelta(state, ctx?.entry ?? base) === 1,
     },
     {
       label: 'Revenir sur main',
-      done: (state) =>
-        headBranch(state) === 'main' && commitCount(state) === initialCount + 1,
+      done: (state, ctx) =>
+        headBranch(state) === 'main' && commitDelta(state, ctx?.entry ?? base) === 1,
     },
     {
       label: 'Créer sauvetage sur le commit orphelin',
-      done: (state) => branchTip(state, 'sauvetage') === orphan.hash,
+      done: (state, ctx) => rescuedCommit(state, ctx?.entry ?? base) !== undefined,
     },
   ],
   takeaway:
@@ -78,21 +91,21 @@ export const mission23: Mission = {
   difficulty: 3,
   par: 6,
   initialState: base,
-  validate: (state) =>
-    allOf(
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? base;
+    const rescued = rescuedCommit(state, entry);
+    return allOf(
       check(headBranch(state) === 'main', 'HEAD doit revenir sur main.'),
-      check(
-        branchTip(state, 'sauvetage') === orphan.hash,
-        'sauvetage doit pointer sur le commit expérimental.',
-      ),
+      check(rescued !== undefined, 'sauvetage doit pointer sur le commit expérimental.'),
       check(
         branchFile(state, 'sauvetage', 'exp.txt') === 'expérience',
         'sauvetage doit conserver exp.txt.',
       ),
-      check(branchTip(state, 'main') === mainTip, 'main ne doit pas bouger.'),
-      check(branchTip(state, 'feature') === featureTip, 'feature ne doit pas bouger.'),
-      check(commitCount(state) === initialCount + 1, 'Un seul commit expérimental est attendu.'),
-    ),
+      check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
+      check(branchUnchanged(state, entry, 'feature'), 'feature ne doit pas bouger.'),
+      check(commitDelta(state, entry) === 1, 'Un seul commit expérimental est attendu.'),
+    );
+  },
   hints: [
     'git checkout <hash> détache HEAD : le commit créé ici n’appartiendra à aucune branche.',
     'Après le retour sur main, Git liste le commit laissé derrière et propose git branch <nom> <hash>.',

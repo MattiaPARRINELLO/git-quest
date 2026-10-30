@@ -7,6 +7,7 @@ import {
   workingFile,
   worktreePaths,
 } from '../../../../engine/validate';
+import { branchUnchanged } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
 const initial = scenario()
@@ -18,8 +19,6 @@ const initial = scenario()
   .branch('docs')
   .write('README.md', '# Nova — WIP de documentation')
   .build();
-
-const mainTip = initial.branches.main ?? '';
 
 export const mission42: Mission = {
   id: 'deux-worktrees',
@@ -43,10 +42,15 @@ export const mission42: Mission = {
     },
     {
       label: 'Revenir sur main avec le WIP intact',
-      done: (state) =>
-        worktreePaths(state).includes('~/gitquest-docs') &&
-        state.activeWorktree === 'main' &&
-        workingFile(state, 'README.md') === '# Nova — WIP de documentation',
+      done: (state, ctx) => {
+        const entry = ctx?.entry ?? initial;
+        return (
+          worktreePaths(state).includes('~/gitquest-docs') &&
+          state.activeWorktree === 'main' &&
+          workingFile(state, 'README.md') === '# Nova — WIP de documentation' &&
+          branchUnchanged(state, entry, 'main')
+        );
+      },
     },
   ],
   takeaway:
@@ -54,8 +58,9 @@ export const mission42: Mission = {
   difficulty: 2,
   par: 6,
   initialState: initial,
-  validate: (state) =>
-    allOf(
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    return allOf(
       check(worktreePaths(state).includes('~/gitquest-docs'), 'Le worktree docs doit exister.'),
       check(
         branchFile(state, 'docs', 'GUIDE.md') === '# Guide Nova',
@@ -67,8 +72,9 @@ export const mission42: Mission = {
       ),
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
       check(state.worktrees.main?.workingDir['GUIDE.md'] === undefined, 'GUIDE.md ne doit pas apparaître dans le worktree principal.'),
-      check(state.branches.main === mainTip, 'main ne doit pas bouger.'),
-    ),
+      check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
+    );
+  },
   hints: [
     'Crée un worktree sur la branche docs déjà existante, puis active-le avec cd.',
     'Dans le worktree docs, crée GUIDE.md, indexe-le et commit.',

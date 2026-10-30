@@ -2,12 +2,12 @@ import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   check,
-  commitCount,
   headBranch,
   headFile,
   indexFile,
   workingFile,
 } from '../../../../engine/validate';
+import { commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
 const initial = scenario()
@@ -56,16 +56,18 @@ export const mission12: Mission = {
   difficulty: 2,
   par: 4,
   initialState: initial,
-  validate: (state) =>
-    allOf(
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    return allOf(
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
-      check(commitCount(state) === 2, 'Il faut exactement deux commits.'),
+      check(commitDelta(state, entry) === 1, 'Il faut exactement un nouveau commit.'),
       check(headFile(state, 'app.ts') === 'v2', 'Le commit doit contenir v2.'),
       check(
         workingFile(state, 'app.ts') === 'v3',
         'Le working dir doit encore contenir v3, non commité.',
       ),
-    ),
+    );
+  },
   hints: [
     'Le commit photographie l’index, même si le fichier change ensuite sur le disque.',
     'Indexe v2, puis réécris v3 sans refaire git add.',

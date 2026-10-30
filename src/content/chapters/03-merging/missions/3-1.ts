@@ -3,10 +3,10 @@ import {
   allOf,
   branchTip,
   check,
-  commitCount,
   headBranch,
   headFile,
 } from '../../../../engine/validate';
+import { commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
 const initial = scenario()
@@ -40,8 +40,13 @@ export const mission31: Mission = {
     },
     {
       label: 'Ne créer aucun commit de fusion',
-      done: (state) =>
-        branchTip(state, 'main') === branchTip(state, 'feature') && commitCount(state) === 2,
+      done: (state, ctx) => {
+        const entry = ctx?.entry ?? initial;
+        return (
+          branchTip(state, 'main') === branchTip(state, 'feature') &&
+          commitDelta(state, entry) === 0
+        );
+      },
     },
     {
       label: 'Vérifier que export.ts arrive sur main',
@@ -52,16 +57,18 @@ export const mission31: Mission = {
   difficulty: 2,
   par: 1,
   initialState: initial,
-  validate: (state) =>
-    allOf(
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    return allOf(
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
       check(
         branchTip(state, 'main') === branchTip(state, 'feature'),
         'main doit rejoindre le commit de feature.',
       ),
-      check(commitCount(state) === 2, 'Aucun commit de fusion ne doit être créé.'),
+      check(commitDelta(state, entry) === 0, 'Aucun commit de fusion ne doit être créé.'),
       check(headFile(state, 'src/export.ts') !== undefined, 'Le fichier export.ts doit arriver sur main.'),
-    ),
+    );
+  },
   hints: [
     'Quand HEAD est un ancêtre de la cible, Git peut avancer sans commit.',
     'Une seule commande suffit : demande à Git de fusionner feature.',

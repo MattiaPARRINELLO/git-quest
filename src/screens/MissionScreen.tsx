@@ -120,7 +120,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     const used = result.scored ? commandsUsed + 1 : commandsUsed;
     if (result.scored) setCommandsUsed(used);
     if (!result.error && result.events.length > 0) {
-      const stateOk = mission.validate(result.state).ok;
+      const stateOk = mission.validate(result.state, { entry: mission.initialState }).ok;
       const attemptOk = mission.validateAttempt
         ? mission.validateAttempt(attemptedCommands.current).ok
         : true;

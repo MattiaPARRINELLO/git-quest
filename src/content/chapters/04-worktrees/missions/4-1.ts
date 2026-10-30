@@ -2,12 +2,12 @@ import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   branchFile,
-  branchTip,
   check,
   headBranch,
   workingFile,
   worktreePaths,
 } from '../../../../engine/validate';
+import { branchUnchanged } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
 const initial = scenario()
@@ -30,9 +30,6 @@ const initial = scenario()
   .checkout('feature')
   .write('src/app.ts', "export const app = 'refonte WIP';")
   .build();
-
-const mainTip = initial.branches.main ?? '';
-const featureTip = initial.branches.feature ?? '';
 
 export const mission41: Mission = {
   id: 'hotfix-worktree',
@@ -68,8 +65,9 @@ export const mission41: Mission = {
   difficulty: 3,
   par: 6,
   initialState: initial,
-  validate: (state) =>
-    allOf(
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    return allOf(
       check(
         worktreePaths(state).includes('~/gitquest-hotfix'),
         'Le worktree hotfix doit exister.',
@@ -78,15 +76,16 @@ export const mission41: Mission = {
         branchFile(state, 'hotfix', 'bug.txt') === 'corrigé',
         'Le correctif doit être commité sur hotfix.',
       ),
-      check(branchTip(state, 'main') === mainTip, 'main ne doit pas bouger.'),
-      check(branchTip(state, 'feature') === featureTip, 'feature ne doit pas bouger.'),
+      check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
+      check(branchUnchanged(state, entry, 'feature'), 'feature ne doit pas bouger.'),
       check(
         workingFile(state, 'src/app.ts') === "export const app = 'refonte WIP';",
         'Le WIP de feature doit rester intact.',
       ),
       check(headBranch(state) === 'feature', 'Le worktree principal doit rester sur feature.'),
       check(state.activeWorktree === 'main', 'Le terminal doit revenir au worktree principal.'),
-    ),
+    );
+  },
   hints: [
     'Essaie de passer sur main. Que dit Git ?',
     'Crée un worktree sur une nouvelle branche hotfix à partir de main, sans toucher au worktree principal.',

@@ -2,13 +2,12 @@ import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   branchFile,
-  branchTip,
   check,
-  commitCount,
   hasBranch,
   headBranch,
   headFile,
 } from '../../../../engine/validate';
+import { branchUnchanged, commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
 const initial = scenario()
@@ -39,28 +38,32 @@ export const mission21: Mission = {
     },
     {
       label: 'Terminer sur experiment avec main inchangée',
-      done: (state) =>
-        headBranch(state) === 'experiment' && branchTip(state, 'main') === mainTip,
+      done: (state, ctx) => {
+        const entry = ctx?.entry ?? initial;
+        return headBranch(state) === 'experiment' && branchUnchanged(state, entry, 'main');
+      },
     },
   ],
   takeaway: 'Une branche est un pointeur : seule l’étiquette de HEAD avance au commit.',
   difficulty: 2,
   par: 5,
   initialState: initial,
-  validate: (state) =>
-    allOf(
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    return allOf(
       check(headBranch(state) === 'experiment', 'HEAD doit être sur experiment.'),
       check(
         branchFile(state, 'experiment', 'notes.txt') === 'notes de la branche',
         'experiment doit contenir notes.txt.',
       ),
-      check(branchTip(state, 'main') === mainTip, 'main ne doit pas bouger.'),
+      check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
       check(
         headFile(state, 'notes.txt') === 'notes de la branche',
         'Le HEAD de experiment doit voir notes.txt.',
       ),
-      check(commitCount(state) === 2, 'Un seul nouveau commit est attendu.'),
-    ),
+      check(commitDelta(state, entry) === 1, 'Un seul nouveau commit est attendu.'),
+    );
+  },
   hints: [
     'Créer une branche ne change pas HEAD : il faut ensuite y basculer.',
     'Après le switch, crée notes.txt, indexe-le, puis commit.',

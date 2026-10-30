@@ -4,9 +4,9 @@ import {
   branchFile,
   branchTip,
   check,
-  commitCount,
   headBranch,
 } from '../../../../engine/validate';
+import { commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
 const initial = scenario()
@@ -18,8 +18,6 @@ const initial = scenario()
   .branch('feature')
   .checkout('feature')
   .build();
-
-const initialTip = initial.branches.main ?? '';
 
 export const mission22: Mission = {
   id: 'qui-avance',
@@ -47,16 +45,22 @@ export const mission22: Mission = {
     },
     {
       label: 'Faire diverger main et feature',
-      done: (state) =>
-        branchTip(state, 'main') !== branchTip(state, 'feature') && commitCount(state) === 3,
+      done: (state, ctx) => {
+        const entry = ctx?.entry ?? initial;
+        return (
+          branchTip(state, 'main') !== branchTip(state, 'feature') &&
+          commitDelta(state, entry) === 2
+        );
+      },
     },
   ],
   takeaway: 'Un commit ne déplace que la branche sur laquelle HEAD est attaché.',
   difficulty: 2,
   par: 7,
   initialState: initial,
-  validate: (state) =>
-    allOf(
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    return allOf(
       check(headBranch(state) === 'main', 'HEAD doit revenir sur main.'),
       check(branchFile(state, 'feature', 'feature.ts') !== undefined, 'feature doit contenir feature.ts.'),
       check(branchFile(state, 'main', 'main.ts') !== undefined, 'main doit contenir main.ts.'),
@@ -66,11 +70,12 @@ export const mission22: Mission = {
         'Les deux branches doivent avoir divergé.',
       ),
       check(
-        branchTip(state, 'feature') !== initialTip,
+        branchTip(state, 'feature') !== branchTip(entry, 'feature'),
         'feature doit avoir avancé après son commit.',
       ),
-      check(commitCount(state) === 3, 'Deux nouveaux commits sont attendus.'),
-    ),
+      check(commitDelta(state, entry) === 2, 'Deux nouveaux commits sont attendus.'),
+    );
+  },
   hints: [
     'Un commit déplace uniquement l’étiquette de la branche sur laquelle HEAD est attaché.',
     'Commite feature, puis bascule sur main avant de créer main.ts.',

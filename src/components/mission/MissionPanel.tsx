@@ -27,7 +27,9 @@ export function MissionPanel({
   const stars = starsFor(commandsUsed, mission.par);
   const remainingHints = mission.hints.length - hintsUsed;
   const revealed = mission.hints.slice(0, hintsUsed);
-  const stepsDone = mission.steps.filter((step) => step.done(state)).length;
+  const stepsDone = mission.steps.filter((step) =>
+    step.done(state, { entry: mission.initialState }),
+  ).length;
 
   return (
     <section
@@ -117,7 +119,7 @@ export function MissionPanel({
                 <p className="mt-1 text-xs leading-relaxed text-text">{mission.objective}</p>
                 <ul className="mt-2 space-y-1">
                   {mission.steps.map((step) => {
-                    const done = step.done(state);
+                    const done = step.done(state, { entry: mission.initialState });
                     return (
                       <li
                         key={step.label}

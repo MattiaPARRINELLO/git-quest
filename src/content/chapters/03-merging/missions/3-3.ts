@@ -1,14 +1,14 @@
 import { Scenario, scenario } from '../../../../engine/scenario';
 import {
   allOf,
-  branchTip,
+  branchFile,
   check,
-  commitCount,
   hasBranch,
   headBranch,
   headFile,
   workingFile,
 } from '../../../../engine/validate';
+import { branchUnchanged, commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
 const base = scenario()
@@ -35,10 +35,6 @@ const initial = Scenario.from(base)
   .checkout('main')
   .build();
 
-const initialMainTip = initial.branches.main ?? '';
-const experimentTip = initial.branches.experiment ?? '';
-const initialCount = Object.keys(initial.commits).length;
-
 export const mission33: Mission = {
   id: 'menage-branches',
   chapterId: 'merging',
@@ -62,10 +58,14 @@ export const mission33: Mission = {
     },
     {
       label: 'Choisir consciemment le sort d’experiment',
-      done: (state) =>
-        !hasBranch(state, 'experiment') &&
-        (branchTip(state, 'main') === experimentTip ||
-          branchTip(state, 'main') === initialMainTip),
+      done: (state, ctx) => {
+        const entry = ctx?.entry ?? initial;
+        return (
+          !hasBranch(state, 'experiment') &&
+          (branchFile(state, 'main', 'exp.txt') === 'expérience' ||
+            branchUnchanged(state, entry, 'main'))
+        );
+      },
     },
   ],
   takeaway:
@@ -73,9 +73,10 @@ export const mission33: Mission = {
   difficulty: 3,
   par: 3,
   initialState: initial,
-  validate: (state) => {
-    const merged = branchTip(state, 'main') === experimentTip;
-    const forced = branchTip(state, 'main') === initialMainTip;
+  validate: (state, ctx) => {
+    const entry = ctx?.entry ?? initial;
+    const merged = branchFile(state, 'main', 'exp.txt') === 'expérience';
+    const forced = branchUnchanged(state, entry, 'main');
     return allOf(
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
       check(!hasBranch(state, 'feature-login'), 'La branche feature-login doit être supprimée.'),
@@ -90,7 +91,7 @@ export const mission33: Mission = {
           ? 'La fusion doit intégrer exp.txt.'
           : 'La suppression forcée doit laisser main inchangée.',
       ),
-      check(commitCount(state) === initialCount, 'Aucun commit supplémentaire ne doit être créé.'),
+      check(commitDelta(state, entry) === 0, 'Aucun commit supplémentaire ne doit être créé.'),
     );
   },
   validateAttempt: (commands) =>
