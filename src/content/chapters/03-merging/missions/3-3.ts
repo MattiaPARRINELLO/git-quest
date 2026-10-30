@@ -1,4 +1,3 @@
-import { Scenario, scenario } from '../../../../engine/scenario';
 import {
   allOf,
   branchFile,
@@ -8,32 +7,11 @@ import {
   headFile,
   workingFile,
 } from '../../../../engine/validate';
+import { entryState } from '../../../../story/checkpoints';
 import { branchUnchanged, commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const base = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': '# Projet Nova',
-    'src/app.ts': "export const app = 'nova';",
-  })
-  .branch('feature-login')
-  .checkout('feature-login')
-  .commit('feat: formulaire de connexion', {
-    'src/login.ts': "export const login = () => 'ok';",
-  })
-  .checkout('main')
-  .run('git merge feature-login')
-  .build();
-
-const initial = Scenario.from(base)
-  .branch('experiment')
-  .checkout('experiment')
-  .commit('exp: test de cache', {
-    'exp.txt': 'expérience',
-  })
-  .checkout('main')
-  .build();
+const initial = entryState('menage-branches');
 
 export const mission33: Mission = {
   id: 'menage-branches',

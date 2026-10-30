@@ -1,4 +1,4 @@
-import { scenario } from '../../../../engine/scenario';
+import { entryState } from '../../../../story/checkpoints';
 import {
   allOf,
   branchTip,
@@ -8,22 +8,7 @@ import {
 } from '../../../../engine/validate';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': '# Projet Nova',
-    'src/app.ts': "export const app = 'nova';",
-  })
-  .branch('feature')
-  .checkout('feature')
-  .commit('feat: notifications', {
-    'src/notify.ts': "export const notify = (message: string) => message;",
-  })
-  .checkout('main')
-  .commit('fix: configuration', {
-    'src/config.ts': "export const config = { retries: 3 };",
-  })
-  .build();
+const initial = entryState('merge-commit');
 
 export const mission32: Mission = {
   id: 'merge-commit',

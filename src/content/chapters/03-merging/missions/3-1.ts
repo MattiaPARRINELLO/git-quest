@@ -1,4 +1,4 @@
-import { scenario } from '../../../../engine/scenario';
+import { entryState } from '../../../../story/checkpoints';
 import {
   allOf,
   branchTip,
@@ -9,19 +9,7 @@ import {
 import { commitDelta } from '../../../../story/preconditions';
 import type { Mission } from '../../../types';
 
-const initial = scenario()
-  .init()
-  .commit('Initial commit', {
-    'README.md': '# Projet Nova',
-    'src/app.ts': "export const app = 'nova';",
-  })
-  .branch('feature')
-  .checkout('feature')
-  .commit('feat: export CSV', {
-    'src/export.ts': "export const exportCsv = () => 'csv';",
-  })
-  .checkout('main')
-  .build();
+const initial = entryState('avance-rapide');
 
 export const mission31: Mission = {
   id: 'avance-rapide',
