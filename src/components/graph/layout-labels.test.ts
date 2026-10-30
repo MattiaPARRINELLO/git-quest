@@ -40,4 +40,22 @@ describe('placement des étiquettes du graphe', () => {
     if (!first || !second) throw new Error('deux nœuds attendus');
     expect(second.x - first.x).toBeGreaterThanOrEqual(140);
   });
+
+  it('marque le commit HEAD sur le nœud lui-même (pas de pillule séparée)', () => {
+    const repo = scenario()
+      .init()
+      .commit('Initial', { 'a.txt': 'a' })
+      .commit('Second', { 'b.txt': 'b' })
+      .build();
+
+    const layout = layoutGraph(repo);
+    const headNode = layout.nodes.find((node) => node.hash === repo.branches.main);
+    expect(headNode?.head).toBe(true);
+    expect(headNode?.activeHead).toBe(true);
+    expect(headNode?.detachedHead).toBe(false);
+
+    const other = layout.nodes.find((node) => node.hash !== repo.branches.main);
+    expect(other?.head).toBe(false);
+    expect(other?.activeHead).toBe(false);
+  });
 });

@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { RepoState, GitEvent } from '../../engine/types';
 import { branchColor } from '../../lib/colors';
 import { layoutGraph, PADDING_X } from './layout';
-import type { BranchLabel, GraphNode, HeadMarker } from './layout';
+import type { BranchLabel, GraphNode } from './layout';
 import { Icon } from '../ui/Icon';
 
 interface CommitGraphProps {
@@ -325,17 +325,6 @@ export function CommitGraph({
                 />
               ))}
             </AnimatePresence>
-
-            <AnimatePresence initial={false}>
-              {layout.headMarkers.map((marker) => (
-                <HeadMarkerView
-                  key={marker.worktreeId}
-                  marker={marker}
-                  delay={0}
-                  duration={duration}
-                />
-              ))}
-            </AnimatePresence>
           </g>
         </svg>
 
@@ -452,11 +441,28 @@ function CommitNodeView({
       }
       style={{ cursor: onSelect === undefined ? 'help' : 'pointer' }}
     >
+      {node.head && (
+        <title>
+          {`HEAD · ${node.headPaths.join(', ')}${node.detachedHead ? ' (détaché)' : ''}`}
+        </title>
+      )}
+      {node.head && (
+        <circle
+          cx={node.x}
+          cy={node.y}
+          r={(isMerge ? 9 : 6.5) + 4}
+          fill="none"
+          stroke={color}
+          strokeOpacity={node.activeHead ? 0.9 : 0.4}
+          strokeWidth={1.4}
+          strokeDasharray={node.detachedHead ? '3 2' : undefined}
+        />
+      )}
       <motion.circle
         cx={node.x}
         cy={node.y}
         r={isMerge ? 9 : 6.5}
-        fill="var(--panel)"
+        fill={node.head ? color : 'var(--panel)'}
         stroke={color}
         strokeWidth={2.4}
         initial={{ scale: 0.4 }}
@@ -464,7 +470,9 @@ function CommitNodeView({
         transition={{ duration, delay, type: 'spring', stiffness: 260, damping: 20 }}
         style={{ transformOrigin: `${node.x}px ${node.y}px` }}
       />
-      {isMerge && <circle cx={node.x} cy={node.y} r={3} fill={color} />}
+      {isMerge && (
+        <circle cx={node.x} cy={node.y} r={3} fill={node.head ? 'var(--panel)' : color} />
+      )}
       <text
         x={node.x}
         y={node.y + 22}
@@ -554,45 +562,6 @@ function BranchLabelView({
       />
       <text x={9} y={12.5} fill={label.color} fontSize={10} className="font-mono font-semibold">
         {text}
-      </text>
-    </motion.g>
-  );
-}
-
-function HeadMarkerView({
-  marker,
-  delay,
-  duration,
-}: {
-  readonly marker: HeadMarker;
-  readonly delay: number;
-  readonly duration: number;
-}) {
-  const width = marker.detached ? 76 : 44;
-  const label = marker.detached ? 'HEAD détaché' : 'HEAD';
-  const color = marker.active ? 'var(--accent)' : 'var(--muted)';
-
-  return (
-    <motion.g
-      initial={{ opacity: 0, x: marker.x, y: marker.y + 5 }}
-      animate={{ opacity: 1, x: marker.x, y: marker.y }}
-      exit={{ opacity: 0 }}
-      transition={{ duration, delay, ease: 'easeOut' }}
-    >
-      <title>{`HEAD · ${marker.path}${marker.detached ? ' (détaché)' : ''}`}</title>
-      <rect
-        x={0}
-        y={0}
-        width={width}
-        height={17}
-        rx={5}
-        fill="var(--panel)"
-        stroke={color}
-        strokeOpacity={0.75}
-        strokeDasharray={marker.detached ? '3 2' : undefined}
-      />
-      <text x={7} y={11.5} fill={color} fontSize={8.5} className="font-mono">
-        ▶ {label}
       </text>
     </motion.g>
   );

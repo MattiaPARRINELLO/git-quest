@@ -23,6 +23,13 @@ export interface GraphNode {
   readonly files: readonly string[];
   readonly parents: readonly string[];
   readonly branch?: string;
+  /** Un worktree a son HEAD sur ce commit : le nœud est rempli. */
+  readonly head: boolean;
+  /** Le worktree actif (celui du terminal) est sur ce commit. */
+  readonly activeHead: boolean;
+  /** Au moins un HEAD détaché pointe ici. */
+  readonly detachedHead: boolean;
+  readonly headPaths: readonly string[];
 }
 
 export interface GraphEdge {
@@ -107,6 +114,15 @@ export function layoutGraph(state: RepoState): GraphLayout {
   const commits = sortedCommits(state);
   const connected = connectedHashes(state);
 
+  const headsByCommit = new Map<string, Worktree[]>();
+  for (const worktree of Object.values(state.worktrees)) {
+    const commit = headCommitOfHead(state, worktree.head);
+    if (commit === undefined) continue;
+    const list = headsByCommit.get(commit) ?? [];
+    list.push(worktree);
+    headsByCommit.set(commit, list);
+  }
+
   const laneByKey = new Map<string, number>();
   let laneCount = 0;
 
@@ -118,6 +134,8 @@ export function layoutGraph(state: RepoState): GraphLayout {
       laneCount += 1;
       laneByKey.set(key, lane);
     }
+
+    const heads = headsByCommit.get(commit.hash) ?? [];
 
     return {
       hash: commit.hash,
@@ -131,6 +149,10 @@ export function layoutGraph(state: RepoState): GraphLayout {
       files: Object.keys(commit.snapshot).sort(),
       parents: commit.parents,
       ...(commit.branch === undefined ? {} : { branch: commit.branch }),
+      head: heads.length > 0,
+      activeHead: heads.some((worktree) => worktree.id === state.activeWorktree),
+      detachedHead: heads.some((worktree) => worktree.head.kind === 'detached'),
+      headPaths: heads.map((worktree) => worktree.path),
     };
   });
 
@@ -195,15 +217,6 @@ export function layoutGraph(state: RepoState): GraphLayout {
       };
       branchLabels.push(label);
     });
-  }
-
-  const headsByCommit = new Map<string, Worktree[]>();
-  for (const worktree of Object.values(state.worktrees)) {
-    const commit = headCommitOfHead(state, worktree.head);
-    if (commit === undefined) continue;
-    const list = headsByCommit.get(commit) ?? [];
-    list.push(worktree);
-    headsByCommit.set(commit, list);
   }
 
   const headMarkers: HeadMarker[] = [];
