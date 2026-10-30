@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { findForbiddenCommand, findPrediction, missionText, normalizeCommand, resolvePrediction, starsFor } from '../app/mission';
-import { MissionComplete } from '../components/mission/MissionComplete';
+import { MissionComplete, MissionCompleteBar } from '../components/mission/MissionComplete';
 import { MissionBriefing } from '../components/mission/MissionBriefing';
 import { MissionPanel } from '../components/mission/MissionPanel';
 import { PredictionFeedback, PredictionOverlay } from '../components/mission/PredictionOverlay';
@@ -79,6 +79,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const [commandsUsed, setCommandsUsed] = useState(0);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [completed, setCompleted] = useState<Completion | null>(null);
+  const [inspecting, setInspecting] = useState(false);
   const [pendingPrediction, setPendingPrediction] = useState<PendingPrediction | null>(null);
   const [answered, setAnswered] = useState<Set<Prediction>>(new Set());
   const attemptedCommands = useRef<string[]>([]);
@@ -127,6 +128,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
     setCommandsUsed(draftResumable?.commandsUsed ?? 0);
     setHintsUsed(draftResumable?.hintsUsed ?? 0);
     setCompleted(null);
+    setInspecting(false);
     setPendingPrediction(null);
     setAnswered(
       new Set(
@@ -414,7 +416,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
         />
       )}
 
-      {completed && (
+      {completed && !inspecting && (
         <MissionComplete
           mission={mission}
           stars={completed.stars}
@@ -424,9 +426,18 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
           {...(briefing?.outcome === undefined ? {} : { outcome: briefing.outcome })}
           {...(briefing?.teaser === undefined ? {} : { teaser: briefing.teaser })}
           onInspect={() => {
-            setCompleted(null);
-            useUiStore.getState().setMobileTab('terminal');
+            setInspecting(true);
+            useUiStore.getState().setMobileTab('graph');
           }}
+        />
+      )}
+
+      {completed && inspecting && (
+        <MissionCompleteBar
+          mission={mission}
+          stars={completed.stars}
+          after={afterMission(mission.id)}
+          onResume={() => setInspecting(false)}
         />
       )}
     </>
