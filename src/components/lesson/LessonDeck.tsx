@@ -185,10 +185,7 @@ export function LessonDeck({
 
         <div className="mt-7 grid gap-10 lg:grid-cols-[13.5rem_minmax(0,1fr)]">
           <aside className="hidden lg:block">
-            <div className="flex items-center gap-2">
-              <span aria-hidden="true" className="h-3.5 w-[2px] rounded-full bg-accent" />
-            </div>
-            <h1 className="display mt-1 text-[26px] leading-[1.15] text-text">{lesson.title}</h1>
+            <h1 className="display text-[26px] leading-[1.15] text-text">{lesson.title}</h1>
 
             <ol className="mt-6 space-y-px">
               {lesson.slides.map((item, position) => (
