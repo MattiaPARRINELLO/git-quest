@@ -218,9 +218,9 @@ export function layoutGraph(state: RepoState): GraphLayout {
         commit: commitHash,
         branch,
         detached: branch === null,
-        x: node.x + 16,
-        // Sous le nœud, et sous toutes les étiquettes de branches.
-        y: node.y + 16 + index * 22,
+        x: node.x + 14,
+        // Sous le hash du commit (y + 22) : jamais par-dessus.
+        y: node.y + 34 + index * 20,
         active: worktree.id === state.activeWorktree,
       });
     });

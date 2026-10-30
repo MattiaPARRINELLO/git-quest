@@ -471,6 +471,9 @@ function CommitNodeView({
         textAnchor="middle"
         className="fill-[var(--muted)] font-mono"
         fontSize={9}
+        stroke="var(--panel)"
+        strokeWidth={3}
+        paintOrder="stroke"
       >
         {node.shortHash}
       </text>
@@ -537,6 +540,7 @@ function BranchLabelView({
       }
       style={{ cursor: onSelect === undefined ? 'default' : 'pointer' }}
     >
+      <title>{`Branche ${label.name}`}</title>
       <rect
         x={0}
         y={0}
@@ -564,10 +568,8 @@ function HeadMarkerView({
   readonly delay: number;
   readonly duration: number;
 }) {
-  const width = Math.min(160, Math.max(58, marker.path.length * 5.6 + 30));
-  const label = marker.detached
-    ? `HEAD détaché · ${marker.path.split('/').pop() ?? marker.path}`
-    : `HEAD · ${marker.path.split('/').pop() ?? marker.path}`;
+  const width = marker.detached ? 76 : 44;
+  const label = marker.detached ? 'HEAD détaché' : 'HEAD';
   const color = marker.active ? 'var(--accent)' : 'var(--muted)';
 
   return (
@@ -577,6 +579,7 @@ function HeadMarkerView({
       exit={{ opacity: 0 }}
       transition={{ duration, delay, ease: 'easeOut' }}
     >
+      <title>{`HEAD · ${marker.path}${marker.detached ? ' (détaché)' : ''}`}</title>
       <rect
         x={0}
         y={0}
@@ -589,8 +592,7 @@ function HeadMarkerView({
         strokeDasharray={marker.detached ? '3 2' : undefined}
       />
       <text x={7} y={11.5} fill={color} fontSize={8.5} className="font-mono">
-        {marker.detached ? '◌ ' : '▶ '}
-        {label.slice(0, 26)}
+        ▶ {label}
       </text>
     </motion.g>
   );
