@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 export type Route =
   | { readonly name: 'home' }
   | { readonly name: 'sandbox' }
+  | { readonly name: 'final' }
   | { readonly name: 'lesson'; readonly chapterId: string }
   | { readonly name: 'mission'; readonly missionId: string }
   | { readonly name: 'not-found' };
@@ -13,6 +14,7 @@ export function parseRoute(hash: string): Route {
 
   if (parts.length === 0) return { name: 'home' };
   if (parts[0] === 'sandbox') return { name: 'sandbox' };
+  if (parts[0] === 'final') return { name: 'final' };
   if (parts[0] === 'chapter' && parts[1] && parts[2] === 'lesson') {
     return { name: 'lesson', chapterId: parts[1] };
   }
