@@ -9,7 +9,7 @@ export const chapter02Story: readonly ChainMission[] = [
       {
         slotId: 'm2.1-c1',
         missionId: 'branche-pointeur',
-        signature: { branch: 'experiment', files: { 'notes.txt': 'notes de la branche' } },
+        signature: { branch: 'experiment', present: ['notes.txt'] },
       },
     ],
     reference: [
@@ -32,12 +32,12 @@ export const chapter02Story: readonly ChainMission[] = [
       {
         slotId: 'm2.2-c1',
         missionId: 'qui-avance',
-        signature: { branch: 'feature', files: { 'feature.ts': 'export const feature = true;' } },
+        signature: { branch: 'feature', present: ['feature.ts'] },
       },
       {
         slotId: 'm2.2-c2',
         missionId: 'qui-avance',
-        signature: { branch: 'main', files: { 'main.ts': 'export const main = true;' } },
+        signature: { branch: 'main', present: ['main.ts'] },
       },
     ],
     reference: [
@@ -57,7 +57,7 @@ export const chapter02Story: readonly ChainMission[] = [
       {
         slotId: 'm2.3-c1',
         missionId: 'commit-perdu',
-        signature: { branch: null, files: { 'exp.txt': 'expérience' } },
+        signature: { branch: null, present: ['exp.txt'] },
       },
     ],
     reference: [

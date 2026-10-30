@@ -23,6 +23,8 @@ export interface SlotSignature {
   readonly branch?: BranchName | null;
   /** Fichiers dont le contenu doit correspondre exactement. */
   readonly files?: Readonly<Record<string, string>>;
+  /** Fichiers qui doivent simplement exister (contenu libre). */
+  readonly present?: readonly string[];
   /** Fichiers qui doivent être absents du snapshot. */
   readonly absent?: readonly string[];
 }

@@ -21,12 +21,12 @@ export const mission21: Mission = {
   story:
     "L'équipe veut tester une idée de notes internes sans polluer main. Tu crées une branche experiment, tu y travailles, puis tu vérifies que main n'a pas bougé d'un millimètre. Une branche n'est qu'une étiquette : c'est le moment de le prouver.",
   situation: 'HEAD est sur main ; la branche experiment n’existe pas encore.',
-  objective: 'Crée la branche experiment, commite notes.txt dessus, et laisse main intacte.',
+  objective: 'Crée la branche experiment, commite notes.txt dessus (le contenu est libre), et laisse main intacte.',
   steps: [
     { label: 'Créer la branche experiment', done: (state) => hasBranch(state, 'experiment') },
     {
       label: 'Committer notes.txt sur experiment',
-      done: (state) => branchFile(state, 'experiment', 'notes.txt') === 'notes de la branche',
+      done: (state) => branchFile(state, 'experiment', 'notes.txt') !== undefined,
     },
     {
       label: 'Terminer sur experiment avec main inchangée',
@@ -45,12 +45,12 @@ export const mission21: Mission = {
     return allOf(
       check(headBranch(state) === 'experiment', 'HEAD doit être sur experiment.'),
       check(
-        branchFile(state, 'experiment', 'notes.txt') === 'notes de la branche',
+        branchFile(state, 'experiment', 'notes.txt') !== undefined,
         'experiment doit contenir notes.txt.',
       ),
       check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
       check(
-        headFile(state, 'notes.txt') === 'notes de la branche',
+        headFile(state, 'notes.txt') !== undefined,
         'Le HEAD de experiment doit voir notes.txt.',
       ),
       check(commitDelta(state, entry) === 1, 'Un seul nouveau commit est attendu.'),
@@ -58,8 +58,8 @@ export const mission21: Mission = {
   },
   hints: [
     'Créer une branche ne change pas HEAD : il faut ensuite y basculer.',
-    'Après le switch, crée notes.txt, indexe-le, puis commit.',
-    'git branch experiment, git switch experiment, edit notes.txt "notes de la branche", git add notes.txt, git commit -m "feat: notes expérimentales".',
+    'Après le switch, crée notes.txt (n’importe quel contenu), indexe-le, puis commit.',
+    'git branch experiment, git switch experiment, edit notes.txt "mes notes", git add notes.txt, git commit -m "feat: notes expérimentales".',
   ],
   solution: [
     'git branch experiment',

@@ -41,7 +41,7 @@ export const chapter04Story: readonly ChainMission[] = [
       {
         slotId: 'm4.1-c1',
         missionId: 'hotfix-worktree',
-        signature: { branch: 'hotfix', files: { 'bug.txt': 'corrigé' } },
+        signature: { branch: 'hotfix', present: ['bug.txt'] },
       },
     ],
     reference: [
@@ -77,7 +77,7 @@ export const chapter04Story: readonly ChainMission[] = [
       {
         slotId: 'm4.2-c1',
         missionId: 'deux-worktrees',
-        signature: { branch: 'docs', files: { 'docs/GUIDE.md': '# Guide Nova' } },
+        signature: { branch: 'docs', present: ['docs/GUIDE.md'] },
       },
     ],
     reference: [

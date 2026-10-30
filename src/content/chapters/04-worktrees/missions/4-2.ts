@@ -30,7 +30,7 @@ export const mission42: Mission = {
     },
     {
       label: 'Committer GUIDE.md sur docs',
-      done: (state) => branchFile(state, 'docs', 'docs/GUIDE.md') === '# Guide Nova',
+      done: (state) => branchFile(state, 'docs', 'docs/GUIDE.md') !== undefined,
     },
     {
       label: 'Revenir sur main avec le WIP intact',
@@ -55,7 +55,7 @@ export const mission42: Mission = {
     return allOf(
       check(worktreePaths(state).includes('~/gitquest-docs'), 'Le worktree docs doit exister.'),
       check(
-        branchFile(state, 'docs', 'docs/GUIDE.md') === '# Guide Nova',
+        branchFile(state, 'docs', 'docs/GUIDE.md') !== undefined,
         'La branche docs doit contenir GUIDE.md.',
       ),
       check(

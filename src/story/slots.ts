@@ -53,6 +53,9 @@ export function matchesSignature(
   for (const [path, content] of Object.entries(signature.files ?? {})) {
     if (!fileMatches(changes, path, content)) return false;
   }
+  for (const path of signature.present ?? []) {
+    if (commit.snapshot[path] === undefined) return false;
+  }
   for (const path of signature.absent ?? []) {
     if (commit.snapshot[path] !== undefined) return false;
   }

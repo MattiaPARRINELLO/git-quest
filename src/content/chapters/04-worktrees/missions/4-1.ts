@@ -31,7 +31,7 @@ export const mission41: Mission = {
     },
     {
       label: 'Committer le correctif sur hotfix',
-      done: (state) => branchFile(state, 'hotfix', 'bug.txt') === 'corrigé',
+      done: (state) => branchFile(state, 'hotfix', 'bug.txt') !== undefined && branchFile(state, 'hotfix', 'bug.txt') !== 'bug critique',
     },
     {
       label: 'Revenir au worktree principal avec le WIP intact',
@@ -54,7 +54,8 @@ export const mission41: Mission = {
         'Le worktree hotfix doit exister.',
       ),
       check(
-        branchFile(state, 'hotfix', 'bug.txt') === 'corrigé',
+        branchFile(state, 'hotfix', 'bug.txt') !== undefined &&
+          branchFile(state, 'hotfix', 'bug.txt') !== 'bug critique',
         'Le correctif doit être commité sur hotfix.',
       ),
       check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
