@@ -6,6 +6,15 @@ export const X_SPACING = 148;
 export const ROW_HEIGHT = 78;
 export const PADDING_X = 48;
 export const PADDING_Y = 72;
+/** Ligne de la branche principale : les autres alternent au-dessus et en dessous. */
+const LANE_CENTER_ROWS = 3;
+
+/** lane 0 = 0, lane 1 = -1 (haut), lane 2 = +1 (bas), lane 3 = -2, lane 4 = +2… */
+function laneOffset(lane: number): number {
+  if (lane === 0) return 0;
+  const magnitude = Math.ceil(lane / 2);
+  return lane % 2 === 1 ? -magnitude : magnitude;
+}
 
 export interface Point {
   readonly x: number;
@@ -143,7 +152,7 @@ export function layoutGraph(state: RepoState): GraphLayout {
       message: commit.message,
       // Index d'ordre de création : les commandes non-commit ne créent aucun espace.
       x: PADDING_X + creationIndex * X_SPACING,
-      y: PADDING_Y + lane * ROW_HEIGHT,
+      y: PADDING_Y + (LANE_CENTER_ROWS + laneOffset(lane)) * ROW_HEIGHT,
       lane,
       orphan: !connected.has(commit.hash),
       files: Object.keys(commit.snapshot).sort(),
@@ -185,7 +194,7 @@ export function layoutGraph(state: RepoState): GraphLayout {
     const branch = laneBranch.get(index);
     return {
       index,
-      y: PADDING_Y + index * ROW_HEIGHT,
+      y: PADDING_Y + (LANE_CENTER_ROWS + laneOffset(index)) * ROW_HEIGHT,
       color: branch === undefined ? ORPHAN_COLOR : branchColor(branch),
       ...(branch === undefined ? {} : { branch }),
     };

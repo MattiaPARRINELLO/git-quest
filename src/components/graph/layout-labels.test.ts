@@ -62,4 +62,29 @@ describe('placement des étiquettes du graphe', () => {
     expect(other?.head).toBe(false);
     expect(other?.activeHead).toBe(false);
   });
+
+  it('place les branches en alternance au-dessus et en dessous de main', () => {
+    const repo = scenario()
+      .init()
+      .commit('Initial', { 'a.txt': 'a' })
+      .branch('up')
+      .checkout('up')
+      .commit('up', { 'b.txt': 'b' })
+      .checkout('main')
+      .branch('down')
+      .checkout('down')
+      .commit('down', { 'c.txt': 'c' })
+      .build();
+
+    const layout = layoutGraph(repo);
+    const node = (message: string) =>
+      layout.nodes.find((candidate) => candidate.message === message);
+    const main = node('Initial');
+    const up = node('up');
+    const down = node('down');
+    if (!main || !up || !down) throw new Error('nœuds attendus');
+
+    expect(up.y).toBeLessThan(main.y);
+    expect(down.y).toBeGreaterThan(main.y);
+  });
 });
