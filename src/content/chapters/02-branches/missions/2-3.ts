@@ -42,11 +42,11 @@ const initialCount = Object.keys(base.commits).length;
 const oldShort = oldest.hash.slice(0, 7);
 const orphanShort = orphan.hash.slice(0, 7);
 
-export const mission24: Mission = {
+export const mission23: Mission = {
   id: 'commit-perdu',
   chapterId: 'branches',
   order: 3,
-  number: '2.4',
+  number: '2.3',
   title: 'Le commit perdu',
   story:
     "Une régression est apparue dans l'API de facturation. Tu te détaches sur l'ancien commit pour enquêter, tu commites une expérience, puis tu reviens sur main. Git t'avertit : ce commit n'est plus relié à aucune branche. Avant qu'il ne disparaisse, garde-le dans une branche de sauvetage.",

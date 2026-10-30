@@ -2,7 +2,7 @@ import type { Chapter } from '../../types';
 import { lesson02 } from './lesson';
 import { mission21 } from './missions/2-1';
 import { mission22 } from './missions/2-2';
-import { mission24 } from './missions/2-4';
+import { mission23 } from './missions/2-3';
 
 export const chapter02: Chapter = {
   id: 'branches',
@@ -12,5 +12,5 @@ export const chapter02: Chapter = {
   description:
     'Faire diverger deux lignes de travail, explorer un commit sans rien casser, et rescuer un commit orphelin.',
   lesson: lesson02,
-  missions: [mission21, mission22, mission24],
+  missions: [mission21, mission22, mission23],
 };

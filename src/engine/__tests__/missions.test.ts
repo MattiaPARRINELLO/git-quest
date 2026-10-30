@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allMissions, findMission } from '../../content';
+import { allMissions, findMission, isMissionUnlocked } from '../../content';
 import { execute } from '../execute';
 import { findForbiddenCommand, findPrediction } from '../../app/mission';
 import { runAll } from './helpers';
@@ -107,12 +107,47 @@ describe('missions (contenu réel)', () => {
     const result = mission.validate(forced);
     expect(result.ok, result.reason).toBe(true);
 
-    expect(
-      mission.validateAttempt?.(['git branch -D experiment'])?.ok,
-      'forcer sans avoir tenté -d ne suffit pas',
-    ).toBe(false);
+    const directAttempt = mission.validateAttempt?.(['git branch -D experiment']);
+    expect(directAttempt?.ok, 'forcer sans avoir tenté -d ne suffit pas').toBe(false);
+    expect(directAttempt?.reason).toContain('Essaie d’abord git branch -d experiment');
     expect(
       mission.validateAttempt?.(['git branch -d experiment', 'git branch -D experiment'])?.ok,
+    ).toBe(true);
+  });
+
+  it('3.3 — merge experiment puis -d valide la mission', () => {
+    const mission = findMission('menage-branches');
+    if (!mission) throw new Error('mission 3.3 attendue');
+    const commands = [
+      'git branch -d feature-login',
+      'git merge experiment',
+      'git branch -d experiment',
+    ];
+    const state = runAll(mission.initialState, commands);
+    expect(mission.validate(state).ok).toBe(true);
+    expect(mission.validateAttempt?.(commands)?.ok).toBe(true);
+  });
+
+  it('3.3 — -d refusé puis -D valide la mission', () => {
+    const mission = findMission('menage-branches');
+    if (!mission) throw new Error('mission 3.3 attendue');
+    const refused = execute(mission.initialState, 'git branch -d experiment');
+    expect(refused.error?.code).toBe('branch-not-fully-merged');
+
+    const commands = ['git branch -d feature-login', 'git branch -D experiment'];
+    const state = runAll(refused.newState, commands);
+    expect(mission.validate(state).ok).toBe(true);
+    expect(
+      mission.validateAttempt?.(['git branch -d experiment', ...commands])?.ok,
+    ).toBe(true);
+  });
+
+  it('la clé de progression « commit-perdu » reste valide après renumérotation', () => {
+    const mission = findMission('commit-perdu');
+    expect(mission?.number).toBe('2.3');
+    expect(
+      isMissionUnlocked('avance-rapide', { 'commit-perdu': { stars: 3 } }),
+      'une mission 2.3 déjà terminée doit déverrouiller la suite',
     ).toBe(true);
   });
 
