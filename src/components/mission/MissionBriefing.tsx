@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
 import type { Mission } from '../../content/types';
-import type { MissionBriefing as Briefing } from '../../content/briefings';
+import type { BriefingLine, MissionBriefing as Briefing } from '../../content/briefings';
 import type { PreparedFile } from '../../lib/prepared-files';
+import { branchColor } from '../../lib/colors';
+import { TEAMMATES } from '../../story/actor';
 import { Icon } from '../ui/Icon';
 
 interface MissionBriefingProps {
@@ -9,6 +11,50 @@ interface MissionBriefingProps {
   readonly briefing: Briefing;
   readonly prepared?: readonly PreparedFile[];
   readonly onClose: () => void;
+}
+
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .map((part) => part[0] ?? '')
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function DialogueLine({ line }: { readonly line: BriefingLine }) {
+  if (line.speaker === 'narrateur') {
+    return (
+      <p className="border-l-2 border-border pl-2.5 text-sm leading-relaxed text-muted">
+        {line.text}
+      </p>
+    );
+  }
+
+  const teammate = TEAMMATES[line.speaker];
+  if (teammate === undefined) {
+    return <p className="text-sm leading-relaxed text-muted">{line.text}</p>;
+  }
+  const color = branchColor(teammate.id);
+
+  return (
+    <div className="flex items-start gap-2.5">
+      <span
+        aria-hidden="true"
+        className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[9px] font-semibold"
+        style={{ borderColor: color, color, background: `${color}1a` }}
+      >
+        {initials(teammate.name)}
+      </span>
+      <div className="min-w-0">
+        <p className="text-[10px] font-semibold tracking-wide text-text">
+          {teammate.name}
+          <span className="ml-1.5 font-normal text-muted">· {teammate.role}</span>
+        </p>
+        <p className="text-sm leading-relaxed text-muted">{line.text}</p>
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -32,11 +78,9 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
         </p>
         <h2 className="mt-2 text-xl font-semibold tracking-tight text-text">{briefing.title}</h2>
 
-        <div className="mt-3 space-y-2.5">
-          {briefing.paragraphs.map((paragraph) => (
-            <p key={paragraph} className="text-sm leading-relaxed text-muted">
-              {paragraph}
-            </p>
+        <div className="mt-3 space-y-3">
+          {briefing.lines.map((line) => (
+            <DialogueLine key={`${line.speaker}-${line.text}`} line={line} />
           ))}
         </div>
 
@@ -60,7 +104,6 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
             </ul>
           </div>
         )}
-
 
         <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button type="button" className="btn justify-center px-3 py-2 text-sm" onClick={onClose}>

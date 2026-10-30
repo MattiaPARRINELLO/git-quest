@@ -96,7 +96,7 @@ describe('briefing narratif de mission', () => {
     });
   });
 
-  it('2.1 dit que notes.txt est déjà prêt à être commité', async () => {
+  it('2.1 présente Léa et le fichier déjà prêt', async () => {
     useProgressStore.setState({
       completed: {
         'trois-zones': { stars: 3 },
@@ -106,7 +106,7 @@ describe('briefing narratif de mission', () => {
     });
     render(<MissionScreen missionId="branche-pointeur" />);
     expect(
-      await screen.findByText(/notes\.txt a déjà été mis à jour/i),
+      await screen.findByText(/notes\.txt est déjà modifié/i),
     ).toBeInTheDocument();
   });
 });
