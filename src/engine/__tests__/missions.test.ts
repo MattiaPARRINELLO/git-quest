@@ -99,6 +99,28 @@ describe('missions (contenu réel)', () => {
     }
   });
 
+  it('1.3 — prédiction ciblée sur -a et chemin add puis commit -am', () => {
+    const mission = findMission('piege-am');
+    if (!mission) throw new Error('mission 1.3 attendue');
+
+    expect(findPrediction(mission, 'git commit -m "docs"', mission.initialState)).toBeUndefined();
+    const prediction = findPrediction(
+      mission,
+      'git commit -am "docs"',
+      mission.initialState,
+    );
+    expect(prediction?.correctOptionId).toBe('non');
+    expect(prediction?.question).toContain('notes.txt');
+
+    const alternative = runAll(mission.initialState, [
+      'git add notes.txt',
+      'git commit -am "docs: tout"',
+    ]);
+    expect(mission.validate(alternative).ok).toBe(true);
+    for (const step of mission.steps) expect(step.done(alternative)).toBe(true);
+    expect(mission.story.toLowerCase()).not.toContain('untracked');
+  });
+
   it('1.3 — git commit -am seul laisse l’untracked hors du commit', () => {
     const mission = findMission('piege-am');
     if (!mission) throw new Error('mission 1.3 attendue');

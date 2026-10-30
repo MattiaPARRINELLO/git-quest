@@ -75,13 +75,13 @@ export const mission11: Mission = {
   predictions: [
     {
       trigger: (parsed) => parsed.kind === 'git-commit',
-      question: 'Quels fichiers seront réellement dans ce commit ?',
+      question: 'Quels fichiers seront dans ce commit ?',
       options: [
-        { id: 'both', label: 'Les deux fichiers modifiés' },
-        { id: 'indexed', label: 'Uniquement le fichier indexé' },
-        { id: 'none', label: 'Aucun fichier : le commit sera vide' },
+        { id: 'a', label: 'a.txt' },
+        { id: 'both', label: 'a.txt et b.txt' },
+        { id: 'none', label: 'Aucun' },
       ],
-      correctOptionId: 'indexed',
+      correctOptionId: 'a',
       explanation:
         'Le commit ne lit que l’index. b.txt reste modifié dans le working dir sans entrer dans la photo.',
     },

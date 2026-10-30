@@ -330,9 +330,10 @@ Routeur maison par hash (`src/router/useHashRoute.ts`), aucun routeur externe.
 - `completed: Record<missionId, { stars }>` (les étoiles ne peuvent que monter) ;
 - `lessonSlides: Record<chapterId, index>` pour reprendre un cours.
 
-Une migration légère mappe d'anciennes clés de progression numériques (`2.4`,
-`mission-2-4`, …) vers l'id canonique `commit-perdu` (mission 2.3), en conservant
-le meilleur score en cas de collision.
+La renumérotation 2.4 → 2.3 ne change pas l'id persisté (`commit-perdu`) : le
+format réel `{ version: 1, completed, lessonSlides }` reste valide tel quel. Un
+test utilise une fixture issue de ce format pour garantir qu'une mission 2.4
+terminée reste acquise en 2.3.
 
 Les missions se déverrouillent **linéairement** : la première est ouverte, chaque
 suivante exige la précédente terminée (`isMissionUnlocked`). Le bac à sable reste

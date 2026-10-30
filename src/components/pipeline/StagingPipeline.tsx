@@ -164,7 +164,7 @@ export function StagingPipeline() {
     status: 'staged',
     zone: 'staging',
     flow: !headPaths.has(change.path),
-    ...(headPaths.has(change.path) ? { diffLabel: '≠ HEAD' } : { diffLabel: 'nouveau' }),
+    ...(headPaths.has(change.path) ? { diffLabel: '≠ dernier commit' } : { diffLabel: 'nouveau' }),
   }));
 
   const commitChips: Chip[] = Object.keys(headSnapshot)

@@ -2,10 +2,9 @@ import { scenario } from '../../../../engine/scenario';
 import {
   allOf,
   check,
-  commitCount,
+  commitList,
   headBranch,
   headFile,
-  indexFile,
   isWorkingTreeClean,
 } from '../../../../engine/validate';
 import type { Mission } from '../../../types';
@@ -27,47 +26,63 @@ export const mission13: Mission = {
   number: '1.3',
   title: 'Le piège du -am',
   story:
-    "README.md est modifié et notes.txt vient d’apparaître. Un coéquipier t’assure que « git commit -am » s’occupe de tout : rapide, efficace, sans réfléchir. Sauf que notes.txt n’a jamais été suivi : commit tout proprement et découvre ce que -am laisse de côté.",
-  situation: 'README.md est modifié et notes.txt n’a jamais été suivi par Git.',
-  objective: 'Commite README.md et notes.txt ensemble, sans laisser de fichier orphelin.',
+    "Un coéquipier affirme que « git commit -am » s’occupe de tout, sans jamais avoir à indexer quoi que ce soit. Vérifie ce que Git photographie vraiment avec ce réflexe.",
+  situation: 'README.md est modifié et notes.txt vient d’apparaître dans le projet.',
+  objective: 'Commite README.md en version 2 et notes.txt, puis laisse un working dir propre.',
   steps: [
     {
-      label: 'Indexer notes.txt avec git add',
-      done: (state) => indexFile(state, 'notes.txt') === 'notes de réunion',
-    },
-    {
-      label: 'Committer README.md en version 2',
-      done: (state) => headFile(state, 'README.md') === 'version 2',
-    },
-    {
-      label: 'Committer aussi notes.txt',
-      done: (state) => headFile(state, 'notes.txt') === 'notes de réunion',
-    },
-    {
-      label: 'Obtenir un working dir propre',
+      label: 'README v2 présent dans un commit',
       done: (state) =>
-        isWorkingTreeClean(state) && headFile(state, 'notes.txt') !== undefined,
+        commitList(state).some((commit) => commit.snapshot['README.md'] === 'version 2'),
+    },
+    {
+      label: 'notes.txt présent dans un commit',
+      done: (state) =>
+        commitList(state).some((commit) => commit.snapshot['notes.txt'] === 'notes de réunion'),
+    },
+    {
+      label: 'Working dir propre',
+      done: (state) => isWorkingTreeClean(state),
     },
   ],
   takeaway:
-    'git commit -am indexe le suivi, pas les untracked : git add reste nécessaire pour les nouveaux fichiers.',
+    'git commit -am indexe les fichiers suivis, pas les untracked : git add reste nécessaire pour un nouveau fichier.',
   difficulty: 2,
-  par: 2,
+  par: 3,
   initialState: initial,
   validate: (state) =>
     allOf(
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
-      check(commitCount(state) === 2, 'Un seul nouveau commit est attendu.'),
-      check(headFile(state, 'README.md') === 'version 2', 'README.md doit être commité en version 2.'),
-      check(headFile(state, 'notes.txt') === 'notes de réunion', 'notes.txt doit entrer dans le commit.'),
+      check(headFile(state, 'README.md') === 'version 2', 'README.md doit finir en version 2.'),
+      check(headFile(state, 'notes.txt') === 'notes de réunion', 'notes.txt doit finir commité.'),
       check(isWorkingTreeClean(state), 'Le working dir doit être propre à la fin.'),
     ),
   hints: [
-    'L’option -a indexe les fichiers déjà suivis, jamais les fichiers non suivis.',
-    'notes.txt est untracked : il faut d’abord l’ajouter explicitement à l’index.',
-    'git add notes.txt, puis git commit -am "docs: readme et notes".',
+    'Lance d’abord le commit -am comme le suggère ton coéquipier, puis inspecte le résultat.',
+    'notes.txt n’a jamais été suivi : -a ne peut pas l’indexer. Il faut l’ajouter explicitement, puis commiter.',
+    'git commit -am "docs: readme", git add notes.txt, git commit -m "docs: notes".',
   ],
-  solution: ['git add notes.txt', 'git commit -am "docs: readme et notes"'],
-  successNote: 'Le piège est désamorcé : -a gère le suivi, git add gère les nouveaux fichiers.',
-  suggestedCommands: ['cat README.md', 'git status', 'git add notes.txt', 'git commit -am "docs: readme et notes"'],
+  solution: [
+    'git commit -am "docs: readme"',
+    'git add notes.txt',
+    'git commit -m "docs: notes"',
+  ],
+  predictions: [
+    {
+      trigger: (parsed) => parsed.kind === 'git-commit' && parsed.stageAllTracked,
+      question: 'notes.txt sera-t-il dans ce commit ?',
+      options: [
+        { id: 'oui', label: 'Oui' },
+        { id: 'non', label: 'Non' },
+      ],
+      correctOptionId: 'non',
+      explanation:
+        'notes.txt n’a jamais été suivi : -a ne peut pas l’indexer. Il reste hors de la photo.',
+    },
+  ],
+  suggestedCommands: [
+    'cat README.md',
+    'git status',
+    'git commit -am "docs: readme"',
+  ],
 };

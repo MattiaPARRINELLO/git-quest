@@ -3,34 +3,6 @@ import { storage } from '../storage/storage';
 
 const PROGRESS_KEY = 'gitquest.progress.v1';
 
-/**
- * Clés de progression d'anciens prototypes (numéro affiché) à migrer vers les
- * ids sémantiques actuels. `commit-perdu` reste l'id canonique après le passage
- * de 2.4 à 2.3.
- */
-const LEGACY_MISSION_KEYS: Readonly<Record<string, string>> = {
-  '2.4': 'commit-perdu',
-  'mission-2.4': 'commit-perdu',
-  'mission-2-4': 'commit-perdu',
-  'commit-perdu-2.4': 'commit-perdu',
-};
-
-function migrateCompleted(
-  completed: Readonly<Record<string, MissionCompletion>>,
-): Record<string, MissionCompletion> {
-  const migrated: Record<string, MissionCompletion> = { ...completed };
-  for (const [legacy, current] of Object.entries(LEGACY_MISSION_KEYS)) {
-    const entry = migrated[legacy];
-    if (!entry) continue;
-    const existing = migrated[current];
-    if (!existing || entry.stars > existing.stars) {
-      migrated[current] = entry;
-    }
-    delete migrated[legacy];
-  }
-  return migrated;
-}
-
 export interface MissionCompletion {
   readonly stars: 1 | 2 | 3;
 }
@@ -72,7 +44,7 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     const saved = await storage.get<PersistedProgress | null>(PROGRESS_KEY, null);
     if (saved && saved.version === 1) {
       set({
-        completed: migrateCompleted(saved.completed),
+        completed: { ...saved.completed },
         lessonSlides: { ...saved.lessonSlides },
         hydrated: true,
       });

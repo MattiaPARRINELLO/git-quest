@@ -34,6 +34,9 @@ describe('commandes applicatives', () => {
     expect(text).toContain('Outils');
     expect(text).toContain('explain <commande>');
     expect(text).toContain('git switch');
+    expect(text).toContain('git branch -d|-D <nom>');
+    expect(text).toContain('git worktree add -b <branche> <chemin>');
+    expect(text).toContain('../gitquest-hotfix');
   });
 
   it('une commande inconnue suggère help et la commande proche', () => {

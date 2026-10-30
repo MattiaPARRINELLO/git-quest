@@ -24,7 +24,7 @@ export const mission12: Mission = {
   number: '1.2',
   title: 'La photo ne bouge plus',
   story:
-    'La doc de Nova doit passer en v2, mais tu continues à la retoucher après l’avoir indexée. Le CTO veut vérifier une intuition : un commit est une photo figée de l’index, pas un miroir du fichier sur ton disque.',
+    'Le module app.ts de Nova doit passer en v2, mais tu continues à le modifier après l’avoir indexé. Le CTO veut vérifier une intuition : un commit est une photo figée de l’index, pas un miroir du fichier sur ton disque.',
   situation: 'app.ts contient « v1 », déjà commité, et le working dir est propre.',
   objective:
     'Écris v2, indexe-la, réécris v3 sans l’indexer, puis commite : le commit doit garder v2.',

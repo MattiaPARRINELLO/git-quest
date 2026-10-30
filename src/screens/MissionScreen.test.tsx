@@ -140,7 +140,7 @@ describe('MissionScreen', () => {
     }
 
     await user.click(
-      await screen.findByRole('button', { name: /Uniquement le fichier indexé/i }),
+      await screen.findByRole('button', { name: /^a\.txt$/ }),
     );
 
     const dialog = await screen.findByRole('dialog', { name: /Mission 1.1 réussie/i });

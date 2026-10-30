@@ -1,37 +1,49 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { findMission, isMissionUnlocked } from '../content';
 import { storage } from '../storage/storage';
 import { useProgressStore } from './useProgressStore';
 
 const KEY = 'gitquest.progress.v1';
 
-describe('migration de progression', () => {
+/**
+ * Fixture copiée du format réellement écrit par persist.ts :
+ * { version: 1, completed: { [missionId]: { stars } }, lessonSlides }.
+ * La mission renumérotée 2.4 → 2.3 a conservé son id `commit-perdu`.
+ */
+const STORED_PROGRESS_FIXTURE = {
+  version: 1 as const,
+  completed: { 'commit-perdu': { stars: 2 } },
+  lessonSlides: { branches: 2 },
+};
+
+describe('progression persistée (format réel)', () => {
   beforeEach(async () => {
     await storage.remove(KEY);
     useProgressStore.setState({ completed: {}, lessonSlides: {}, hydrated: false });
   });
 
-  it('migre l’ancienne clé 2.4 vers commit-perdu (mission 2.3)', async () => {
-    await storage.set(KEY, {
-      version: 1,
-      completed: { '2.4': { stars: 2 } },
-      lessonSlides: {},
-    });
+  it('recharge une mission 2.4 terminée sous son id réel, désormais 2.3', async () => {
+    await storage.set(KEY, STORED_PROGRESS_FIXTURE);
 
     await useProgressStore.getState().hydrate();
 
     expect(useProgressStore.getState().completed['commit-perdu']).toEqual({ stars: 2 });
-    expect(useProgressStore.getState().completed['2.4']).toBeUndefined();
+    expect(useProgressStore.getState().lessonSlides.branches).toBe(2);
+    expect(findMission('commit-perdu')?.number).toBe('2.3');
+    expect(
+      isMissionUnlocked('avance-rapide', useProgressStore.getState().completed),
+    ).toBe(true);
   });
 
-  it('conserve le meilleur score en cas de collision', async () => {
-    await storage.set(KEY, {
+  it('réécrit exactement le même format après une complétion', async () => {
+    await useProgressStore.getState().hydrate();
+    useProgressStore.getState().completeMission('commit-perdu', 3);
+
+    const saved = await storage.get<typeof STORED_PROGRESS_FIXTURE | null>(KEY, null);
+    expect(saved).toEqual({
       version: 1,
-      completed: { '2.4': { stars: 2 }, 'commit-perdu': { stars: 3 } },
+      completed: { 'commit-perdu': { stars: 3 } },
       lessonSlides: {},
     });
-
-    await useProgressStore.getState().hydrate();
-
-    expect(useProgressStore.getState().completed['commit-perdu']).toEqual({ stars: 3 });
   });
 });
