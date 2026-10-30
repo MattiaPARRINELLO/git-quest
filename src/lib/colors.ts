@@ -1,4 +1,4 @@
-const BRANCH_HUES = [258, 190, 152, 38, 330, 212, 14, 280];
+const BRANCH_HUES = [205, 158, 78, 330, 264, 96, 186, 300];
 
 function stableHash(value: string): number {
   let hash = 0x811c9dc5;
@@ -9,18 +9,21 @@ function stableHash(value: string): number {
   return hash;
 }
 
-/** Couleur stable et vive dérivée du nom de branche. */
+/**
+ * Couleur stable et lisible dérivée du nom de branche. Teintes désaturées :
+ * le graphe doit rester calme, la couleur sert à suivre une ligne, pas à briller.
+ */
 export function branchColor(name: string): string {
   const index = stableHash(name) % BRANCH_HUES.length;
-  const hue = BRANCH_HUES[index] ?? 258;
-  return `hsl(${hue} 82% 64%)`;
+  const hue = BRANCH_HUES[index] ?? 18;
+  return `hsl(${hue} var(--branch-sat, 54%) var(--branch-light, 62%))`;
 }
 
 export function branchColorSoft(name: string): string {
   const index = stableHash(name) % BRANCH_HUES.length;
-  const hue = BRANCH_HUES[index] ?? 258;
-  return `hsl(${hue} 82% 64% / 0.14)`;
+  const hue = BRANCH_HUES[index] ?? 18;
+  return `hsl(${hue} var(--branch-sat, 54%) var(--branch-light, 62%) / 0.14)`;
 }
 
-export const ORPHAN_COLOR = 'hsl(220 8% 55%)';
+export const ORPHAN_COLOR = 'hsl(120 5% 55%)';
 export const HEAD_COLOR = 'var(--accent)';

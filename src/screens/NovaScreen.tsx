@@ -9,6 +9,7 @@ import { teammateForAuthor } from '../story/actor';
 import { findMission } from '../content';
 import { unreferencedHashes } from '../story/display';
 import { downloadSvgAsPng } from '../lib/export-graph';
+import { cn } from '../lib/cn';
 
 function stats(nova: RepoState, journal: readonly { kind: string }[]) {
   const commits = Object.values(nova.commits);
@@ -20,6 +21,22 @@ function stats(nova: RepoState, journal: readonly { kind: string }[]) {
     worktreesActive: Object.keys(nova.worktrees).length,
     orphans: unreferencedHashes(nova).length,
   };
+}
+
+function Stars({ count }: { readonly count: number }) {
+  return (
+    <span className="inline-flex items-center gap-[3px]" aria-label={`${count} étoile(s)`}>
+      {[0, 1, 2].map((index) => (
+        <span
+          key={index}
+          className={cn(
+            'h-[5px] w-[5px] rounded-full',
+            index < count ? 'bg-warning' : 'bg-border-strong/60',
+          )}
+        />
+      ))}
+    </span>
+  );
 }
 
 export function NovaScreen() {
@@ -41,7 +58,7 @@ export function NovaScreen() {
   if (nova === null) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 px-4 text-center">
-        <p className="text-sm text-muted">
+        <p className="max-w-sm text-[13px] leading-relaxed text-muted">
           Ton arbre Nova apparaîtra ici une fois ta première mission terminée.
         </p>
         <a href={routePaths.home} className="btn">
@@ -88,63 +105,69 @@ export function NovaScreen() {
     if (svg instanceof SVGSVGElement) void downloadSvgAsPng(svg, 'nova.png');
   };
 
+  const summary: ReadonlyArray<readonly [string, number]> = [
+    ['Missions', Object.keys(completed).length],
+    ['Commits', numbers.commits],
+    ['Branches', numbers.branches],
+    ['Merges', numbers.merges],
+    ['Étoiles', stars],
+    ['Worktrees créés', numbers.worktreesCreated],
+    ['Worktrees actifs', numbers.worktreesActive],
+    ['Abandonnés', numbers.orphans],
+  ];
+
   return (
     <div className="scrollbar-thin h-full overflow-y-auto">
-      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
-        <header className="flex flex-wrap items-end justify-between gap-3">
+      <div className="mx-auto max-w-[1160px] px-5 py-8 sm:px-8 sm:py-10">
+        <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+            <p className="flex items-center gap-2 text-[11.5px] text-muted">
+              <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
               Ton histoire
             </p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-text">
-              Ton arbre Nova
-            </h1>
+            <h1 className="display mt-1.5 text-[34px] leading-[1.1] text-text">Ton arbre Nova</h1>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button type="button" className="btn px-3 py-1.5 text-xs" onClick={exportPng}>
+            <button type="button" className="btn h-8 px-2.5 text-[12px]" onClick={exportPng}>
               Exporter en PNG
             </button>
-            <button type="button" className="btn px-3 py-1.5 text-xs" onClick={() => void copyLog()}>
+            <button
+              type="button"
+              className="btn h-8 px-2.5 text-[12px]"
+              onClick={() => void copyLog()}
+            >
               {copied ? 'Copié' : 'Copier git log'}
             </button>
-            <a href={routePaths.home} className="btn px-3 py-1.5 text-xs">
+            <a href={routePaths.home} className="btn h-8 px-2.5 text-[12px]">
               Carte
             </a>
           </div>
         </header>
 
-        <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {[
-            ['Commits', numbers.commits],
-            ['Branches', numbers.branches],
-            ['Merges', numbers.merges],
-            ['Étoiles', stars],
-            ['Worktrees créés', numbers.worktreesCreated],
-            ['Worktrees actifs', numbers.worktreesActive],
-            ['Abandonnés', numbers.orphans],
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-xl border border-border bg-panel px-3 py-2">
-              <dt className="text-[10px] uppercase tracking-wider text-muted">{label}</dt>
-              <dd className="font-mono text-lg text-text">{value}</dd>
+        <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-4">
+          {summary.map(([label, value]) => (
+            <div key={label} className="bg-panel px-3.5 py-3">
+              <dt className="mono-meta">{label}</dt>
+              <dd className="mt-1 font-mono text-[19px] leading-none tabular-nums text-text">
+                {value}
+              </dd>
             </div>
           ))}
         </dl>
 
         {timeline.length > 0 && (
-          <section className="mt-5" aria-label="Fil de l’histoire">
-            <h2 className="text-sm font-semibold text-text">Le fil de l’histoire</h2>
-            <ol className="mt-2 space-y-1.5">
-              {timeline.map(({ mission, stars, messages }) => (
+          <section className="mt-7" aria-label="Fil de l’histoire">
+            <h2 className="text-[14px] font-medium text-text">Le fil de l’histoire</h2>
+            <ol className="mt-2 divide-y divide-border border-y border-border">
+              {timeline.map(({ mission, stars: missionStars, messages }) => (
                 <li
                   key={mission.id}
-                  className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-lg border border-border bg-panel px-2.5 py-1.5"
+                  className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2"
                 >
-                  <span className="font-mono text-[10px] text-accent">{mission.number}</span>
-                  <span className="text-xs font-medium text-text">{mission.title}</span>
-                  <span className="text-[10px] text-warning" aria-label={`${stars} étoile(s)`}>
-                    {'★'.repeat(stars)}
-                  </span>
-                  <span className="w-full truncate font-mono text-[10px] text-muted">
+                  <span className="font-mono text-[10.5px] text-muted">{mission.number}</span>
+                  <span className="text-[12.5px] font-medium text-text">{mission.title}</span>
+                  <Stars count={missionStars} />
+                  <span className="w-full truncate font-mono text-[10.5px] text-muted">
                     {messages.length > 0 ? messages.join(' · ') : 'Aucun message personnel'}
                   </span>
                 </li>
@@ -153,10 +176,10 @@ export function NovaScreen() {
           </section>
         )}
 
-        <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="mt-6 grid gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div
             ref={graphRef}
-            className="min-h-[22rem] overflow-hidden rounded-2xl border border-border bg-panel"
+            className="min-h-[24rem] overflow-hidden rounded-xl border border-border bg-panel"
           >
             <CommitGraph
               state={nova}
@@ -165,49 +188,57 @@ export function NovaScreen() {
             />
           </div>
 
-          <aside className="rounded-2xl border border-border bg-panel p-3">
-            {commit ? (
-              <div className="space-y-1.5 text-xs">
-                <p className="font-mono text-[11px] text-accent-2">{commit.hash.slice(0, 7)}</p>
-                <p className="font-medium text-text">{commit.message}</p>
-                <p className="text-muted">
-                  {author === undefined
-                    ? 'Toi · commit de ton parcours'
-                    : `${author.name} · ${author.role}`}
-                </p>
-                <p className="text-muted">{commit.parents.length} parent(s)</p>
-                <p className="text-muted">
-                  Branche : {commit.branch ?? 'HEAD détaché'}
-                </p>
-                <p className="text-muted">
-                  {Object.keys(commit.snapshot).length} fichier(s) dans la photo
-                </p>
-                <p className="text-[11px] text-muted">
-                  Orphelin : {unreferencedHashes(nova).includes(commit.hash) ? 'oui' : 'non'}
-                </p>
-                {origin !== undefined && (
-                  <p className="text-[11px] text-muted">
-                    Mission d’origine :{' '}
-                    {originMission === undefined
-                      ? origin.missionId
-                      : `${originMission.number} — ${originMission.title}`}
+          <aside className="rounded-xl border border-border bg-panel">
+            <div className="flex items-center gap-2 border-b border-border px-3.5 py-2.5">
+              <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
+              <h2 className="text-[12px] font-medium text-text">
+                {commit ? 'Commit sélectionné' : 'Détail'}
+              </h2>
+            </div>
+            <div className="px-3.5 py-3">
+              {commit ? (
+                <div className="space-y-1.5 text-[12px]">
+                  <p className="font-mono text-[11px] text-accent-2">{commit.hash.slice(0, 7)}</p>
+                  <p className="font-medium leading-snug text-text">{commit.message}</p>
+                  <p className="text-muted">
+                    {author === undefined
+                      ? 'Toi · commit de ton parcours'
+                      : `${author.name} · ${author.role}`}
                   </p>
-                )}
-              </div>
-            ) : (
-              <p className="text-xs leading-relaxed text-muted">
-                Clique sur un commit du graphe pour voir son message, son auteur et son
-                contenu. Les commits abandonnés restent visibles, plus pâles.
-              </p>
-            )}
+                  <p className="text-muted">{commit.parents.length} parent(s)</p>
+                  <p className="text-muted">
+                    Branche : {commit.branch ?? 'HEAD détaché'}
+                  </p>
+                  <p className="text-muted">
+                    {Object.keys(commit.snapshot).length} fichier(s) dans la photo
+                  </p>
+                  <p className="text-[11px] text-muted">
+                    Orphelin : {unreferencedHashes(nova).includes(commit.hash) ? 'oui' : 'non'}
+                  </p>
+                  {origin !== undefined && (
+                    <p className="text-[11px] text-muted">
+                      Mission d’origine :{' '}
+                      {originMission === undefined
+                        ? origin.missionId
+                        : `${originMission.number} — ${originMission.title}`}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-[12px] leading-relaxed text-muted">
+                  Clique sur un commit du graphe pour voir son message, son auteur et son
+                  contenu. Les commits abandonnés restent visibles, plus pâles.
+                </p>
+              )}
+            </div>
           </aside>
         </div>
 
-        <details className="mt-4 rounded-2xl border border-border bg-panel p-3">
-          <summary className="cursor-pointer text-xs font-semibold text-text">
+        <details className="mt-4 rounded-xl border border-border bg-panel">
+          <summary className="cursor-pointer px-3.5 py-2.5 text-[12px] font-medium text-text">
             git log --oneline --graph
           </summary>
-          <pre className="scrollbar-thin mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-5 text-muted">
+          <pre className="scrollbar-thin max-h-72 overflow-auto whitespace-pre-wrap break-words border-t border-border px-3.5 py-3 font-mono text-[11px] leading-5 text-muted">
             {log}
           </pre>
         </details>

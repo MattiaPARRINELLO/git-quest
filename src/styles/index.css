@@ -2,42 +2,49 @@
 
 :root {
   color-scheme: dark;
-  --bg: #0a0b0f;
-  --panel: #101218;
-  --panel-2: #151823;
-  --panel-3: #1b1f2d;
-  --border: #242838;
-  --border-strong: #323750;
-  --text: #e8eaf2;
-  --muted: #9096a8;
-  --accent: #8b7cf6;
-  --accent-soft: #8b7cf624;
-  --accent-2: #22d3ee;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --danger: #fb7185;
-  --graph-grid: #1a1e2c;
-  --shadow: 0 18px 60px -24px rgb(0 0 0 / 0.8);
+  --bg: #0e100e;
+  --panel: #141714;
+  --panel-2: #1a1e1a;
+  --panel-3: #222722;
+  --border: #272d27;
+  --border-strong: #3b433b;
+  --text: #e9ece6;
+  --muted: #99a299;
+  --accent: #ec6a40;
+  --accent-soft: #ec6a4019;
+  --on-accent: #180e08;
+  --accent-2: #a9c0b2;
+  --success: #63bb8e;
+  --warning: #d9a94f;
+  --danger: #e07a6f;
+  --graph-grid: #1b201b;
+  --shadow: 0 26px 70px -34px rgb(0 0 0 / 0.9);
+  --branch-sat: 54%;
+  --branch-light: 62%;
+  --font-display: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
 }
 
 html.light {
   color-scheme: light;
-  --bg: #f6f6fa;
-  --panel: #ffffff;
-  --panel-2: #f0f1f7;
-  --panel-3: #e7e8f1;
-  --border: #dddfe9;
-  --border-strong: #c8cbd9;
-  --text: #171923;
-  --muted: #62677a;
-  --accent: #6d5ce7;
-  --accent-soft: #6d5ce714;
-  --accent-2: #0891b2;
-  --success: #059669;
-  --warning: #b45309;
-  --danger: #dc2626;
-  --graph-grid: #e6e7ef;
-  --shadow: 0 18px 60px -30px rgb(30 30 60 / 0.25);
+  --bg: #f3f1ea;
+  --panel: #fbfaf5;
+  --panel-2: #eeede4;
+  --panel-3: #e4e2d8;
+  --border: #dcd9cd;
+  --border-strong: #c2bfb1;
+  --text: #1b1d19;
+  --muted: #5f665d;
+  --accent: #c1461f;
+  --accent-soft: #c1461f14;
+  --on-accent: #fffaf6;
+  --accent-2: #356752;
+  --success: #2f7d59;
+  --warning: #9a6a12;
+  --danger: #ad3a32;
+  --graph-grid: #e6e3d8;
+  --shadow: 0 20px 50px -34px rgb(40 36 20 / 0.28);
+  --branch-sat: 62%;
+  --branch-light: 40%;
 }
 
 @theme inline {
@@ -55,8 +62,10 @@ html.light {
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-on-accent: var(--on-accent);
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+  --font-display: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
 }
 
 @layer base {
@@ -75,13 +84,15 @@ html.light {
     background: var(--bg);
     color: var(--text);
     font-family: var(--font-sans);
+    font-size: 14px;
+    font-feature-settings: 'cv05';
     -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
   }
 
   ::selection {
-    background: var(--accent);
-    color: #fff;
+    background: var(--accent-soft);
+    color: var(--text);
   }
 
   :focus-visible {
@@ -93,8 +104,17 @@ html.light {
     cursor: pointer;
   }
 
+  button:disabled {
+    cursor: default;
+  }
+
   input {
     font-family: inherit;
+  }
+
+  pre,
+  code {
+    font-variant-ligatures: none;
   }
 }
 
@@ -108,30 +128,58 @@ html.light {
     background: var(--border);
   }
 
-  .btn {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-border bg-panel-2 px-2.5 py-1.5 text-xs font-medium text-muted transition-colors;
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
   }
 
-  .btn:hover {
+  .mono-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .btn {
+    @apply inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border bg-transparent px-2.5 text-[12.5px] font-medium text-muted transition-colors;
+  }
+
+  .btn:hover:not(:disabled) {
     @apply border-border-strong text-text;
   }
 
-  .btn-accent {
-    @apply border-transparent text-white;
-    background: var(--accent);
+  .btn:disabled {
+    @apply opacity-45;
   }
 
-  .btn-accent:hover {
-    color: #fff;
-    filter: brightness(1.08);
+  .btn-accent {
+    @apply border-transparent font-medium;
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .btn-accent:hover:not(:disabled) {
+    color: var(--on-accent);
+    background: color-mix(in oklab, var(--accent) 90%, white);
   }
 
   .tab {
-    @apply relative flex-1 px-3 py-2 text-center text-xs font-medium text-muted transition-colors;
+    @apply relative flex-1 px-3 py-2 text-center text-[12.5px] font-medium text-muted transition-colors;
   }
 
   .tab-active {
     color: var(--text);
+  }
+
+  .rule {
+    height: 1px;
+    background: var(--border);
+  }
+
+  .zone {
+    @apply rounded-lg border border-border bg-panel-2;
   }
 }
 
@@ -160,14 +208,14 @@ html.light {
   }
 
   .animate-fade-up {
-    animation: fade-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: fade-up 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;

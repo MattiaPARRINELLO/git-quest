@@ -3,6 +3,7 @@ import type { PointerEvent as ReactPointerEvent, ReactNode, WheelEvent as ReactW
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { RepoState, GitEvent } from '../../engine/types';
 import { branchColor } from '../../lib/colors';
+import { cn } from '../../lib/cn';
 import { layoutGraph, PADDING_X } from './layout';
 import type { BranchLabel, GraphNode } from './layout';
 import { Icon } from '../ui/Icon';
@@ -14,6 +15,10 @@ interface CommitGraphProps {
   readonly overlay?: ReactNode;
   readonly onSelectCommit?: (hash: string) => void;
   readonly onSelectBranch?: (name: string) => void;
+  /** Vue décorative : ni contrôles, ni interactions. */
+  readonly preview?: boolean;
+  /** Masque le quadrillage pour les vignettes. */
+  readonly bare?: boolean;
 }
 
 interface Viewport {
@@ -67,6 +72,8 @@ export function CommitGraph({
   overlay,
   onSelectCommit,
   onSelectBranch,
+  preview = false,
+  bare = false,
 }: CommitGraphProps) {
   const layout = useMemo(() => layoutGraph(state), [state]);
   const delays = useMemo(() => eventDelays(batch.events), [batch]);
@@ -200,53 +207,69 @@ export function CommitGraph({
     : undefined;
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col overflow-hidden bg-bg">
-      <div className="pointer-events-none absolute left-3 top-2.5 z-10 flex items-center gap-2">
-        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted">Graphe</h2>
-        <span className="rounded border border-border bg-panel/80 px-1.5 py-0.5 font-mono text-[10px] text-muted">
-          {layout.nodes.length} commit{layout.nodes.length > 1 ? 's' : ''}
-        </span>
-      </div>
+    <div
+      className={cn(
+        'relative flex h-full min-h-0 flex-col overflow-hidden',
+        preview ? 'bg-transparent' : 'bg-bg',
+      )}
+    >
+      {!preview && (
+        <div className="pointer-events-none absolute left-4 top-3 z-10 flex items-baseline gap-2">
+          <h2 className="text-[12.5px] font-medium text-text">Graphe</h2>
+          <span className="mono-meta">
+            {layout.nodes.length} commit{layout.nodes.length > 1 ? 's' : ''}
+          </span>
+        </div>
+      )}
 
-      <div className="absolute right-2 top-2 z-20 flex items-center gap-1">
-        <button
-          type="button"
-          className="btn bg-panel/90 px-2"
-          onClick={() => zoomBy(1.15)}
-          aria-label="Zoomer"
-          title="Zoomer"
-        >
-          +
-        </button>
-        <button
-          type="button"
-          className="btn bg-panel/90 px-2"
-          onClick={() => zoomBy(0.87)}
-          aria-label="Dézoomer"
-          title="Dézoomer"
-        >
-          −
-        </button>
-        <button
-          type="button"
-          className="btn bg-panel/90"
-          onClick={() => centerOn(activeHeadNode)}
-          title="Recentrer sur HEAD"
-        >
-          <Icon name="target" size={13} />
-          <span className="hidden sm:inline">HEAD</span>
-        </button>
-      </div>
+      {!preview && (
+        <div className="absolute right-3 top-2.5 z-20 flex items-center gap-1">
+          <button
+            type="button"
+            className="btn h-7 w-7 bg-panel/90 px-0"
+            onClick={() => zoomBy(1.15)}
+            aria-label="Zoomer"
+            title="Zoomer"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            className="btn h-7 w-7 bg-panel/90 px-0"
+            onClick={() => zoomBy(0.87)}
+            aria-label="Dézoomer"
+            title="Dézoomer"
+          >
+            −
+          </button>
+          <button
+            type="button"
+            className="btn h-7 gap-1 bg-panel/90 px-2"
+            onClick={() => centerOn(activeHeadNode)}
+            title="Recentrer sur HEAD"
+          >
+            <Icon name="target" size={12} />
+            <span className="hidden sm:inline">HEAD</span>
+          </button>
+        </div>
+      )}
 
       <div
         ref={containerRef}
-        className="relative h-full w-full cursor-grab touch-none active:cursor-grabbing"
-        onWheel={onWheel}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        onPointerLeave={endDrag}
+        className={cn(
+          'relative h-full w-full touch-none',
+          preview ? 'cursor-default' : 'cursor-grab active:cursor-grabbing',
+        )}
+        {...(preview
+          ? {}
+          : {
+              onWheel,
+              onPointerDown,
+              onPointerMove,
+              onPointerUp: endDrag,
+              onPointerCancel: endDrag,
+              onPointerLeave: endDrag,
+            })}
       >
         <svg
           width="100%"
@@ -256,11 +279,11 @@ export function CommitGraph({
           className="select-none"
         >
           <defs>
-            <pattern id="grid" width="26" height="26" patternUnits="userSpaceOnUse">
-              <path d="M 26 0 L 0 0 0 26" fill="none" stroke="var(--graph-grid)" strokeWidth="1" />
+            <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+              <path d="M 32 0 L 0 0 0 32" fill="none" stroke="var(--graph-grid)" strokeWidth="1" />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" opacity="0.55" />
+          {!bare && <rect width="100%" height="100%" fill="url(#grid)" opacity="0.5" />}
 
           <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
             {layout.lanes.map((lane) => (
@@ -328,15 +351,15 @@ export function CommitGraph({
           </g>
         </svg>
 
-        {hovered && tooltipStyle && (
+        {hovered && tooltipStyle && !preview && (
           <div
-            className="pointer-events-none absolute z-30 w-64 -translate-x-1/2 -translate-y-full rounded-xl border border-border bg-panel/95 p-2.5 text-[11px] shadow-2xl backdrop-blur"
+            className="pointer-events-none absolute z-30 w-64 -translate-x-1/2 -translate-y-full rounded-lg border border-border bg-panel p-2.5 text-[11px] shadow-[var(--shadow)]"
             style={tooltipStyle}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="font-mono text-[10.5px] text-accent-2">{hovered.shortHash}</span>
+              <span className="font-mono text-[10.5px] text-muted">{hovered.shortHash}</span>
               {hovered.orphan && (
-                <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[9px] text-warning">
+                <span className="rounded bg-warning/12 px-1.5 py-0.5 text-[9px] text-warning">
                   orphelin
                 </span>
               )}
@@ -359,32 +382,47 @@ export function CommitGraph({
           </div>
         )}
 
-        {layout.nodes.length === 0 && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="max-w-xs text-center">
-              <p className="text-sm font-medium text-text">Aucun commit</p>
-              <p className="mt-1 text-xs text-muted">
-                Crée un fichier avec <span className="font-mono text-accent-2">touch notes.txt</span>,
-                indexe-le puis commit.
+        {layout.nodes.length === 0 && !preview && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+            <div className="w-full max-w-[24rem] rounded-lg border border-border bg-panel px-5 py-4">
+              <p className="text-[13px] font-medium text-text">Ton dépôt n’a encore aucun commit</p>
+              <p className="mt-1 text-[12px] leading-relaxed text-muted">
+                Trois commandes suffisent pour créer la première photo.
               </p>
+              <ol className="mt-3 space-y-1.5">
+                {[
+                  ['1', 'touch app.ts'],
+                  ['2', 'git add app.ts'],
+                  ['3', 'git commit -m "feat: app"'],
+                ].map(([step, command]) => (
+                  <li key={command} className="flex items-baseline gap-2.5 font-mono text-[11.5px]">
+                    <span className="w-3 shrink-0 text-[10px] tabular-nums text-muted">{step}</span>
+                    <span className="text-text">{command}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
         )}
 
         {overlay}
 
-        <div className="pointer-events-none absolute bottom-2 left-3 font-mono text-[10px] text-muted/80">
-          molette = zoom · glisser = déplacer
-        </div>
-        <label className="absolute bottom-2 right-3 flex items-center gap-1.5 font-mono text-[10px] text-muted">
-          <input
-            type="checkbox"
-            checked={reducedMotion}
-            onChange={(event) => setReducedMotion(event.target.checked)}
-            className="h-3 w-3 accent-violet-500"
-          />
-          sans animation
-        </label>
+        {!preview && (
+          <>
+            <div className="pointer-events-none absolute bottom-2.5 left-4 font-mono text-[10px] text-muted/70">
+              molette = zoom · glisser = déplacer
+            </div>
+            <label className="absolute bottom-2.5 right-4 flex items-center gap-1.5 font-mono text-[10px] text-muted">
+              <input
+                type="checkbox"
+                checked={reducedMotion}
+                onChange={(event) => setReducedMotion(event.target.checked)}
+                className="h-3 w-3 accent-[var(--accent)]"
+              />
+              sans animation
+            </label>
+          </>
+        )}
       </div>
     </div>
   );
