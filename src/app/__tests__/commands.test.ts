@@ -23,6 +23,26 @@ function contextOf(
 }
 
 describe('commandes applicatives', () => {
+  it('help liste les commandes groupées avec des exemples', () => {
+    const result = routeCommand(noMission, 'help');
+    const text = result.output.map((line) => line.text).join('\n');
+    expect(result.effect).toBe('help');
+    expect(result.state).toBe(noMission.state);
+    expect(result.scored).toBe(false);
+    expect(text).toContain('Fichiers');
+    expect(text).toContain('Git');
+    expect(text).toContain('Outils');
+    expect(text).toContain('explain <commande>');
+    expect(text).toContain('git switch');
+  });
+
+  it('une commande inconnue suggère help et la commande proche', () => {
+    const result = routeCommand(noMission, 'git swich');
+    const text = result.output.map((line) => line.text).join('\n');
+    expect(text).toContain('Vouliez-vous dire « git switch » ?');
+    expect(text).toContain('help');
+  });
+
   it('explain ne modifie pas l’état et décrit les événements', () => {
     const result = routeCommand(noMission, 'explain git branch feature');
     expect(result.state).toBe(noMission.state);
@@ -130,6 +150,7 @@ describe('score', () => {
     expect(countsTowardScore('git add .', true)).toBe(false);
     expect(countsTowardScore('explain git merge x', false)).toBe(false);
     expect(countsTowardScore('hint', false)).toBe(false);
+    expect(countsTowardScore('help', false)).toBe(false);
   });
 
   it('compte les commandes qui changent réellement le dépôt', () => {

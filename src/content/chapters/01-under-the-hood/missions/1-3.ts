@@ -46,4 +46,5 @@ export const mission13: Mission = {
   ],
   solution: ['git add notes.txt', 'git commit -am "docs: readme et notes"'],
   successNote: 'Le piège est désamorcé : -a gère le suivi, git add gère les nouveaux fichiers.',
+  suggestedCommands: ['cat README.md', 'git status', 'git add notes.txt', 'git commit -am "docs: readme et notes"'],
 };

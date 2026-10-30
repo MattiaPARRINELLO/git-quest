@@ -6,6 +6,7 @@ import type {
   TerminalLine,
 } from '../engine/types';
 import { explainError, explainEvent } from '../explanations/fr';
+import { helpOutput, suggestCommand } from './help';
 
 export interface MissionContext {
   readonly title: string;
@@ -20,7 +21,7 @@ export interface RoutedContext {
   readonly hintsUsed: number;
 }
 
-export type AppEffect = 'execute' | 'explain' | 'undo' | 'hint' | 'reset-mission';
+export type AppEffect = 'execute' | 'explain' | 'undo' | 'hint' | 'reset-mission' | 'help';
 
 export interface RoutedResult {
   readonly state: RepoState;
@@ -53,7 +54,13 @@ function unchanged(context: RoutedContext, effect: AppEffect, output: TerminalLi
 }
 
 function isAppCommand(name: string): boolean {
-  return name === 'explain' || name === 'undo' || name === 'hint' || name === 'reset-mission';
+  return (
+    name === 'explain' ||
+    name === 'undo' ||
+    name === 'hint' ||
+    name === 'reset-mission' ||
+    name === 'help'
+  );
 }
 
 export function isAppCommandInput(input: string): boolean {
@@ -82,6 +89,10 @@ export function routeCommand(context: RoutedContext, input: string): RoutedResul
   const [name, ...rest] = trimmed.split(/\s+/);
 
   switch (name) {
+    case 'help': {
+      return unchanged(context, 'help', helpOutput());
+    }
+
     case 'explain': {
       const command = rest.join(' ').trim();
       if (command === '') {
@@ -164,10 +175,19 @@ export function routeCommand(context: RoutedContext, input: string): RoutedResul
         ? [...context.history, context.state].slice(-HISTORY_LIMIT)
         : context.history;
 
+      const output = [...result.output];
+      if (result.error?.code === 'unknown-command') {
+        const suggestion = suggestCommand(trimmed);
+        if (suggestion) {
+          output.push(line(`Vouliez-vous dire « ${suggestion} » ?`, 'muted'));
+        }
+        output.push(line('Tape « help » pour voir toutes les commandes.', 'muted'));
+      }
+
       return {
         state: result.newState,
         history,
-        output: result.output,
+        output,
         events: result.events,
         ...(result.error === undefined ? {} : { error: result.error }),
         effect: 'execute',

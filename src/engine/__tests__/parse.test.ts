@@ -109,6 +109,7 @@ describe('parseCommand', () => {
       path: 'notes.txt',
       content: 'contenu',
     });
+    expect(parsed('cat README.md')).toEqual({ kind: 'shell-cat', path: 'README.md' });
     expect(parsed('ls')).toEqual({ kind: 'shell-ls' });
     expect(parsed('cd ../hotfix')).toEqual({ kind: 'shell-cd', target: '../hotfix' });
   });

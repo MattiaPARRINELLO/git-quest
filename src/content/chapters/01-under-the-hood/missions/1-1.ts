@@ -66,4 +66,5 @@ export const mission11: Mission = {
         'Le commit ne lit que l’index. b.txt reste modifié dans le working dir sans entrer dans la photo.',
     },
   ],
+  suggestedCommands: ['cat a.txt', 'git status', 'git add a.txt', 'git commit -m "fix: a.txt"'],
 };

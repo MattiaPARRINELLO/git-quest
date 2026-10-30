@@ -10,9 +10,16 @@ interface MissionPanelProps {
   readonly commandsUsed: number;
   readonly hintsUsed: number;
   readonly onHint: () => void;
+  readonly onSuggest: (command: string) => void;
 }
 
-export function MissionPanel({ mission, commandsUsed, hintsUsed, onHint }: MissionPanelProps) {
+export function MissionPanel({
+  mission,
+  commandsUsed,
+  hintsUsed,
+  onHint,
+  onSuggest,
+}: MissionPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
   const stars = starsFor(commandsUsed, mission.par);
   const remainingHints = mission.hints.length - hintsUsed;
@@ -103,6 +110,27 @@ export function MissionPanel({ mission, commandsUsed, hintsUsed, onHint }: Missi
                     </li>
                   ))}
                 </ul>
+              )}
+
+              {mission.suggestedCommands && mission.suggestedCommands.length > 0 && (
+                <details className="mt-2 rounded-lg border border-border bg-panel-2/50 px-2.5 py-2">
+                  <summary className="cursor-pointer text-[11px] font-medium text-text">
+                    Commandes utiles ici
+                  </summary>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {mission.suggestedCommands.map((command) => (
+                      <button
+                        key={command}
+                        type="button"
+                        onClick={() => onSuggest(command)}
+                        className="rounded-md border border-border bg-panel px-2 py-1 font-mono text-[10px] text-accent-2 transition-colors hover:border-accent/50 hover:bg-accent-soft"
+                        title="Pré-remplir la commande sans l’exécuter"
+                      >
+                        {command}
+                      </button>
+                    ))}
+                  </div>
+                </details>
               )}
 
               <p className="mt-2 text-[10px] text-muted/70">

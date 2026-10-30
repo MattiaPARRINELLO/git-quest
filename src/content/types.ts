@@ -94,6 +94,7 @@ export interface Mission {
   readonly hints: readonly [string, string, string];
   readonly solution: readonly string[];
   readonly predictions?: readonly Prediction[];
+  readonly suggestedCommands?: readonly string[];
   readonly forbidden?: readonly ForbiddenCommand[];
   readonly successNote?: string;
 }

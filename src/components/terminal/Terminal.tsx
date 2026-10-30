@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useRepoStore } from '../../store/useRepoStore';
+import { useUiStore } from '../../store/useUiStore';
 import type { TerminalEntry } from '../../store/useRepoStore';
 import { promptFor } from '../../lib/prompt';
 import { cn } from '../../lib/cn';
@@ -47,6 +48,8 @@ export function Terminal({ onCommand }: TerminalProps) {
   const commandHistory = useRepoStore((store) => store.commandHistory);
   const executeCommand = useRepoStore((store) => store.execute);
   const clearTerminal = useRepoStore((store) => store.clearTerminal);
+  const commandPrefill = useUiStore((store) => store.commandPrefill);
+  const clearPrefill = useUiStore((store) => store.clearPrefill);
 
   const [input, setInput] = useState('');
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
@@ -63,6 +66,15 @@ export function Terminal({ onCommand }: TerminalProps) {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (commandPrefill === null) return;
+    setInput(commandPrefill);
+    setHistoryIndex(null);
+    setSuggestions([]);
+    clearPrefill();
+    inputRef.current?.focus();
+  }, [commandPrefill, clearPrefill]);
 
   const submit = () => {
     if (input.trim() !== '') {

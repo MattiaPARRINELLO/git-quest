@@ -241,6 +241,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
             commandsUsed={commandsUsed}
             hintsUsed={hintsUsed}
             onHint={() => setHintsUsed((current) => Math.min(mission.hints.length, current + 1))}
+            onSuggest={(command) => useUiStore.getState().prefillCommand(command)}
           />
         }
         {...(overlay === undefined ? {} : { graphOverlay: overlay })}

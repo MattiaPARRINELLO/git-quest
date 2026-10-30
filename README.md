@@ -127,7 +127,8 @@ la mission (voir `src/engine/__tests__/missions.test.ts`).
 `branch [<nom> [<start>]]` (créer / lister / `-d` / `-D`),
 `switch`, `switch -c [<nom> [<start>]]`, `checkout` (branche ou commit),
 `merge` (fast-forward, merge commit, merge 3-way fichiers), `worktree add` (+ `-b`),
-`worktree list`, `worktree remove`, `git rm`, `touch`, `edit`, `rm`, `ls`, `cd`.
+`worktree list`, `worktree remove`, `git rm`, `touch`, `edit`, `cat`, `rm`, `ls`, `cd`.
+Commandes d’aide : `help`, `explain`, `undo`, `hint`, `reset-mission`.
 
 Hors périmètre MVP : conflits, rebase, cherry-pick, reset/revert, stash, remotes,
 reflog, bisect, comptes, backend.

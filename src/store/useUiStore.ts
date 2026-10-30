@@ -8,11 +8,14 @@ interface UiState {
   readonly showExplanations: boolean;
   readonly mobileTab: MobileTab;
   readonly graphUnseen: number;
+  readonly commandPrefill: string | null;
   setTheme(theme: Theme): void;
   toggleTheme(): void;
   setShowExplanations(value: boolean): void;
   setMobileTab(tab: MobileTab): void;
   noteGraphChange(): void;
+  prefillCommand(command: string): void;
+  clearPrefill(): void;
 }
 
 function readTheme(): Theme {
@@ -30,6 +33,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   showExplanations: readExplanations(),
   mobileTab: 'terminal',
   graphUnseen: 0,
+  commandPrefill: null,
 
   setTheme(theme) {
     if (typeof localStorage !== 'undefined') localStorage.setItem('gitquest.theme', theme);
@@ -53,5 +57,13 @@ export const useUiStore = create<UiState>((set, get) => ({
 
   noteGraphChange() {
     set({ graphUnseen: get().graphUnseen + 1 });
+  },
+
+  prefillCommand(command) {
+    set({ commandPrefill: command });
+  },
+
+  clearPrefill() {
+    set({ commandPrefill: null });
   },
 }));

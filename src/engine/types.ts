@@ -213,5 +213,6 @@ export type ParsedCommand =
   | { readonly kind: 'shell-touch'; readonly path: string }
   | { readonly kind: 'shell-edit'; readonly path: string; readonly content?: string }
   | { readonly kind: 'shell-rm'; readonly path: string }
+  | { readonly kind: 'shell-cat'; readonly path: string }
   | { readonly kind: 'shell-ls' }
   | { readonly kind: 'shell-cd'; readonly target: string };

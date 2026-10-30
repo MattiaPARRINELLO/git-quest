@@ -64,4 +64,5 @@ export const mission12: Mission = {
         'La version 3 n’est pas indexée : le commit reste sur la photo de la version 2. Le working dir garde la retouche.',
     },
   ],
+  suggestedCommands: ['edit README.md "version 2"', 'cat README.md', 'git add README.md', 'git status', 'git commit -m "docs: v2"'],
 };

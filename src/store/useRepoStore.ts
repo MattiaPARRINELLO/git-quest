@@ -59,7 +59,13 @@ function welcomeEntries(startId: number): TerminalEntry[] {
     {
       id: startId + 1,
       kind: 'output',
-      text: 'Astuce : « explain <commande> » pour comprendre avant d’exécuter.',
+      text: 'Tape `help` pour voir les commandes.',
+      tone: 'muted',
+    },
+    {
+      id: startId + 2,
+      kind: 'output',
+      text: 'Les fichiers sont simulés : `edit app.ts "texte"` pour écrire dedans.',
       tone: 'muted',
     },
   ];
@@ -86,7 +92,7 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
   commandHistory: [],
   lastEvents: { id: 0, events: [] },
   hydrated: false,
-  nextEntryId: 3,
+  nextEntryId: 4,
 
   execute(input) {
     const command = input.trim();

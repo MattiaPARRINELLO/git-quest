@@ -17,6 +17,7 @@ import {
 type TouchCommand = Extract<ParsedCommand, { kind: 'shell-touch' }>;
 type EditCommand = Extract<ParsedCommand, { kind: 'shell-edit' }>;
 type RmCommand = Extract<ParsedCommand, { kind: 'shell-rm' }>;
+type CatCommand = Extract<ParsedCommand, { kind: 'shell-cat' }>;
 type CdCommand = Extract<ParsedCommand, { kind: 'shell-cd' }>;
 
 export function shellTouch(state: RepoState, command: TouchCommand): ExecuteResult {
@@ -93,6 +94,30 @@ export function shellRm(state: RepoState, command: RmCommand): ExecuteResult {
     replaceWorktree(state, { ...worktree, workingDir }),
     [],
     [{ type: 'working-file-removed', path: command.path }],
+  );
+}
+
+/** `cat <fichier>` : lit le working dir, sans aucune mutation. */
+export function shellCat(state: RepoState, command: CatCommand): ExecuteResult {
+  const repoError = requireRepository(state);
+  if (repoError) return failure(state, repoError);
+
+  const worktree = activeWorktree(state);
+  const content = worktree.workingDir[command.path];
+  if (content === undefined) {
+    return failure(
+      state,
+      gitError(
+        'file-not-found',
+        `cat: ${command.path}: No such file or directory`,
+      ),
+    );
+  }
+
+  return success(
+    state,
+    content.split('\n').map((text) => line(text)),
+    [],
   );
 }
 

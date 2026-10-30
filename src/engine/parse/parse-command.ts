@@ -395,6 +395,14 @@ export function parseCommand(input: string): ParseResult {
       return { ok: true, command: { kind: 'shell-rm', path } };
     }
 
+    case 'cat': {
+      const path = args[0];
+      if (path === undefined) {
+        return fail('invalid-option', 'cat: missing file operand');
+      }
+      return { ok: true, command: { kind: 'shell-cat', path } };
+    }
+
     case 'ls':
       return { ok: true, command: { kind: 'shell-ls' } };
 

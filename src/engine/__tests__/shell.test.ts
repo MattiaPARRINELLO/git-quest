@@ -22,6 +22,14 @@ describe('shell simulé', () => {
     expect(appended.worktrees.main?.workingDir['notes.txt']).toContain('bonjour\nmodification ');
   });
 
+  it('cat lit le contenu du working dir sans muter l’état', () => {
+    const repo = basicRepo();
+    const result = run(repo, 'cat README.md');
+    expect(result.newState).toBe(repo);
+    expect(result.output.map((line) => line.text).join('\n')).toContain('# Projet');
+    expectError(repo, 'cat inconnu.txt', 'file-not-found');
+  });
+
   it('ls liste les fichiers du worktree actif', () => {
     const output = run(basicRepo(), 'ls').output.map((line) => line.text);
     expect(output).toEqual(['README.md', 'src/app.ts']);
