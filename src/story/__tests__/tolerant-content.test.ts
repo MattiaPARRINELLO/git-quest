@@ -21,6 +21,17 @@ function mission(id: string) {
 }
 
 describe('contenu libre quand le concept ne porte pas sur le contenu', () => {
+  it('2.1 ne valide pas sur la simple création de la branche', () => {
+    const target = mission('branche-pointeur');
+    const entry = target.initialState;
+    const afterBranch = runAll(entry, ['git branch experiment', 'git switch experiment']);
+
+    const result = target.validate(afterBranch, { entry });
+    expect(result.ok).toBe(false);
+    const step = target.steps[1];
+    expect(step?.done(afterBranch, { entry })).toBe(false);
+  });
+
   it('2.1 accepte n’importe quel contenu dans notes.txt', () => {
     const target = mission('branche-pointeur');
     const entry = target.initialState;

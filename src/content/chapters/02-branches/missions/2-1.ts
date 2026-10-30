@@ -1,16 +1,32 @@
 import {
   allOf,
-  branchFile,
   check,
   hasBranch,
   headBranch,
   headFile,
 } from '../../../../engine/validate';
+import type { Commit, RepoState } from '../../../../engine/types';
 import { entryState } from '../../../../story/checkpoints';
-import { branchUnchanged, commitDelta } from '../../../../story/preconditions';
+import { branchUnchanged, commitDelta, commitsSince } from '../../../../story/preconditions';
+import { changeSetOf } from '../../../../story/slots';
 import type { Mission } from '../../../types';
 
 const initial = entryState('branche-pointeur');
+
+/**
+ * Commit créé sur `experiment` qui introduit ou modifie notes.txt.
+ * La simple présence du fichier ne suffit pas : il existe déjà sur main depuis
+ * le chapitre 1, donc une branche créée sans commit ne doit rien valider.
+ */
+function notesCommit(state: RepoState, entry: RepoState): Commit | undefined {
+  return commitsSince(state, entry).find(
+    (commit) =>
+      commit.branch === 'experiment' &&
+      changeSetOf(state, commit).some(
+        (change) => change.path === 'notes.txt' && change.content !== null,
+      ),
+  );
+}
 
 export const mission21: Mission = {
   id: 'branche-pointeur',
@@ -26,7 +42,7 @@ export const mission21: Mission = {
     { label: 'Créer la branche experiment', done: (state) => hasBranch(state, 'experiment') },
     {
       label: 'Committer notes.txt sur experiment',
-      done: (state) => branchFile(state, 'experiment', 'notes.txt') !== undefined,
+      done: (state, ctx) => notesCommit(state, ctx?.entry ?? initial) !== undefined,
     },
     {
       label: 'Terminer sur experiment avec main inchangée',
@@ -45,8 +61,8 @@ export const mission21: Mission = {
     return allOf(
       check(headBranch(state) === 'experiment', 'HEAD doit être sur experiment.'),
       check(
-        branchFile(state, 'experiment', 'notes.txt') !== undefined,
-        'experiment doit contenir notes.txt.',
+        notesCommit(state, entry) !== undefined,
+        'Un nouveau commit sur experiment doit modifier notes.txt.',
       ),
       check(branchUnchanged(state, entry, 'main'), 'main ne doit pas bouger.'),
       check(
