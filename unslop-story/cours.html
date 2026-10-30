@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cours — GitQuest</title>
+<link rel="stylesheet" href="story-base.css">
+<meta name="unslop-steps" content="Espacement, Couleur, Typographie et copie, Détails">
+<meta name="unslop-frame" content="0 0 1000">
+<style>
+  .screen{padding:0 24px 32px 84px}
+  .top{margin:0 -24px 0 -84px;padding:0 24px 0 84px}
+  .body{margin:24px auto 0;max-width:720px;display:grid;grid-template-columns:0px minmax(0,1fr);gap:0;padding:0 24px}
+  .aside{min-width:0;overflow:hidden}
+  .chaptag{display:flex;align-items:center;gap:8px}
+  .tick{width:2px;height:14px;border-radius:2px;background:var(--violet);flex:none}
+  .asidetitle{margin:8px 0 0;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:26px;line-height:1.15;white-space:nowrap}
+  .asidetag{margin:6px 0 0;font-size:12px;line-height:1.5;color:var(--muted)}
+  .slidelist{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:2px;width:176px}
+  .slidelist li{display:flex;gap:10px;align-items:baseline;padding:6px;border-radius:6px;font-size:12px;color:var(--muted)}
+  .slidelist li.on{background:var(--panel2);color:var(--text)}
+  .slidelist .idx{font-family:Mono;font-size:10px}
+
+  .content{min-width:0;display:flex;flex-direction:column;min-height:880px}
+  .crumbrow{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted)}
+  .headextra{display:flex;align-items:center;gap:8px}
+  .pill{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 9px;border-radius:999px;border:1px solid var(--border);background:var(--panel2);color:var(--muted)}
+  .progress{display:flex;align-items:center;gap:12px;margin-top:16px}
+  .track{flex:1;height:6px;border-radius:999px;background:var(--panel2);overflow:hidden}
+  .fill{height:100%;width:12.5%;border-radius:999px;background:linear-gradient(90deg,#8b7cf6,#22d3ee)}
+  .count{font-family:Mono;font-size:10px;color:var(--muted)}
+
+  .slide{margin-top:24px}
+  .slide h2{margin:0;font-size:24px;font-weight:600;letter-spacing:-.015em;line-height:1.2}
+  .p{margin:12px 0 0;font-size:14px;line-height:1.7;color:var(--muted)}
+  .code{margin:16px 0 0;padding:12px 14px;border-radius:12px;border:1px solid rgba(139,124,246,.35);background:rgba(139,124,246,.08);font-family:Mono;font-size:12px;color:var(--cyan)}
+  .code .prompt{color:var(--muted)}
+  .note{margin:12px 0 0;padding:10px 12px;border-radius:10px;border:1px solid rgba(251,191,36,.25);background:rgba(251,191,36,.1);font-size:12px;color:var(--amber)}
+
+  .pager{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;padding-top:16px;border-top:1px solid var(--border)}
+  .next{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;background:linear-gradient(135deg,#8b7cf6,#7c6cf0);color:#fff;font-size:13px;font-weight:600;box-shadow:0 12px 30px -10px rgba(139,124,246,.9)}
+
+  /* 1 — Espacement */
+  html.s1 .body{margin-top:32px}
+  html.s1 .progress{margin-top:24px}
+  html.s1 .slide{margin-top:28px}
+  html.s1 .p{margin-top:14px}
+  html.s1 .code{margin-top:20px;padding:10px 14px}
+  html.s1 .note{margin-top:16px;padding:0 0 0 12px}
+  html.s1 .pager{padding-top:16px}
+  html.s1 .slidelist{margin-top:24px}
+
+  /* 2 — Couleur */
+  html.s2{--bg:#0e100e;--panel:#141714;--panel2:#1a1e1a;--border:#272d27;--text:#e9ece6;--muted:#99a299;--violet:#ec6a40;--cyan:#a9c0b2;--amber:#d9a94f}
+  html.s2 .top{background:var(--panel);border-color:var(--border)}
+  html.s2 .mark{background:#ec6a40;box-shadow:none}
+  html.s2 .brandname{background:none;-webkit-text-fill-color:var(--text);color:var(--text)}
+  html.s2 .body{max-width:860px;grid-template-columns:170px minmax(0,1fr);gap:48px}
+  html.s2 .tick{background:var(--branch)}
+  html.s2 .headextra{opacity:0}
+  html.s2 .track{height:1px;border-radius:0;background:var(--border)}
+  html.s2 .fill{background:var(--accent,#ec6a40);border-radius:0}
+  html.s2 .code{background:var(--panel2);border-color:var(--border);color:var(--text)}
+  html.s2 .code .prompt{color:var(--muted)}
+  html.s2 .note{background:transparent;border:0;border-left:2px solid #d9a94f;border-radius:0;color:var(--muted)}
+  html.s2 .pill{background:transparent;border-color:var(--border)}
+  html.s2 .next{background:#ec6a40;color:#180e08;box-shadow:none}
+  html.s2 .ghostbtn{background:transparent}
+  html.s2 .slidelist li.on{background:var(--panel2)}
+
+  /* 3 — Typographie et copie */
+  html.s3 .slide h2{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:30px;line-height:1.12}
+  html.s3 .p{font-family:Newsreader,Georgia,serif;font-size:17px;line-height:1.72;color:#cdd3c9}
+  html.s3 .asidetitle{font-size:27px}
+  html.s3 .crumbrow{font-size:12px}
+  html.s3 .pill{letter-spacing:.02em;text-transform:none;font-weight:400;font-size:11px;color:var(--muted)}
+
+  /* 4 — Détails */
+  html.s4 .next{border-radius:8px;height:36px;padding:0 14px;font-weight:500}
+  html.s4 .ghostbtn{border-radius:8px}
+  html.s4 .code{border-radius:8px}
+  html.s4 .note{border-radius:0}
+  html.s4 .pill{opacity:0}
+  html.s4 .tableradius{}
+</style>
+</head>
+<body>
+<main class="screen">
+  <header class="top">
+    <div class="brand">
+      <span class="mark">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0b0f" stroke-width="1.8" stroke-linecap="round">
+          <path d="M5 19V8a3 3 0 0 1 3-3h5M13 5h6M13 5l3 3M13 5l3-3"/>
+          <circle cx="5" cy="19" r="2"/><circle cx="5" cy="5" r="2"/>
+        </svg>
+      </span>
+      <span class="brandname">GitQuest</span>
+    </div>
+    <nav class="nav">
+      <span class="navlink">Chapitres</span>
+      <span class="navlink">Bac à sable</span>
+      <span class="navlink">Mon arbre</span>
+    </nav>
+    <div class="topright"><span class="ghostbtn">☼</span></div>
+  </header>
+
+  <div class="body">
+    <aside class="aside">
+      <div class="chaptag" data-gap="aside"><span class="tick"></span><span class="mono" style="font-size:11px;color:var(--muted)">Chapitre 1</span></div>
+      <h1 class="asidetitle" data-gap="aside">Sous le capot</h1>
+      <p class="asidetag" data-gap="aside">Commits, snapshots, branches et HEAD</p>
+      <ol class="slidelist" data-gap="aside">
+        <li class="on"><span class="idx">01</span>Texte</li>
+        <li><span class="idx">02</span>Schéma</li>
+        <li><span class="idx">03</span>Texte</li>
+        <li><span class="idx">04</span>Texte</li>
+        <li><span class="idx">05</span>Texte</li>
+        <li><span class="idx">06</span>Démo</li>
+        <li><span class="idx">07</span>Texte</li>
+        <li><span class="idx">08</span>Récapitulatif</li>
+      </ol>
+    </aside>
+
+    <div class="content">
+      <div class="crumbrow">
+        <span>← Chapitres</span>
+        <span class="headextra" data-out="2"><span class="pill">Chapitre 1</span><span class="mono" style="font-size:11px">5 min</span></span>
+      </div>
+
+      <div class="progress"><div class="track"><div class="fill"></div></div><span class="count">1 / 8</span></div>
+
+      <div class="slide">
+        <h2 data-gap="cours">Un commit est une photo</h2>
+        <p class="p" data-gap="cours">Git ne stocke pas des différences : chaque commit est une photographie complète des fichiers indexés à un instant donné.</p>
+        <p class="p" data-gap="cours">C’est pour cela que revenir à un ancien commit ne dépend pas de ceux qui l’entourent : la photo contient tout.</p>
+        <pre class="code" data-gap="cours" data-radius><span class="prompt">$ </span>git commit -m "docs: première version"</pre>
+        <p class="note" data-gap="cours">À noter · Modifier un fichier après le commit ne change jamais la photo déjà prise.</p>
+      </div>
+
+      <div class="pager">
+        <span class="ghostbtn" style="height:38px;padding:0 14px;border-radius:999px">Précédent</span>
+        <span class="next" data-radius>Suivant <span>→</span></span>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

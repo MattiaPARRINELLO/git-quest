@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Mission — GitQuest</title>
+<link rel="stylesheet" href="story-base.css">
+<meta name="unslop-steps" content="Espacement, Couleur, Typographie et copie, Détails">
+<meta name="unslop-frame" content="0 0 1000">
+<style>
+  .screen{padding:0 0 24px 84px}
+  .top{margin-left:-84px;padding-left:84px}
+  .mission{padding:12px 24px;border-bottom:1px solid var(--border);background:var(--panel)}
+  .mrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .mleft{display:flex;gap:10px;min-width:0}
+  .mnum{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:9px;border:1px solid rgba(139,124,246,.4);background:rgba(139,124,246,.12);color:#a99df9;font-family:Mono;font-size:11px;font-weight:600}
+  .mnumline{display:flex;align-items:baseline;gap:7px;min-width:0}
+  .mnumline .n{font-family:Mono;font-size:10px;color:var(--violet)}
+  .mtitle{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+  .mmeta{display:flex;align-items:center;gap:8px;margin-top:3px;font-family:Mono;font-size:10px;color:var(--muted)}
+  .stars{font-size:10px;letter-spacing:1px;color:var(--amber)}
+  .msituation{margin:4px 0 0;font-size:11px;line-height:1.5;color:var(--muted)}
+  .msituation b{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:9px;color:#7e8497;margin-right:4px}
+  .mbtns{display:flex;gap:6px;flex:none}
+  .mbody{margin-top:10px;padding-left:40px;max-width:640px}
+  .objlabel{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--violet)}
+  .obj{margin:4px 0 0;font-size:12px;line-height:1.6;color:var(--text)}
+  .steps{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+  .steps li{display:flex;gap:7px;align-items:flex-start;font-size:11px;color:var(--muted)}
+  .steps li.done{color:var(--success)}
+  .box{width:8px;height:8px;margin-top:4px;border-radius:2px;border:1px solid #3a4056;flex:none}
+  .steps li.done .box{background:var(--success);border-color:var(--success)}
+  .story{margin:10px 0 0;font-size:11.5px;line-height:1.65;color:var(--muted)}
+  .useful{margin-top:10px;font-size:11px;color:var(--muted)}
+  .useful b{color:var(--text);font-weight:600}
+
+  .bodygrid{display:grid;grid-template-columns:384px minmax(0,1fr);border-bottom:1px solid var(--border);height:552px}
+  .terminal{border-right:1px solid var(--border);background:#08090d;display:flex;flex-direction:column}
+  .thead{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--border)}
+  .lights{display:flex;gap:4px;margin-right:8px}
+  .lights i{width:7px;height:7px;border-radius:50%;display:block}
+  .thead .label{font-family:Mono;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-right:auto}
+  .thead .hint{font-family:Mono;font-size:9px;color:var(--muted)}
+  .log{flex:1;padding:12px;font-family:Mono;font-size:12px;line-height:1.9;color:var(--text);white-space:pre-wrap}
+  .log .ok{color:var(--success)}
+  .log .warn{color:var(--amber)}
+  .log .dim{color:var(--muted)}
+  .promptrow{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);font-family:Mono;font-size:12px}
+  .promptrow .ps1{color:var(--cyan);flex:none}
+  .promptrow .caret{color:var(--text)}
+
+  .graph{position:relative;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+  .ghead{display:flex;align-items:center;gap:8px;padding:10px 14px;position:relative;z-index:2}
+  .glabel{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .gcount{font-family:Mono;font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:2px 6px;background:var(--panel)}
+  .gcontrols{margin-left:auto;display:flex;gap:4px;position:relative;z-index:2}
+  .gbtn{height:28px;min-width:28px;display:grid;place-items:center;padding:0 8px;border:1px solid var(--border);border-radius:999px;background:rgba(16,18,24,.9);color:var(--muted);font-family:Mono;font-size:12px}
+  .gbody{flex:1;position:relative}
+  .gfoot{position:absolute;bottom:8px;left:14px;font-family:Mono;font-size:9px;color:var(--muted)}
+  .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(139,124,246,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(139,124,246,.08) 1px,transparent 1px);background-size:32px 32px}
+
+  .pipeline{padding:10px 12px 4px;background:var(--panel)}
+  .phead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 2px 8px}
+  .plabel{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .path{font-family:Mono;font-size:10px;color:var(--text);border:1px solid var(--border);border-radius:6px;padding:2px 6px;background:var(--panel2);margin-left:8px}
+  .phint{font-family:Mono;font-size:9px;color:var(--muted)}
+  .zones{display:flex;gap:8px;align-items:stretch}
+  .zone{flex:1;min-width:0;border:1px solid var(--border);border-radius:12px;background:rgba(21,24,35,.6);padding:8px}
+  .zhead{display:flex;align-items:center;gap:6px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+  .zdot{width:6px;height:6px;border-radius:50%;flex:none}
+  .ztitle{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text)}
+  .zcount{margin-left:auto;font-family:Mono;font-size:9px;color:var(--muted)}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .chip{font-family:Mono;font-size:10px;padding:2px 6px;border-radius:6px;border:1px solid #3a4056;background:rgba(58,64,86,.35);color:#c3c8da;white-space:nowrap}
+  .chip.new{border-color:rgba(56,189,248,.45);background:rgba(56,189,248,.12);color:#7dd3fc}
+  .chip.mod{border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.12);color:#fcd34d}
+  .chip.old{border-color:#3a4056;background:rgba(58,64,86,.35);color:#9aa1b5}
+  .chip.staged{border-color:rgba(139,124,246,.55);background:rgba(139,124,246,.14);color:#c4b5fd}
+  .arrow{display:flex;align-items:center;color:#4a5068;font-family:Mono}
+
+  /* 1 — Espacement */
+  html.s1 .top{height:48px}
+  html.s1 .mission{padding:10px 20px 12px}
+  html.s1 .mbody{margin-top:12px;padding-left:0}
+  html.s1 .story{margin-top:12px}
+  html.s1 .bodygrid{height:540px;grid-template-columns:376px minmax(0,1fr)}
+  html.s1 .pipeline{padding:12px 14px 6px}
+  html.s1 .zones{gap:10px}
+  html.s1 .zone{padding:10px}
+  html.s1 .chips{gap:6px;margin-top:10px}
+
+  /* 2 — Couleur */
+  html.s2{--bg:#0e100e;--panel:#141714;--panel2:#1a1e1a;--border:#272d27;--text:#e9ece6;--muted:#99a299;--violet:#ec6a40;--cyan:#a9c0b2;--amber:#d9a94f}
+  html.s2 .top{background:var(--panel);border-color:var(--border)}
+  html.s2 .mark{background:#ec6a40;box-shadow:none}
+  html.s2 .brandname{background:none;-webkit-text-fill-color:var(--text);color:var(--text)}
+  html.s2 .mission{background:var(--panel);border-color:var(--border)}
+  html.s2 .mnum{background:transparent;border-color:var(--border);color:var(--muted)}
+  html.s2 .objlabel{color:var(--muted)}
+  html.s2 .obj{border-left:2px solid #ec6a40;padding-left:10px}
+  html.s2 .terminal{background:#0e100e}
+  html.s2 .lights{opacity:0}
+  html.s2 .ps1{color:var(--muted)}
+  html.s2 .grid{background-image:linear-gradient(rgba(153,162,153,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(153,162,153,.09) 1px,transparent 1px)}
+  html.s2 .gbtn{background:var(--panel);border-color:var(--border);border-radius:6px}
+  html.s2 .chip{background:transparent;border-color:var(--border);color:var(--muted)}
+  html.s2 .chip.new{border-color:rgba(99,187,142,.4);background:rgba(99,187,142,.1);color:#63bb8e}
+  html.s2 .chip.mod{border-color:rgba(217,169,79,.4);background:rgba(217,169,79,.1);color:#d9a94f}
+  html.s2 .chip.staged{border-color:rgba(236,106,64,.45);background:rgba(236,106,64,.1);color:#ec6a40}
+  html.s2 .chip.old{border-color:var(--border);background:var(--panel);color:var(--muted)}
+  html.s2 .zone{background:rgba(26,30,26,.4);border-color:var(--border)}
+  html.s2 .path{background:transparent;border-color:var(--border)}
+  html.s2 .ghostbtn{background:transparent}
+  html.s2 .mbtns .ghostbtn{background:transparent}
+
+  /* 3 — Typographie et copie */
+  html.s3 .mtitle{font-size:13.5px;font-weight:500}
+  html.s3 .mnumline .n{color:var(--muted)}
+  html.s3 .msituation b{letter-spacing:.01em;text-transform:none;font-weight:400;font-size:11px;color:var(--muted)}
+  html.s3 .objlabel{letter-spacing:.01em;text-transform:none;font-size:11px;font-weight:400}
+  html.s3 .story{font-size:12px}
+  html.s3 .glabel{letter-spacing:.02em;text-transform:none;font-weight:500;font-size:12px;color:var(--text)}
+  html.s3 .thead .label{letter-spacing:0;text-transform:none;font-size:12px;color:var(--muted)}
+  html.s3 .plabel{letter-spacing:.01em;text-transform:none;font-weight:500;font-size:12px;color:var(--text)}
+  html.s3 .ztitle{letter-spacing:.01em;text-transform:none;font-weight:500;font-size:12px}
+
+  /* 4 — Détails */
+  html.s4 .mnum{width:2px;height:14px;padding:0;border:0;border-radius:2px;background:#ec6a40;color:transparent;font-size:0;margin-top:2px}
+  html.s4 .zone{border-radius:8px}
+  html.s4 .chip{border-radius:6px}
+  html.s4 .gbtn{border-radius:6px}
+  html.s4 .stars{font-size:0;color:transparent}
+  html.s4 .stars::after{content:"2 sur 3";font-family:Mono;font-size:9px;color:var(--muted)}
+  html.s4 .zone,.s4 .zone{}
+</style>
+</head>
+<body>
+<main class="screen">
+  <header class="top">
+    <div class="brand">
+      <span class="mark" data-slop="Pastille dégradée">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0b0f" stroke-width="1.8" stroke-linecap="round">
+          <path d="M5 19V8a3 3 0 0 1 3-3h5M13 5h6M13 5l3 3M13 5l3-3"/><circle cx="5" cy="19" r="2"/><circle cx="5" cy="5" r="2"/>
+        </svg>
+      </span>
+      <span class="brandname">GitQuest</span>
+    </div>
+    <nav class="nav">
+      <span class="navlink">Chapitres</span>
+      <span class="navlink">Bac à sable</span>
+      <span class="navlink">Mon arbre</span>
+    </nav>
+    <div class="topright"><span class="ghostbtn">● Explications</span><span class="ghostbtn">☼</span></div>
+  </header>
+
+  <section class="mission">
+    <div class="mrow">
+      <div class="mleft">
+        <span class="mnum" data-radius data-slop="Pastille violette">1.1</span>
+        <div style="min-width:0">
+          <div class="mnumline"><span class="n">1.1</span><h2 class="mtitle">Les 3 zones</h2></div>
+          <div class="mmeta" data-gap="mission"><span>0 / 2 commandes</span><span class="stars">★★★</span></div>
+          <p class="msituation" data-gap="mission"><b>Situation de départ ·</b>a.txt et b.txt sont modifiés ; rien n’est encore indexé.</p>
+        </div>
+      </div>
+      <div class="mbtns">
+        <span class="ghostbtn small" data-radius>? Indice 1/3</span>
+        <span class="ghostbtn small">⌃</span>
+      </div>
+    </div>
+    <div class="mbody">
+      <span class="objlabel">Objectif</span>
+      <p class="obj" data-gap="mission">Commite uniquement a.txt et laisse b.txt modifié dans le working dir.</p>
+      <ul class="steps">
+        <li class="done"><span class="box"></span>Indexer a.txt avec git add</li>
+        <li><span class="box"></span>Commiter la note de conception mise à jour</li>
+        <li><span class="box"></span>Laisser b.txt modifié hors du commit</li>
+      </ul>
+      <p class="story">Deux fichiers sont modifiés dans le projet Nova : a.txt et b.txt. Le lead ne veut livrer que le correctif de a.txt maintenant, et garder b.txt pour la prochaine release.</p>
+      <p class="useful">▸ <b>Commandes utiles ici</b></p>
+    </div>
+  </section>
+
+  <div class="bodygrid">
+    <div class="terminal">
+      <div class="thead">
+        <span class="lights" data-slop="Feux tricolores"><i style="background:#fb7185"></i><i style="background:#fbbf24"></i><i style="background:#34d399"></i></span>
+        <span class="label">Terminal</span>
+        <span class="hint">↑↓ historique · Tab complétion</span>
+      </div>
+      <div class="log"><span class="ok">Mission 1.1 — Les 3 zones</span>
+<span class="dim">Objectif : Commite uniquement a.txt et laisse b.txt
+modifié dans le working dir.</span>
+<span class="dim">~/gitquest (main) $</span> touch a.txt
+<span class="dim">~/gitquest (main) $</span> git add a.txt
+<span class="warn">« a.txt » est indexé : la prochaine photo (commit)
+le contiendra.</span>
+<span class="dim">~/gitquest (main) $</span> git status
+<span class="ok">Sur la branche main
+Modifications qui seront validées :
+  nouveau fichier : a.txt</span>
+<span class="dim">Modifications qui ne seront pas validées :
+  modifié : b.txt</span></div>
+      <div class="promptrow"><span class="ps1">~/gitquest (main) $</span><span class="caret">git commit -m "docs: note a"</span></div>
+    </div>
+
+    <div class="graph">
+      <div class="grid"></div>
+      <div class="ghead">
+        <span class="glabel" data-slop="Étiquette en capitales">Graphe</span>
+        <span class="gcount">1 commit</span>
+        <div class="gcontrols"><span class="gbtn">+</span><span class="gbtn">−</span><span class="gbtn">◎ HEAD</span></div>
+      </div>
+      <div class="gbody">
+        <svg width="100%" height="100%" viewBox="0 0 560 460">
+          <path d="M120 210 H460" stroke="hsl(205 54% 62% / .25)" stroke-width="1"/>
+          <path d="M120 210 H460" stroke="hsl(205 54% 62%)" stroke-width="2" fill="none"/>
+          <circle cx="120" cy="210" r="6.5" fill="#101218" stroke="hsl(205 54% 62%)" stroke-width="2.4"/>
+          <circle cx="290" cy="210" r="8.5" fill="hsl(205 54% 62%)" stroke="hsl(205 54% 62%)" stroke-width="2.4"/>
+          <circle cx="290" cy="210" r="3" fill="#101218"/>
+          <text x="120" y="196" text-anchor="middle" font-family="Mono" font-size="9" fill="#9096a8">racine</text>
+          <text x="120" y="232" text-anchor="middle" font-family="Mono" font-size="9" fill="#9096a8">2608790</text>
+          <text x="290" y="232" text-anchor="middle" font-family="Mono" font-size="9" fill="#9096a8">29087db</text>
+          <rect x="304" y="201" width="34" height="18" rx="9" fill="hsl(205 54% 62%)"/>
+          <text x="321" y="213.5" text-anchor="middle" font-family="Mono" font-size="10" font-weight="600" fill="#101218">main</text>
+        </svg>
+      </div>
+      <div class="gfoot">molette = zoom · glisser = déplacer</div>
+    </div>
+  </div>
+
+  <section class="pipeline">
+    <div class="phead">
+      <div style="display:flex;align-items:center">
+        <span class="plabel" data-slop="Étiquette en capitales">Pipeline</span>
+        <span class="path">~/gitquest</span>
+      </div>
+      <span class="phint">survol / clic = contenu</span>
+    </div>
+    <div class="zones">
+      <div class="zone">
+        <div class="zhead"><span class="zdot" style="background:#fbbf24"></span><span class="ztitle">Working dir</span><span class="zcount">1 fichier</span></div>
+        <div class="chips"><span class="chip mod">• b.txt</span></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="zone">
+        <div class="zhead"><span class="zdot" style="background:#8b7cf6"></span><span class="ztitle">Staging</span><span class="zcount">1 indexé</span></div>
+        <div class="chips"><span class="chip staged">• a.txt</span></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="zone">
+        <div class="zhead"><span class="zdot" style="background:#34d399"></span><span class="ztitle">Dernier commit</span><span class="zcount">4 fichiers</span></div>
+        <div class="chips"><span class="chip old">• a.txt</span><span class="chip old">• app.ts</span><span class="chip old">• b.txt</span><span class="chip old">• bug.txt</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

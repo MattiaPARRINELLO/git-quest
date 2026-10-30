@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Accueil — GitQuest</title>
+<meta name="unslop-steps" content="Espacement, Couleur, Typographie et copie, Détails">
+<meta name="unslop-frame" content="0 0 1000">
+<style>
+  @font-face{font-family:Inter;src:url(fonts/inter-latin-wght-normal.woff2) format("woff2");font-weight:100 900;font-display:block}
+  @font-face{font-family:Mono;src:url(fonts/jetbrains-mono-latin-wght-normal.woff2) format("woff2");font-weight:100 800;font-display:block}
+  @font-face{font-family:Newsreader;src:url(fonts/newsreader-latin-wght-normal.woff2) format("woff2");font-weight:200 800;font-display:block}
+
+  :root{
+    --bg:#0a0b0f; --panel:#101218; --panel2:#151823; --border:#242838;
+    --text:#e8eaf2; --muted:#9096a8; --violet:#8b7cf6; --cyan:#22d3ee; --amber:#fbbf24;
+    --branch:hsl(205 54% 62%);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;width:1440px;background:var(--bg)}
+  body{font-family:Inter,system-ui,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+  .screen{width:1000px;min-height:1000px;padding:0 28px 32px 84px;overflow:hidden}
+
+  .top{height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);margin:0 -28px 0 -84px;padding:0 28px 0 84px}
+  .brand{display:flex;align-items:center;gap:9px}
+  .mark{width:26px;height:26px;border-radius:9px;background:linear-gradient(135deg,#8b7cf6,#22d3ee);display:grid;place-items:center;box-shadow:0 8px 22px -8px rgba(139,124,246,.9)}
+  .mark svg{display:block}
+  .brandname{font-size:14px;font-weight:600;letter-spacing:-.01em;background:linear-gradient(90deg,#c4b5fd,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .badge{font-size:9px;font-weight:700;padding:3px 7px;border-radius:999px;background:rgba(139,124,246,.18);color:#c4b5fd;border:1px solid rgba(139,124,246,.4)}
+  .nav{display:flex;gap:4px;margin-left:16px;margin-right:auto}
+  .navlink{font-size:12px;color:var(--muted);padding:5px 9px;border-radius:8px}
+  .navlink.on{background:var(--panel2);color:var(--text)}
+  .topright{display:flex;gap:6px}
+  .ghostbtn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:1px solid var(--border);border-radius:999px;background:var(--panel2);color:var(--muted);font-size:12px}
+  .ghostbtn.small{height:26px;padding:0 9px;border-radius:8px;font-size:11px}
+
+  .hero{position:relative;margin:24px 0 0;padding:34px 30px 30px;border:1px solid var(--border);border-radius:24px;background:var(--panel);overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 0px;gap:0}
+  .glow{position:absolute;border-radius:50%;filter:blur(64px);pointer-events:none}
+  .glow.a{width:288px;height:288px;right:-96px;top:-96px;background:#8b7cf6;opacity:.32}
+  .glow.b{width:256px;height:256px;left:33%;bottom:-128px;background:#22d3ee;opacity:.2}
+  .heroText{position:relative;min-width:0}
+  .eyebrow{margin:0;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--violet)}
+  .h1{margin:7px 0 0;max-width:560px;font-size:40px;line-height:1.1;font-weight:600;letter-spacing:-.02em;color:var(--text)}
+  .p{margin:9px 0 0;max-width:540px;font-size:14px;line-height:1.7;color:var(--muted)}
+  .ctas{display:flex;align-items:center;gap:8px;margin-top:21px}
+  .cta{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;background:linear-gradient(135deg,#8b7cf6,#7c6cf0);color:#fff;font-size:13px;font-weight:600;box-shadow:0 12px 30px -10px rgba(139,124,246,.9)}
+  .cta .arrow{font-size:14px}
+  .context{margin:6px 0 0;font-size:11px;color:var(--muted)}
+
+  .preview{position:relative;opacity:0;overflow:hidden;border:1px solid var(--border);border-radius:16px;background:var(--panel2);align-self:center}
+  .pvhead{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--border)}
+  .pvmeta{font-family:Mono;font-size:10.5px;color:var(--muted)}
+  .pvfoot{display:flex;gap:14px;align-items:center;padding:8px 12px;border-top:1px solid var(--border);font-family:Mono;font-size:10px;color:var(--muted)}
+  .dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px}
+
+  .stats{display:flex;gap:12px;margin:28px 0 0}
+  .stat{flex:1;border:1px solid var(--border);border-radius:14px;background:var(--panel);padding:14px 16px}
+  .statlabel{display:block;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .statnum{display:block;margin-top:4px;font-family:Mono;font-size:22px;font-variant-numeric:tabular-nums}
+  .statnum i{font-style:normal;font-size:13px;color:var(--muted)}
+
+  .chapters{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:32px}
+  .card{border:1px solid var(--border);border-radius:18px;background:var(--panel);padding:16px}
+  .cardhead{display:flex;align-items:flex-start;gap:12px}
+  .num{width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:12px;border:1px solid rgba(139,124,246,.4);background:rgba(139,124,246,.12);color:#a99df9;font-family:Mono;font-size:14px;font-weight:600}
+  .cardtitle{margin:0;font-size:14px;font-weight:600}
+  .tagline{margin:2px 0 0;font-size:11px;color:var(--muted)}
+  .stars{margin-left:auto;font-size:11px;letter-spacing:1px;color:var(--amber)}
+  .desc{margin:12px 0 0;font-size:12px;line-height:1.65;color:var(--muted)}
+  .cardmeta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+  .rows{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+  .row{display:flex;align-items:center;gap:8px;height:32px;padding:0 6px;border-radius:8px;background:rgba(21,24,35,.6)}
+  .rnum{font-family:Mono;font-size:10px;color:var(--muted)}
+  .rtitle{font-size:12px;color:var(--text)}
+  .rmeta{margin-left:auto;font-family:Mono;font-size:10px;color:var(--violet)}
+  .row.locked .rtitle{color:var(--muted)}
+  .row.locked .rmeta{color:var(--muted)}
+
+  /* 1 — Espacement */
+  html.s1 .top{height:48px}
+  html.s1 .hero{margin-top:36px;padding:4px 0 0;gap:0}
+  html.s1 .stats .stat{}
+  html.s1 .h1{margin-top:12px}
+  html.s1 .p{margin-top:16px}
+  html.s1 .h1{margin-top:12px}
+  html.s1 .p{margin-top:16px;max-width:430px}
+  html.s1 .ctas{margin-top:28px}
+  html.s1 .context{margin-top:12px}
+  html.s1 .stats{margin-top:36px;gap:12px}
+  html.s1 .stat{padding:14px 18px}
+  html.s1 .chapters{margin-top:40px;gap:12px}
+  html.s1 .card{padding:18px}
+  html.s1 .cardmeta{margin-top:16px;padding-top:12px}
+  html.s1 .rows{margin-top:8px;gap:2px}
+  html.s1 .row{height:32px}
+
+  /* 2 — Couleur */
+  html.s2{--bg:#0e100e;--panel:#141714;--panel2:#1a1e1a;--border:#272d27;--text:#e9ece6;--muted:#99a299;--violet:#ec6a40;--cyan:#a9c0b2}
+  html.s2 body{background:var(--bg)}
+  html.s2 .top{border-color:var(--border);background:var(--panel)}
+  html.s2 .hero{background:transparent;border-color:transparent;grid-template-columns:minmax(0,1fr) 360px;gap:36px}
+  html.s2 .glow{opacity:0}
+  html.s2 .preview{opacity:1;background:var(--panel);border-color:var(--border)}
+  html.s2 .mark{background:#ec6a40;box-shadow:none}
+  html.s2 .brandname{background:none;-webkit-text-fill-color:var(--text);color:var(--text)}
+  html.s2 .badge{background:rgba(236,106,64,.14);border-color:rgba(236,106,64,.4);color:#f0a184}
+  html.s2 .eyebrow{color:var(--muted)}
+  html.s2 .cta{background:#ec6a40;color:#180e08;box-shadow:none}
+  html.s2 .ghostbtn{background:transparent;border-color:var(--border);color:var(--muted)}
+  html.s2 .stats{gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  html.s2 .stat{background:var(--panel);border:0;border-radius:0}
+  html.s2 .num{border-color:var(--border);background:transparent;color:var(--muted)}
+  html.s2 .card{background:var(--panel);border-color:var(--border)}
+  html.s2 .row{background:transparent}
+  html.s2 .rmeta{color:var(--muted)}
+
+  /* 3 — Typographie et copie */
+  html.s3 .h1{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:52px;line-height:1.04;letter-spacing:-.02em}
+  html.s3 .eyebrow{font-size:11.5px;font-weight:400;letter-spacing:.01em;text-transform:none}
+  html.s3 .p{font-size:15px;line-height:1.75;color:var(--muted)}
+  html.s3 .cta{font-size:13px;font-weight:500}
+  html.s3 .statlabel{letter-spacing:.01em;text-transform:none;font-weight:400;font-size:11px;color:var(--muted)}
+  html.s3 .cardtitle{font-size:14px;font-weight:500}
+  html.s3 .tagline{font-size:12px}
+  html.s3 .desc{font-size:12.5px}
+  html.s3 .navlink{font-size:13px}
+
+  /* 4 — Détails */
+  html.s4 .cta{border-radius:8px;height:36px;padding:0 14px}
+  html.s4 .ghostbtn{border-radius:8px;height:32px}
+  html.s4 .ghostbtn.small{height:26px;border-radius:6px}
+  html.s4 .hero{border-radius:12px}
+  html.s4 .card{border-radius:12px}
+  html.s4 .stat{border-radius:0}
+  html.s4 .preview{border-radius:12px}
+  html.s4 .num{width:2px;height:14px;padding:0;border:0;border-radius:2px;background:var(--branch);color:transparent;font-size:0;margin-top:3px}
+  html.s4 .row{border-radius:6px}
+  html.s4 .stars{font-size:0;letter-spacing:0;color:transparent}
+  html.s4 .stars::after{content:"0 / 9";font-family:Mono;font-size:11px;color:var(--muted)}
+  html.s4 .badge{display:none}
+</style>
+</head>
+<body>
+<main class="screen">
+  <header class="top">
+    <div class="brand">
+      <span class="mark" data-slop="Pastille dégradée">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0b0f" stroke-width="1.8" stroke-linecap="round">
+          <path d="M5 19V8a3 3 0 0 1 3-3h5M13 5h6M13 5l3 3M13 5l3-3"/>
+          <circle cx="5" cy="19" r="2"/><circle cx="5" cy="5" r="2"/>
+        </svg>
+      </span>
+      <span class="brandname">GitQuest</span>
+      <span class="badge" data-slop="Badge « Nouveau »">Nouveau ✨</span>
+    </div>
+    <nav class="nav">
+      <span class="navlink on">Chapitres</span>
+      <span class="navlink">Bac à sable</span>
+      <span class="navlink">Mon arbre</span>
+    </nav>
+    <div class="topright">
+      <span class="ghostbtn">Explications</span>
+      <span class="ghostbtn">☼</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <span class="glow a" data-slop="Halos flous"></span>
+    <span class="glow b"></span>
+    <div class="heroText">
+      <p class="eyebrow" data-gap="hero">Apprendre Git par la pratique</p>
+      <h1 class="h1" data-gap="hero">Apprends Git en voyant le graphe.</h1>
+      <p class="p" data-gap="hero">Quatre chapitres, douze missions réalistes. Chaque commande se rejoue sous tes yeux : le graphe, HEAD, l’index et les worktrees deviennent enfin lisibles.</p>
+      <div class="ctas" data-gap="hero">
+        <span class="cta" data-radius data-slop="Bouton pilule">Commencer avec le chapitre 1 <span class="arrow">→</span></span>
+        <span class="ghostbtn">Ouvrir le bac à sable</span>
+      </div>
+      <p class="context" data-gap="hero">Chapitre 1 · Sous le capot · 0/3 missions</p>
+    </div>
+
+    <div class="preview" data-radius>
+      <div class="pvhead"><span class="pvmeta">nova · sur main</span><span class="pvmeta">4 commits · 2 branches</span></div>
+      <svg width="100%" height="200" viewBox="0 0 420 200" role="img" aria-label="Graphe de commits">
+        <g stroke-linecap="round">
+          <path d="M40 120 H400" stroke="hsl(205 54% 62% / .22)" stroke-width="1"/>
+          <path d="M40 120 H130 C170 120 170 60 210 60 C250 60 250 120 290 120 H400" fill="none" stroke="hsl(158 54% 62%)" stroke-width="2"/>
+          <path d="M40 120 H290 H400" fill="none" stroke="hsl(205 54% 62%)" stroke-width="2"/>
+        </g>
+        <circle cx="40" cy="120" r="6.5" fill="#141714" stroke="hsl(205 54% 62%)" stroke-width="2.4"/>
+        <circle cx="210" cy="60" r="6.5" fill="#141714" stroke="hsl(158 54% 62%)" stroke-width="2.4"/>
+        <circle cx="290" cy="120" r="8.5" fill="hsl(205 54% 62%)" stroke="hsl(205 54% 62%)" stroke-width="2.4"/>
+        <circle cx="290" cy="120" r="3" fill="#141714"/>
+        <text x="40" y="142" text-anchor="middle" font-family="Mono" font-size="9" fill="#99a299">2608790</text>
+        <text x="210" y="82" text-anchor="middle" font-family="Mono" font-size="9" fill="#99a299">27087a9</text>
+        <text x="290" y="142" text-anchor="middle" font-family="Mono" font-size="9" fill="#99a299">29087db</text>
+        <rect x="302" y="111" width="34" height="18" rx="9" fill="hsl(205 54% 62%)"/>
+        <text x="319" y="123.5" text-anchor="middle" font-family="Mono" font-size="10" font-weight="600" fill="#141714">main</text>
+        <rect x="176" y="51" width="96" height="18" rx="9" fill="#141714" stroke="hsl(158 54% 62%)"/>
+        <text x="215" y="63.5" text-anchor="middle" font-family="Mono" font-size="10" fill="hsl(158 54% 62%)">feature/notes</text>
+      </svg>
+      <div class="pvfoot">
+        <span><i class="dot" style="background:hsl(205 54% 62%)"></i>main</span>
+        <span><i class="dot" style="background:hsl(158 54% 62%)"></i>feature/notes</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats" data-gap="stats">
+    <div class="stat" data-radius><span class="statlabel">Missions</span><span class="statnum">0 <i>/ 12</i></span></div>
+    <div class="stat" data-radius><span class="statlabel">Étoiles</span><span class="statnum">0 <i>/ 36</i></span></div>
+    <div class="stat" data-radius><span class="statlabel">Parcours</span><span class="statnum">0%</span></div>
+  </div>
+
+  <section class="chapters" data-gap="chapters">
+    <article class="card" data-radius>
+      <div class="cardhead">
+        <span class="num" data-radius>1</span>
+        <div><h3 class="cardtitle">Sous le capot</h3><p class="tagline">Commits, snapshots, branches et HEAD</p></div>
+        <span class="stars">★★★★★★★★★</span>
+      </div>
+      <p class="desc">Comprendre ce que Git photographie vraiment, et pourquoi une branche n’est qu’une étiquette.</p>
+      <div class="cardmeta"><span>0 / 3 missions · 5 min de cours</span><span class="ghostbtn small">Cours</span></div>
+      <ul class="rows">
+        <li class="row"><span class="rnum">1.1</span><span class="rtitle">Les 3 zones</span><span class="rmeta">à faire →</span></li>
+        <li class="row locked"><span class="rnum">1.2</span><span class="rtitle">La photo ne bouge plus</span><span class="rmeta">🔒</span></li>
+        <li class="row locked"><span class="rnum">1.3</span><span class="rtitle">Le piège du -am</span><span class="rmeta">🔒</span></li>
+      </ul>
+    </article>
+    <article class="card" data-radius>
+      <div class="cardhead">
+        <span class="num" data-radius>2</span>
+        <div><h3 class="cardtitle">Les branches</h3><p class="tagline">Créer, changer, se détacher proprement</p></div>
+        <span class="stars">★★★★★★★★★</span>
+      </div>
+      <p class="desc">Faire diverger deux lignes de travail, explorer un commit sans rien casser, et resécurer un commit orphelin.</p>
+      <div class="cardmeta"><span>0 / 3 missions · 5 min de cours</span><span class="ghostbtn small">Cours</span></div>
+      <ul class="rows">
+        <li class="row locked"><span class="rnum">2.1</span><span class="rtitle">Le pointeur fantôme</span><span class="rmeta">🔒</span></li>
+        <li class="row locked"><span class="rnum">2.2</span><span class="rtitle">Qui avance ?</span><span class="rmeta">🔒</span></li>
+        <li class="row locked"><span class="rnum">2.3</span><span class="rtitle">Le commit perdu</span><span class="rmeta">🔒</span></li>
+      </ul>
+    </article>
+  </section>
+</main>
+</body>
+</html>

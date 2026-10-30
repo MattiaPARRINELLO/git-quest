@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Arbre Nova — GitQuest</title>
+<link rel="stylesheet" href="story-base.css">
+<meta name="unslop-steps" content="Espacement, Couleur, Typographie et copie, Détails">
+<meta name="unslop-frame" content="0 0 1000">
+<style>
+  .screen{padding:0 24px 32px 84px}
+  .top{margin:0 -24px 0 -84px;padding:0 24px 0 84px}
+  .pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-top:28px}
+  .eyebrow{display:flex;align-items:center;gap:8px;margin:0;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--violet)}
+  .tick{width:2px;height:13px;border-radius:2px;background:var(--violet);flex:none}
+  .h1{margin:6px 0 0;font-size:24px;font-weight:600;letter-spacing:-.02em}
+  .actions{display:flex;gap:6px}
+  .pillbtn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:1px solid var(--border);border-radius:999px;background:var(--panel2);color:var(--text);font-size:11px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+  .stat{border:1px solid rgba(139,124,246,.28);border-radius:14px;background:var(--panel);padding:10px 12px;box-shadow:0 12px 34px -24px rgba(139,124,246,.9)}
+  .statlabel{display:block;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .statnum{display:block;margin-top:4px;font-family:Mono;font-size:19px;line-height:1;font-variant-numeric:tabular-nums}
+
+  .fil{margin-top:26px}
+  .fil h2{margin:0;font-size:14px;font-weight:600}
+  .rows{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .row{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 10px;border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:7px 10px}
+  .rnum{font-family:Mono;font-size:10px;color:var(--violet)}
+  .rtitle{font-size:12px;font-weight:600}
+  .rstars{font-size:10px;letter-spacing:1px;color:var(--amber)}
+  .rmsg{width:100%;font-family:Mono;font-size:10px;color:var(--muted)}
+
+  .split{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:12px;margin-top:22px}
+  .graph{border:1px solid var(--border);border-radius:18px;background:var(--panel);overflow:hidden;height:430px;position:relative}
+  .ghead{display:flex;align-items:center;gap:8px;padding:12px 16px}
+  .glabel{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .gcount{font-family:Mono;font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:2px 6px;background:var(--panel2)}
+  .gcontrols{margin-left:auto;display:flex;gap:4px}
+  .gbtn{height:28px;min-width:28px;display:grid;place-items:center;padding:0 8px;border:1px solid var(--border);border-radius:999px;background:rgba(16,18,24,.9);color:var(--muted);font-family:Mono;font-size:12px}
+  .grid{position:absolute;inset:44px 0 0;background-image:linear-gradient(rgba(139,124,246,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(139,124,246,.09) 1px,transparent 1px);background-size:32px 32px}
+  .gfoot{position:absolute;bottom:10px;left:16px;right:16px;display:flex;justify-content:space-between;font-family:Mono;font-size:9px;color:var(--muted)}
+
+  .aside{border:1px solid var(--border);border-radius:18px;background:var(--panel);padding:12px}
+  .ahead{display:flex;align-items:center;gap:6px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  .alabel{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .atext{margin:10px 0 0;font-size:12px;line-height:1.7;color:var(--muted)}
+
+  .log{margin-top:14px;border:1px solid var(--border);border-radius:16px;background:var(--panel);padding:11px 14px;font-size:12px;color:var(--text)}
+  .log .mono{font-size:11px;color:var(--muted)}
+
+  /* 1 — Espacement */
+  html.s1 .pagehead{margin-top:34px}
+  html.s1 .stats{margin-top:26px;gap:1px}
+  html.s1 .fil{margin-top:30px}
+  html.s1 .rows{gap:2px;margin-top:10px}
+  html.s1 .split{margin-top:24px;gap:12px}
+  html.s1 .graph{height:420px}
+  html.s1 .aside{padding:14px}
+  html.s1 .log{margin-top:18px;padding:12px 14px}
+
+  /* 2 — Couleur */
+  html.s2{--bg:#0e100e;--panel:#141714;--panel2:#1a1e1a;--border:#272d27;--text:#e9ece6;--muted:#99a299;--violet:#ec6a40;--amber:#d9a94f}
+  html.s2 .top{background:var(--panel);border-color:var(--border)}
+  html.s2 .mark{background:#ec6a40;box-shadow:none}
+  html.s2 .brandname{background:none;-webkit-text-fill-color:var(--text);color:var(--text)}
+  html.s2 .tick{background:var(--branch)}
+  html.s2 .eyebrow{color:var(--muted)}
+  html.s2 .pillbtn{background:transparent;border-color:var(--border);color:var(--muted)}
+  html.s2 .stat{border-color:var(--border);box-shadow:none;background:var(--panel);border-radius:0}
+  html.s2 .stats{gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  html.s2 .row{background:transparent;border-color:var(--border);border-radius:0;border-width:0 0 1px}
+  html.s2 .rows{gap:0}
+  html.s2 .graph{background:var(--panel);border-color:var(--border)}
+  html.s2 .grid{background-image:linear-gradient(rgba(153,162,153,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(153,162,153,.09) 1px,transparent 1px)}
+  html.s2 .gbtn{background:var(--panel);border-color:var(--border);border-radius:6px}
+  html.s2 .rnum{color:var(--muted)}
+  html.s2 .aside{background:var(--panel);border-color:var(--border)}
+  html.s2 .log{background:var(--panel);border-color:var(--border)}
+
+  /* 3 — Typographie et copie */
+  html.s3 .h1{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:34px;line-height:1.1;letter-spacing:-.015em}
+  html.s3 .eyebrow{font-size:11.5px;font-weight:400;letter-spacing:.01em;text-transform:none}
+  html.s3 .statlabel{font-size:11px;font-weight:400;letter-spacing:.01em;text-transform:none}
+  html.s3 .fil h2{font-size:14px;font-weight:500}
+  html.s3 .glabel{letter-spacing:.02em;text-transform:none;font-weight:500;font-size:12px;color:var(--text)}
+  html.s3 .alabel{letter-spacing:.01em;text-transform:none;font-weight:500;font-size:12px;color:var(--text)}
+  html.s3 .rtitle{font-weight:500;font-size:12.5px}
+
+  /* 4 — Détails */
+  html.s4 .pillbtn{border-radius:8px;height:32px}
+  html.s4 .gbtn{border-radius:6px}
+  html.s4 .row{border-radius:0}
+  html.s4 .rstars{font-size:0;letter-spacing:0;color:transparent}
+  html.s4 .rstars::after{content:"2 sur 3";font-family:Mono;font-size:10px;color:var(--muted)}
+  html.s4 .graph{border-radius:12px}
+  html.s4 .aside{border-radius:12px;padding:14px}
+  html.s4 .log{border-radius:12px}
+</style>
+</head>
+<body>
+<main class="screen">
+  <header class="top">
+    <div class="brand">
+      <span class="mark" data-slop="Pastille dégradée">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0b0f" stroke-width="1.8" stroke-linecap="round">
+          <path d="M5 19V8a3 3 0 0 1 3-3h5M13 5h6M13 5l3 3M13 5l3-3"/><circle cx="5" cy="19" r="2"/><circle cx="5" cy="5" r="2"/>
+        </svg>
+      </span>
+      <span class="brandname">GitQuest</span>
+    </div>
+    <nav class="nav">
+      <span class="navlink">Chapitres</span>
+      <span class="navlink">Bac à sable</span>
+      <span class="navlink on">Mon arbre</span>
+    </nav>
+    <div class="topright"><span class="ghostbtn">☼</span></div>
+  </header>
+
+  <div class="pagehead">
+    <div>
+      <p class="eyebrow" data-gap="head"><span class="tick"></span>Ton histoire</p>
+      <h1 class="h1" data-gap="head" data-slop="Titre sans personnalité">Ton arbre Nova</h1>
+    </div>
+    <div class="actions"><span class="pillbtn" data-radius>Exporter en PNG</span><span class="pillbtn" data-radius>Copier git log</span><span class="pillbtn" data-radius>Carte</span></div>
+  </div>
+
+  <dl class="stats" data-gap="stats">
+    <div class="stat" data-radius><dt class="statlabel">Missions</dt><dd class="statnum">1</dd></div>
+    <div class="stat" data-radius><dt class="statlabel">Commits</dt><dd class="statnum">2</dd></div>
+    <div class="stat" data-radius><dt class="statlabel">Branches</dt><dd class="statnum">1</dd></div>
+    <div class="stat" data-radius><dt class="statlabel">Merges</dt><dd class="statnum">0</dd></div>
+    <div class="stat" data-radius><dt class="statlabel">Étoiles</dt><dd class="statnum">2</dd></div>
+    <div class="stat" data-radius><dt class="statlabel">Worktrees créés</dt><dd class="statnum">1</dd></div>
+    <div class="stat" data-radius><dt class="statlabel">Worktrees actifs</dt><dd class="statnum">1</dd></div>
+    <div class="stat" data-radius><dt class="statlabel">Abandonnés</dt><dd class="statnum">0</dd></div>
+  </dl>
+
+  <section class="fil">
+    <h2>Le fil de l’histoire</h2>
+    <ol class="rows" data-gap="fil">
+      <li class="row"><span class="rnum">1.1</span><span class="rtitle">Les 3 zones</span><span class="rstars">★★☆</span><span class="rmsg">docs: note a</span></li>
+      <li class="row"><span class="rnum">1.2</span><span class="rtitle">La photo ne bouge plus</span><span class="rstars">★★★</span><span class="rmsg">docs: figer la photo</span></li>
+    </ol>
+  </section>
+
+  <div class="split">
+    <div class="graph">
+      <div class="ghead"><span class="glabel" data-slop="Étiquette en capitales">Graphe</span><span class="gcount">2 commits</span><div class="gcontrols"><span class="gbtn">+</span><span class="gbtn">−</span><span class="gbtn">◎ HEAD</span></div></div>
+      <div class="grid"></div>
+      <svg width="100%" height="350" viewBox="0 0 560 300" style="position:relative">
+        <path d="M90 150 H470" stroke="hsl(205 54% 62% / .22)" stroke-width="1"/>
+        <path d="M90 150 H470" stroke="hsl(205 54% 62%)" stroke-width="2" fill="none"/>
+        <circle cx="90" cy="150" r="6.5" fill="#101218" stroke="hsl(205 54% 62%)" stroke-width="2.4"/>
+        <circle cx="330" cy="150" r="8.5" fill="hsl(205 54% 62%)" stroke="hsl(205 54% 62%)" stroke-width="2.4"/>
+        <circle cx="330" cy="150" r="3" fill="#101218"/>
+        <text x="90" y="132" text-anchor="middle" font-family="Mono" font-size="9" fill="#9096a8">racine</text>
+        <text x="90" y="172" text-anchor="middle" font-family="Mono" font-size="9" fill="#9096a8">2608790</text>
+        <text x="330" y="172" text-anchor="middle" font-family="Mono" font-size="9" fill="#9096a8">27087a9</text>
+        <rect x="342" y="141" width="34" height="18" rx="9" fill="hsl(205 54% 62%)"/>
+        <text x="359" y="153.5" text-anchor="middle" font-family="Mono" font-size="10" font-weight="600" fill="#101218">main</text>
+      </svg>
+      <div class="gfoot"><span>molette = zoom · glisser = déplacer</span><span>☐ sans animation</span></div>
+    </div>
+
+    <aside class="aside">
+      <div class="ahead"><span class="zdot" style="width:6px;height:6px;border-radius:50%;background:var(--violet)"></span><span class="alabel">Détail</span></div>
+      <p class="atext">Clique sur un commit du graphe pour voir son message, son auteur et son contenu. Les commits abandonnés restent visibles, plus pâles.</p>
+    </aside>
+  </div>
+
+  <div class="log"><span class="mono">git log --oneline --graph</span></div>
+</main>
+</body>
+</html>
