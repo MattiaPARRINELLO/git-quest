@@ -31,6 +31,33 @@ describe('placement des étiquettes du graphe', () => {
     expect(marker?.y ?? 0).toBeGreaterThan(ys[ys.length - 1] ?? 0);
   });
 
+  it('distingue la branche courante quand plusieurs branches partagent un commit', () => {
+    const repo = scenario()
+      .init()
+      .commit('Initial', { 'a.txt': 'a' })
+      .branch('feature')
+      .branch('hotfix')
+      .build();
+
+    const labels = layoutGraph(repo).branchLabels.filter(
+      (label) => label.commit === repo.branches.main,
+    );
+    const current = labels.filter((label) => label.current);
+
+    expect(current.map((label) => label.name)).toEqual(['main']);
+    // La branche courante reste la première, collée au nœud.
+    expect(labels[0]?.name).toBe('main');
+
+    const moved = scenario()
+      .init()
+      .commit('Initial', { 'a.txt': 'a' })
+      .branch('feature')
+      .checkout('feature')
+      .build();
+    const movedCurrent = layoutGraph(moved).branchLabels.filter((label) => label.current);
+    expect(movedCurrent.map((label) => label.name)).toEqual(['feature']);
+  });
+
   it('décale les étiquettes de commits voisins horizontalement', () => {
     const repo = scenario()
       .init()

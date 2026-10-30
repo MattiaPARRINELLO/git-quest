@@ -548,18 +548,24 @@ function BranchLabelView({
       }
       style={{ cursor: onSelect === undefined ? 'default' : 'pointer' }}
     >
-      <title>{`Branche ${label.name}`}</title>
+      <title>{label.current ? `Branche ${label.name} (HEAD)` : `Branche ${label.name}`}</title>
       <rect
         x={0}
         y={0}
         width={width}
         height={18}
         rx={9}
-        fill="var(--panel)"
+        fill={label.current ? label.color : 'var(--panel)'}
         stroke={label.color}
-        strokeOpacity={0.85}
+        strokeOpacity={label.current ? 1 : 0.85}
       />
-      <text x={9} y={12.5} fill={label.color} fontSize={10} className="font-mono font-semibold">
+      <text
+        x={9}
+        y={12.5}
+        fill={label.current ? 'var(--bg)' : label.color}
+        fontSize={10}
+        className="font-mono font-semibold"
+      >
         {text}
       </text>
     </motion.g>
