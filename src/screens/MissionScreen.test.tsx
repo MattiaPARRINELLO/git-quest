@@ -105,7 +105,7 @@ describe('MissionScreen', () => {
 
   it('refuse une commande interdite sans exécuter', async () => {
     useProgressStore.setState({
-      completed: { 'menage-branches': { stars: 3 } },
+      completed: { 'menage-branches': { stars: 3 }, 'conflit-docs': { stars: 3 } },
       lessonSlides: {},
       hydrated: true,
     });

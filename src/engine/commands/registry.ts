@@ -4,6 +4,11 @@ import { gitStatus } from './status';
 import { gitAdd } from './add';
 import { gitCommit } from './commit';
 import { gitLog } from './log';
+import { gitDiff } from './diff';
+import { gitRemote } from './remote';
+import { gitPush } from './push';
+import { gitFetch } from './fetch';
+import { gitPull } from './pull';
 import { gitBranch } from './branch';
 import { gitSwitch } from './switch';
 import { gitCheckout } from './checkout';
@@ -25,6 +30,11 @@ const handlers: Handlers = {
   'git-add': gitAdd,
   'git-commit': gitCommit,
   'git-log': gitLog,
+  'git-diff': gitDiff,
+  'git-remote': gitRemote,
+  'git-push': gitPush,
+  'git-fetch': gitFetch,
+  'git-pull': gitPull,
   'git-branch': gitBranch,
   'git-switch': gitSwitch,
   'git-checkout': gitCheckout,

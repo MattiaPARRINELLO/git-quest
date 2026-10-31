@@ -83,11 +83,17 @@ function parseCommit(args: readonly string[]): ParseResult {
     );
   }
 
-  if (message === undefined || message.trim() === '') {
+  if (message !== undefined && message.trim() === '') {
     return fail('invalid-commit-message', "error: switch `m' requires a value");
   }
 
-  const base = { kind: 'git-commit' as const, message, stageAllTracked };
+  // Sans `-m`, le message par défaut n'est valable que pour un commit de fusion :
+  // le moteur le sait, pas le parseur.
+  const base = {
+    kind: 'git-commit' as const,
+    ...(message === undefined ? {} : { message }),
+    stageAllTracked,
+  };
   if (pathspecs.length === 0) return { ok: true, command: base };
   return { ok: true, command: { ...base, paths: pathspecs } };
 }
@@ -278,6 +284,27 @@ function parseGit(args: readonly string[]): ParseResult {
       return { ok: true, command: { kind: 'git-log', graph, oneline } };
     }
 
+    case 'diff': {
+      let target: 'worktree' | 'staged' | 'head' = 'worktree';
+      const paths: string[] = [];
+      for (const arg of rest) {
+        if (arg === '--staged' || arg === '--cached') {
+          target = 'staged';
+          continue;
+        }
+        if (arg === 'HEAD') {
+          target = 'head';
+          continue;
+        }
+        if (arg === '--') continue;
+        if (arg.startsWith('-')) {
+          return fail('invalid-option', `error: unknown option \`${arg}'`);
+        }
+        paths.push(arg);
+      }
+      return { ok: true, command: { kind: 'git-diff', target, paths } };
+    }
+
     case 'branch':
       return parseBranch(rest);
 
@@ -333,7 +360,107 @@ function parseGit(args: readonly string[]): ParseResult {
       if (rest.length > 1) {
         return fail('invalid-option', 'fatal: too many arguments');
       }
-      return { ok: true, command: { kind: 'git-merge', branch } };
+      if (branch === '--continue' || branch === '--abort') {
+        return {
+          ok: true,
+          command: { kind: 'git-merge', action: branch === '--abort' ? 'abort' : 'continue' },
+        };
+      }
+      if (branch.startsWith('-')) {
+        return fail('invalid-option', `error: unknown option \`${branch}'`);
+      }
+      return { ok: true, command: { kind: 'git-merge', action: 'start', branch } };
+    }
+
+    case 'remote': {
+      if (rest.length === 0) {
+        return {
+          ok: true,
+          command: { kind: 'git-remote', action: 'list', verbose: false },
+        };
+      }
+      const [subcommand, ...args] = rest;
+      if (subcommand === '-v' || subcommand === '--verbose') {
+        return {
+          ok: true,
+          command: { kind: 'git-remote', action: 'list', verbose: true },
+        };
+      }
+      if (subcommand === 'add') {
+        const [name, url, ...extra] = args;
+        if (name === undefined || url === undefined || extra.length > 0) {
+          return fail('invalid-option', 'usage: git remote add <name> <url>');
+        }
+        return { ok: true, command: { kind: 'git-remote', action: 'add', name, url, verbose: false } };
+      }
+      if (subcommand === 'remove' || subcommand === 'rm') {
+        const [name, ...extra] = args;
+        if (name === undefined || extra.length > 0) {
+          return fail('invalid-option', 'error: remote name required');
+        }
+        return {
+          ok: true,
+          command: { kind: 'git-remote', action: 'remove', name, verbose: false },
+        };
+      }
+      return fail('invalid-option', `error: unknown subcommand: \`${subcommand ?? ''}'`);
+    }
+
+    case 'push':
+    case 'pull': {
+      let setUpstream = false;
+      const positional: string[] = [];
+      for (const arg of rest) {
+        if (arg === '-u' || arg === '--set-upstream') {
+          if (subcommand === 'pull') {
+            return fail('invalid-option', `error: unknown option \`${arg}'`);
+          }
+          setUpstream = true;
+          continue;
+        }
+        if (arg.startsWith('-')) {
+          return fail('invalid-option', `error: unknown option \`${arg}'`);
+        }
+        positional.push(arg);
+      }
+      if (positional.length > 2) {
+        return fail('invalid-option', 'fatal: too many arguments');
+      }
+      const [remote, refspec] = positional;
+      if (subcommand === 'push') {
+        const colon = refspec?.indexOf(':') ?? -1;
+        const source = colon >= 0 ? refspec?.slice(0, colon) : refspec;
+        const target = colon >= 0 ? refspec?.slice(colon + 1) : undefined;
+        return {
+          ok: true,
+          command: {
+            kind: 'git-push',
+            ...(remote === undefined ? {} : { remote }),
+            ...(source === undefined || source === '' ? {} : { branch: source }),
+            ...(target === undefined || target === '' ? {} : { remoteBranch: target }),
+            setUpstream,
+          },
+        };
+      }
+      return {
+        ok: true,
+        command: {
+          kind: 'git-pull',
+          ...(remote === undefined ? {} : { remote }),
+          ...(refspec === undefined ? {} : { branch: refspec }),
+        },
+      };
+    }
+
+    case 'fetch': {
+      if (rest.length > 1) {
+        return fail('invalid-option', 'fatal: too many arguments');
+      }
+      const [remote] = rest;
+      return {
+        ok: true,
+        command: { kind: 'git-fetch', ...(remote === undefined ? {} : { remote }) },
+      };
     }
 
     case 'worktree':

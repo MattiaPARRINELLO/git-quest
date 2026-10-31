@@ -1,6 +1,16 @@
 import { scenario } from '../../../engine/scenario';
 import type { Lesson } from '../../types';
 
+const conflictDemo = scenario()
+  .init()
+  .commit('Initial commit', { 'README.md': 'Titre' })
+  .branch('feature')
+  .checkout('feature')
+  .commit('docs: accroche équipe', { 'README.md': 'Titre — équipe' })
+  .checkout('main')
+  .commit('docs: accroche locale', { 'README.md': 'Titre — local' })
+  .build();
+
 const demo = scenario()
   .init()
   .commit('Initial commit', { 'README.md': '# Projet Nova' })
@@ -67,7 +77,43 @@ export const lesson03: Lesson = {
         'Deux choix conscients : fusionner d’abord puis -d, ou forcer avec -D. -D jette les commits non référencés : à utiliser en connaissance de cause.',
       ],
       command: 'git branch -d feature',
-      note: 'Les conflits existent dans Git réel mais sont hors du périmètre de GitQuest.',
+      note: 'Une branche fusionnée est une branche dont les commits sont déjà dans HEAD.',
+    },
+    {
+      kind: 'text',
+      title: 'Quand les deux côtés touchent la même ligne',
+      paragraphs: [
+        'Git fusionne fichier par fichier. Si les deux branches ont modifié le même fichier de façons différentes, il ne peut pas choisir : la fusion s’arrête en conflit.',
+        'Git écrit les deux versions dans le fichier, entre <<<<<<< HEAD, ======= et >>>>>>>. Ce n’est pas une erreur : c’est à toi de décider du résultat.',
+        'Tu édites le fichier, tu retires les marqueurs, puis git add marque le conflit comme résolu. git commit (ou git merge --continue) crée enfin le commit de fusion.',
+      ],
+      command: 'git add README.md',
+      note: 'git merge --abort annule tout et restaure l’état d’avant la fusion.',
+    },
+    {
+      kind: 'demo',
+      title: 'Résoudre un conflit',
+      initialState: conflictDemo,
+      caption: 'La fusion s’arrête, le fichier porte les deux versions : à toi de trancher.',
+      steps: [
+        {
+          command: 'git merge feature',
+          explanation:
+            'CONFLICT : README.md contient maintenant les deux accroches entre les marqueurs.',
+        },
+        {
+          command: 'edit README.md "Titre — final"',
+          explanation: 'Tu choisis le texte final et tu retires les marqueurs.',
+        },
+        {
+          command: 'git add README.md',
+          explanation: 'Le conflit est marqué résolu : la version du disque sera commitée.',
+        },
+        {
+          command: 'git merge --continue',
+          explanation: 'Le commit de fusion à deux parents est créé, la fusion est terminée.',
+        },
+      ],
     },
     {
       kind: 'recap',
@@ -76,6 +122,9 @@ export const lesson03: Lesson = {
         { command: 'git merge <branche>', description: 'Fusionne la branche dans HEAD.' },
         { command: 'git log --oneline --graph', description: 'Visualise la forme de l’historique.' },
         { command: 'git branch -d <branche>', description: 'Supprime une branche fusionnée.' },
+        { command: 'git add <fichier>', description: 'Marque un conflit comme résolu.' },
+        { command: 'git merge --continue', description: 'Termine la fusion après résolution.' },
+        { command: 'git merge --abort', description: 'Annule une fusion en conflit.' },
         { command: 'git branch -D <branche>', description: 'Force la suppression.' },
       ],
     },

@@ -1,5 +1,5 @@
 import type { ExecuteResult, ParsedCommand, RepoState } from '../types';
-import { gitError } from '../errors';
+import { gitError, mergeInProgress } from '../errors';
 import {
   activeWorktree,
   resolveCommit,
@@ -34,6 +34,7 @@ export function gitCheckout(state: RepoState, command: CheckoutCommand): Execute
   }
 
   const worktree = activeWorktree(state);
+  if (worktree.merge !== undefined) return failure(state, mergeInProgress());
   const moved = moveHeadWithCheckout(state, worktree, snapshotOf(state, commit), {
     kind: 'detached',
     commit,

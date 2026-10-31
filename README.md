@@ -3,8 +3,8 @@
 PWA pédagogique pour apprendre Git visuellement : un terminal simulé et un graphe de
 commits animé, branchés sur un moteur Git **pur TypeScript**.
 
-> État : **Phases 0–3 livrées** — moteur, bac à sable, cours, 15 missions,
-> prédictions et PWA. L'XP, les niveaux et les badges arrivent en Phase 4.
+> État : **Phases 0–4 livrées** — moteur (conflits, `diff`, remotes), bac à sable,
+> cours, 19 missions, prédictions, PWA, XP, niveaux et badges.
 
 ## Démarrer
 
@@ -28,12 +28,17 @@ En local, servir via Portless : `portless gitquest npm run dev` puis
 
 ## Le parcours
 
-- **5 chapitres** : Sous le capot, Les branches, Fusionner, Worktrees, Raccourcis.
+- **6 chapitres** : Sous le capot, Les branches, Fusionner, Worktrees, Raccourcis,
+  Collaborer (remote façon GitHub).
 - **Prologue** « Lire une commande Git » : programme, sous-commande, options,
   guillemets et placeholders, accessible depuis l'accueil.
-- Chaque chapitre : un cours de 4–5 min (slides texte, diagrammes animés, mini-démo
-  rejouée avec le vrai moteur, antisèche finale), puis 3 missions.
-- **15 missions** scénarisées : story d'équipe, objectif, 3 indices progressifs,
+- Chaque chapitre : un cours de 3–5 min (slides texte, diagrammes animés, mini-démo
+  rejouée avec le vrai moteur, antisèche finale), puis 3 à 4 missions.
+- **Terminal** : `git diff` (disque/index/HEAD), `git merge` avec **conflits
+  praticables** (marqueurs, `git add`, `git commit`, `git merge --continue/--abort`).
+- **Distant façon GitHub** : `git remote`, `git push -u`, `git fetch`, `git pull`,
+  refus non fast-forward (`fetch first`), upstream et statut ahead/behind.
+- **19 missions** scénarisées : story d'équipe, objectif, 3 indices progressifs,
   validation sur l'état final, solution de référence et étoiles selon le nombre de
   commandes (`par` = longueur de la solution).
 - **Missions verrouillées** tant que la précédente n'est pas terminée ; le bac à
@@ -43,6 +48,9 @@ En local, servir via Portless : `portless gitquest npm run dev` puis
   s'exécute et le feedback explique.
 - **Progression** persistée localement (missions terminées, étoiles, slide de cours)
   sous `gitquest.progress.v1`.
+- **XP, niveaux et badges** dérivés de la progression (jamais un compteur séparé) :
+  100 XP par mission + 25 par étoile, 7 paliers de « Novice » à « Maître du dépôt »,
+  badges de chapitre, de série parfaite et de cours lus.
 
 ## Le bac à sable
 
@@ -64,7 +72,7 @@ En local, servir via Portless : `portless gitquest npm run dev` puis
 
 ```
 src/engine/        moteur pur : types, parsing, commandes, worktrees, validations
-src/app/           explain / undo / hint / reset-mission + score
+src/app/           explain / undo / hint / reset-mission + score + XP/niveaux/badges
 src/explanations/  event -> phrase française
 src/components/
   graph/           layoutGraph (pur, testé) + CommitGraph (SVG/Framer Motion)

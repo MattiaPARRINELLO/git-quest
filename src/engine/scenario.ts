@@ -1,5 +1,6 @@
 import type { ExecuteResult, FileTree, RepoState } from './types';
 import { execute } from './execute';
+import { DEFAULT_AUTHOR, hashFor, timestampFor } from './hashes';
 
 function assertOk(result: ExecuteResult, command: string): RepoState {
   if (result.error) {
@@ -84,6 +85,58 @@ export class Scenario {
       return this.run(`git switch ${target}`);
     }
     return this.run(`git checkout ${target}`);
+  }
+
+  /** Ajoute un dépôt distant (`git remote add`). */
+  remote(name: string, url: string): Scenario {
+    return this.run(`git remote add ${name} ${url}`);
+  }
+
+  /**
+   * Simule un coéquipier qui a poussé sur le serveur : crée un commit
+   * inatteignable depuis les branches locales et avance la branche distante.
+   */
+  remoteCommit(
+    remoteName: string,
+    branch: string,
+    message: string,
+    files: FileTree = {},
+  ): Scenario {
+    const remote = this.state.remotes?.[remoteName];
+    if (remote === undefined) {
+      throw new Error(`Scénario invalide : le remote « ${remoteName} » n'existe pas`);
+    }
+
+    const parent = remote.branches[branch];
+    const snapshot = {
+      ...(parent === undefined ? {} : (this.state.commits[parent]?.snapshot ?? {})),
+      ...files,
+    };
+    const hash = hashFor(this.state.nextId);
+
+    return new Scenario({
+      ...this.state,
+      commits: {
+        ...this.state.commits,
+        [hash]: {
+          hash,
+          parents: parent === undefined ? [] : [parent],
+          message,
+          snapshot,
+          author: DEFAULT_AUTHOR,
+          timestamp: timestampFor(this.state.clock + 1),
+        },
+      },
+      remotes: {
+        ...this.state.remotes,
+        [remoteName]: {
+          ...remote,
+          branches: { ...remote.branches, [branch]: hash },
+        },
+      },
+      clock: this.state.clock + 1,
+      nextId: this.state.nextId + 1,
+    });
   }
 
   worktreeAdd(path: string, options: { branch?: string; createBranch?: string } = {}): Scenario {

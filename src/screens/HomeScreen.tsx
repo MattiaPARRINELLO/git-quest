@@ -9,6 +9,8 @@ import {
 import { briefingFor } from '../content/briefings';
 import { scenario } from '../engine/scenario';
 import { resumeContext, resumeTarget } from '../app/resume';
+import { progressSummary } from '../app/xp';
+import { ProgressPanel } from '../components/progress/ProgressPanel';
 import { useProgressStore } from '../store/useProgressStore';
 import { useMissionDraftStore } from '../store/useMissionDraftStore';
 import { routePaths } from '../router/useHashRoute';
@@ -65,6 +67,7 @@ export function HomeScreen() {
   const progress = useMemo(() => ({ completed, lessonSlides }), [completed, lessonSlides]);
   const target = useMemo(() => resumeTarget(progress, activeMission), [progress, activeMission]);
   const context = useMemo(() => resumeContext(progress, activeMission), [progress, activeMission]);
+  const summary = useMemo(() => progressSummary(progress), [progress]);
   const totalMissions = chapters.reduce((sum, chapter) => sum + chapter.missions.length, 0);
   const totalStars = Object.values(completed).reduce((sum, item) => sum + item.stars, 0);
   const lastCompleted = [...missionSequence].reverse().find((mission) => completed[mission.id]);
@@ -102,7 +105,7 @@ export function HomeScreen() {
               Apprends Git en voyant le graphe.
             </h1>
             <p className="mt-4 max-w-[48ch] text-[15px] leading-7 text-muted">
-              Cinq chapitres, quinze missions réalistes. Chaque commande se rejoue sous tes
+              Six chapitres, dix-neuf missions réalistes. Chaque commande se rejoue sous tes
               yeux : le graphe, HEAD, l’index et les worktrees deviennent enfin lisibles.
             </p>
 
@@ -190,6 +193,8 @@ export function HomeScreen() {
             </dd>
           </div>
         </dl>
+
+        <ProgressPanel summary={summary} />
 
         <section className="mt-4" aria-label="Prologue">
           <a

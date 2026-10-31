@@ -126,4 +126,36 @@ export const chapter03Story: readonly ChainMission[] = [
       'git branch -d experiment',
     ],
   },
+  {
+    missionId: 'conflit-docs',
+    prelude: [
+      {
+        id: 'm3.4-p1',
+        teammate: 'samir',
+        commands: [
+          'git branch doc-conflit',
+          'git switch doc-conflit',
+          'edit README.md "# Nova — guide (version équipe)"',
+          'git add README.md',
+          'git commit -m "docs: guide équipe"',
+          'git switch main',
+          'edit README.md "# Nova — guide (version locale)"',
+          'git commit -am "docs: guide local"',
+        ],
+      },
+    ],
+    slots: [
+      {
+        slotId: 'm3.4-c1',
+        missionId: 'conflit-docs',
+        signature: { branch: 'main', files: { 'README.md': '# Nova — guide (version finale)' } },
+      },
+    ],
+    reference: [
+      'git merge doc-conflit',
+      'edit README.md "# Nova — guide (version finale)"',
+      'git add README.md',
+      'git merge --continue',
+    ],
+  },
 ];

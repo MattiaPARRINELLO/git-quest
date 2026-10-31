@@ -3,6 +3,8 @@ import { chapters } from '../content';
 import { createDemoState } from '../content/sandbox';
 import { CommitGraph } from '../components/graph/CommitGraph';
 import { Icon } from '../components/ui/Icon';
+import { progressSummary } from '../app/xp';
+import { ProgressPanel } from '../components/progress/ProgressPanel';
 import { routePaths } from '../router/useHashRoute';
 import { useProgressStore } from '../store/useProgressStore';
 
@@ -12,8 +14,13 @@ import { useProgressStore } from '../store/useProgressStore';
  */
 export function FinalScreen() {
   const completed = useProgressStore((store) => store.completed);
+  const lessonSlides = useProgressStore((store) => store.lessonSlides);
   const state = useMemo(() => createDemoState(), []);
   const batch = useMemo(() => ({ id: 0, events: [] }), []);
+  const summary = useMemo(
+    () => progressSummary({ completed, lessonSlides }),
+    [completed, lessonSlides],
+  );
 
   const totalMissions = chapters.reduce((sum, chapter) => sum + chapter.missions.length, 0);
   const totalStars = Object.values(completed).reduce((sum, item) => sum + item.stars, 0);
@@ -28,7 +35,7 @@ export function FinalScreen() {
         </p>
         <h1 className="display mt-2 text-[42px] leading-[1.04] text-text">Ton arbre Nova</h1>
         <p className="mt-3 max-w-[56ch] text-[14.5px] leading-7 text-muted">
-          Quinze missions plus tard, tu lis un dépôt Git comme une histoire : des commits,
+          Dix-neuf missions plus tard, tu lis un dépôt Git comme une histoire : des commits,
           des branches qui pointent, un HEAD qui avance et des worktrees qui travaillent en
           parallèle. Voici l’arbre de Nova, avec un merge et un worktree de plus.
         </p>
@@ -53,6 +60,8 @@ export function FinalScreen() {
             </dd>
           </div>
         </dl>
+
+        <ProgressPanel summary={summary} compact />
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
           <a href={routePaths.home} className="btn h-9 px-3 text-[13px]">

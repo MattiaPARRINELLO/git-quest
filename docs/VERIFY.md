@@ -126,7 +126,38 @@ $ echo $?
 1
 ```
 
-GitQuest refuse avec `merge-would-conflict` et **ne crée pas** de merge commit partiel.
+GitQuest produit les mêmes lignes, écrit les marqueurs dans `base.txt`, laisse
+`git status` afficher `Unmerged paths`, puis conclut la fusion après
+`git add base.txt` et `git commit` (ou `git merge --continue`). `git merge --abort`
+restaure l'état d'avant, sans commit partiel.
+
+### 3d. Résolution de conflit, puis fusion
+
+```bash
+$ cat base.txt
+<<<<<<< HEAD
+main
+=======
+feature3
+>>>>>>> feature3
+$ echo "main + feature3" > base.txt
+$ git add base.txt
+$ git commit -m "merge: base"
+[main <sha>] merge: base
+$ git log --oneline --graph
+*   <sha> merge: base
+|\
+| * <sha3> feature3
+* | <sha2> main
+|/
+* <sha1> Initial
+$ git status
+On branch main
+nothing to commit, working tree clean
+```
+
+GitQuest : commit à deux parents, contenu `main + feature3`, plus aucun conflit
+dans le worktree.
 
 ---
 
@@ -153,6 +184,73 @@ $ git log --oneline --graph
 
 GitQuest : aucun commit supplémentaire en fast-forward, puis `Already up to date.` et
 état strictement identique.
+
+---
+
+## 4b. `git diff` : disque, index, HEAD
+
+```bash
+$ cd "$(mktemp -d)" && git init -q -b main && git config user.email q@q && git config user.name q
+$ printf 'v1\n' > f.txt && git add . && git commit -qm "Initial"
+$ printf 'v2\n' > f.txt
+$ git diff
+diff --git a/f.txt b/f.txt
+index 944a466..974a4b2 100644
+--- a/f.txt
++++ b/f.txt
+@@ -1 +1 @@
+-v1
++v2
+$ git add f.txt && git diff
+$ git diff --staged
+diff --git a/f.txt b/f.txt
+...
+-v1
++v2
+$ printf 'v3\n' > f.txt && git diff HEAD
+...
+-v1
++v3
+```
+
+GitQuest produit les mêmes en-têtes, hunks et lignes préfixées `-`/`+`, avec les
+mêmes trois lignes de contexte. Les hashes de l'en-tête `index` sont cosmétiques.
+
+---
+
+## 4c. Remote façon GitHub : push refusé, puis pull
+
+```bash
+$ git remote add origin git@github.com:nova/nova.git
+$ git push -u origin main
+To github.com:nova/nova.git
+ * [new branch]      main -> main
+$ git push
+Everything up-to-date
+```
+
+Un coéquipier pousse sur `main`, puis :
+
+```bash
+$ git push
+To github.com:nova/nova.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'git@github.com:nova/nova.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. ...
+$ git pull
+From git@github.com:nova/nova.git
+   1a2b3c4..5d6e7f8  main -> origin/main
+Updating 1a2b3c4..5d6e7f8
+Fast-forward
+ $ git status
+On branch main
+Your branch is up to date with 'origin/main'.
+```
+
+GitQuest produit les mêmes messages, les mêmes refus non fast-forward, et met à
+jour `origin/main` avant de fusionner. Les objets sont partagés dans le modèle :
+aucun transfert réseau n'est simulé.
 
 ---
 

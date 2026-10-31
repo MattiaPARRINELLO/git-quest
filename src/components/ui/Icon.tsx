@@ -15,6 +15,7 @@ export type IconName =
   | 'lock'
   | 'arrow-right'
   | 'book'
+  | 'award'
   | 'menu';
 
 const PATHS: Record<IconName, string> = {
@@ -32,6 +33,7 @@ const PATHS: Record<IconName, string> = {
   lock: 'M6 10h12v10H6zM8 10V7a4 4 0 0 1 8 0v3M12 14v2',
   'arrow-right': 'M4 12h16M14 6l6 6-6 6',
   book: 'M4 4h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H4zM20 4h-3a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h3z',
+  award: 'M12 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM8.5 12.5 7 21l5-2.5L17 21l-1.5-8.5',
   menu: 'M4 7h16M4 12h16M4 17h16',
 };
 

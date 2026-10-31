@@ -19,8 +19,8 @@ describe('FinalScreen', () => {
     render(<FinalScreen />);
 
     expect(screen.getByRole('heading', { name: /Ton arbre Nova/i })).toBeInTheDocument();
-    expect(screen.getByText('15')).toBeInTheDocument();
-    expect(screen.getByText('45')).toBeInTheDocument();
+    expect(screen.getByText(String(missionSequence.length))).toBeInTheDocument();
+    expect(screen.getByText(String(missionSequence.length * 3))).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Revoir la carte des chapitres/i })).toHaveAttribute(
       'href',
       '#/',

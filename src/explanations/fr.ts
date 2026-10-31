@@ -35,6 +35,24 @@ export function explainEvent(event: GitEvent): string {
     }
     case 'merge-commit':
       return `Un commit de fusion « ${event.commit} » est créé : il a deux parents.`;
+    case 'merge-conflict':
+      return `La fusion avec « ${event.branch} » s'arrête : ${event.paths.join(', ')} ${event.paths.length > 1 ? 'ont été modifiés' : 'a été modifié'} des deux côtés. Git a écrit les deux versions dans le fichier, entre les marqueurs <<<<<<<, ======= et >>>>>>>.`;
+    case 'conflict-resolved':
+      return `« ${event.path} » est marqué comme résolu : c'est maintenant la version du disque qui sera commitée.`;
+    case 'merge-aborted':
+      return `La fusion avec « ${event.branch} » est annulée : le dépôt revient exactement à l'état d'avant.`;
+    case 'remote-added':
+      return `Le dépôt distant « ${event.name} » est ajouté (${event.url}) : c'est une simple adresse, rien n'est encore copié.`;
+    case 'remote-removed':
+      return `Le dépôt distant « ${event.name} » est oublié ; les branches de suivi associées disparaissent.`;
+    case 'remote-fetched':
+      return event.branches.length === 0
+        ? `Rien de nouveau sur « ${event.remote} » : les références de suivi sont déjà à jour.`
+        : `Récupération depuis « ${event.remote} » : ${event.branches.join(', ')} mis à jour dans les références de suivi. Le travail local n'a pas bougé.`;
+    case 'remote-updated':
+      return `« ${event.remote}/${event.branch} » passe de ${event.from ?? '(vide)'} à ${event.to} sur le serveur : ton push est publié.`;
+    case 'upstream-set':
+      return `La branche « ${event.branch} » suit maintenant « ${event.upstream} » : « git push » et « git pull » sauront où aller.`;
     case 'up-to-date':
       return `Rien à fusionner : « ${event.branch} » est déjà à jour.`;
     case 'worktree-added':
@@ -62,7 +80,27 @@ export function explainError(error: GitError): string {
     case 'branch-not-fully-merged':
       return 'La branche contient des commits absents de HEAD. « -d » refuse de les perdre ; « -D » force la suppression.';
     case 'merge-would-conflict':
-      return 'Les deux branches ont modifié le même fichier de façon différente. Les conflits ne sont pas gérés dans cette version.';
+      return 'Les deux branches ont modifié le même fichier de façon différente. Résous le conflit, puis « git add » et « git commit » (ou « git merge --abort » pour tout annuler).';
+    case 'unmerged-files':
+      return 'Des fichiers sont encore en conflit. Édite-les pour retirer les marqueurs <<<<<<<, ======= et >>>>>>>, puis marque-les résolus avec « git add ».';
+    case 'no-merge-in-progress':
+      return 'Aucune fusion n’est en cours : il n’y a rien à poursuivre ni à annuler.';
+    case 'merge-in-progress':
+      return 'Une fusion est en cours. Termine-la avec « git commit » ou abandonne-la avec « git merge --abort » avant de changer de branche.';
+    case 'remote-not-found':
+      return 'Ce dépôt distant n’existe pas encore ici. Ajoute-le avec « git remote add origin <url> ».';
+    case 'remote-already-exists':
+      return 'Un remote porte déjà ce nom. Choisis un autre nom ou supprime-le avec « git remote remove ».';
+    case 'remote-ref-not-found':
+      return 'Cette branche n’existe pas sur le serveur. Vérifie son nom ou pousse-la d’abord.';
+    case 'no-upstream':
+      return 'Cette branche ne suit aucune branche distante. Utilise « git push -u origin <branche> » ou précise « git pull <remote> <branche> ».';
+    case 'push-rejected':
+      return 'Le serveur a des commits que tu n’as pas : ton push n’est pas un avancement rapide. Fais « git pull » et résous les conflits éventuels avant de repousser.';
+    case 'not-on-a-branch':
+      return 'HEAD est détaché : crée ou rejoins une branche avant de pousser ou de tirer.';
+    case 'no-push-destination':
+      return 'Aucun dépôt distant n’est configuré. Ajoute-en un avec « git remote add origin <url> ».';
     case 'worktree-has-local-modifications':
       return 'Ce worktree contient des modifications ou des fichiers non suivis. Ajoute « --force » pour les jeter.';
     case 'worktree-remove-main':

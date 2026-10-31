@@ -38,6 +38,32 @@ export type Head =
   | { readonly kind: 'branch'; readonly branch: BranchName }
   | { readonly kind: 'detached'; readonly commit: CommitHash };
 
+/** Un fichier modifié des deux côtés : Git écrit les deux versions dans le disque. */
+export interface MergeConflict {
+  readonly path: FilePath;
+  readonly base?: string;
+  readonly ours?: string;
+  readonly theirs?: string;
+}
+
+/**
+ * Fusion en cours dans un worktree (`MERGE_HEAD` dans un vrai dépôt).
+ * Elle existe dès qu'un merge 3-way a produit des conflits, jusqu'à un commit
+ * de fusion (`git commit` / `git merge --continue`) ou `git merge --abort`.
+ */
+export interface MergeState {
+  /** Branche fusionnée (celle qui a été passée à `git merge`). */
+  readonly branch: BranchName;
+  /** Ancêtre commun utilisé pour la fusion 3-way. */
+  readonly base: CommitHash;
+  /** HEAD au démarrage de la fusion. */
+  readonly ours: CommitHash;
+  /** Sommet de la branche fusionnée. */
+  readonly theirs: CommitHash;
+  /** Conflits non encore résolus. */
+  readonly conflicts: readonly MergeConflict[];
+}
+
 export interface Worktree {
   readonly id: WorktreeId;
   /** Chemin affiché, résolu (ex: `~/gitquest`, `~/gitquest-hotfix`). */
@@ -48,6 +74,19 @@ export interface Worktree {
   readonly index: FileTree;
   /** Working directory : contenu disque. */
   readonly workingDir: FileTree;
+  /** Fusion en cours dans ce worktree, s'il y en a une. */
+  readonly merge?: MergeState;
+}
+
+/**
+ * Un dépôt distant (GitHub, GitLab…). Version simplifiée : les objets sont
+ * partagés avec le dépôt local (pas de transfert réseau), seules les références
+ * distantes comptent. `origin/main` pointe sur `branches.main`.
+ */
+export interface Remote {
+  readonly name: string;
+  readonly url: string;
+  readonly branches: Readonly<Record<BranchName, CommitHash>>;
 }
 
 export interface RepoState {
@@ -64,6 +103,12 @@ export interface RepoState {
   readonly clock: number;
   /** Compteur de génération des hashes déterministes. */
   readonly nextId: number;
+  /** Dépôts distants, par nom (`origin`). */
+  readonly remotes?: Readonly<Record<string, Remote>>;
+  /** Références de suivi (`origin/main`) : dernier état connu du serveur. */
+  readonly remoteTracking?: Readonly<Record<string, CommitHash>>;
+  /** Branche locale → référence amont (`main` → `origin/main`). */
+  readonly upstream?: Readonly<Record<BranchName, string>>;
 }
 
 export type OutputTone = 'default' | 'muted' | 'success' | 'error' | 'warning';
@@ -91,6 +136,16 @@ export type GitErrorCode =
   | 'local-changes-would-be-overwritten'
   | 'untracked-files-would-be-overwritten'
   | 'merge-would-conflict'
+  | 'unmerged-files'
+  | 'no-merge-in-progress'
+  | 'merge-in-progress'
+  | 'remote-not-found'
+  | 'remote-already-exists'
+  | 'remote-ref-not-found'
+  | 'no-upstream'
+  | 'push-rejected'
+  | 'not-on-a-branch'
+  | 'no-push-destination'
   | 'worktree-path-exists'
   | 'worktree-not-found'
   | 'worktree-has-local-modifications'
@@ -152,6 +207,29 @@ export type GitEvent =
       readonly commit: CommitHash;
       readonly parents: readonly [CommitHash, CommitHash];
     }
+  | {
+      readonly type: 'merge-conflict';
+      readonly branch: BranchName;
+      readonly paths: readonly FilePath[];
+      readonly worktree: WorktreeId;
+    }
+  | { readonly type: 'conflict-resolved'; readonly path: FilePath }
+  | { readonly type: 'merge-aborted'; readonly branch: BranchName }
+  | { readonly type: 'remote-added'; readonly name: string; readonly url: string }
+  | { readonly type: 'remote-removed'; readonly name: string }
+  | {
+      readonly type: 'remote-fetched';
+      readonly remote: string;
+      readonly branches: readonly string[];
+    }
+  | {
+      readonly type: 'remote-updated';
+      readonly remote: string;
+      readonly branch: BranchName;
+      readonly from: CommitHash | null;
+      readonly to: CommitHash;
+    }
+  | { readonly type: 'upstream-set'; readonly branch: BranchName; readonly upstream: string }
   | { readonly type: 'up-to-date'; readonly branch: BranchName }
   | {
       readonly type: 'worktree-added';
@@ -180,12 +258,19 @@ export type ParsedCommand =
   | { readonly kind: 'git-add'; readonly paths: readonly string[]; readonly all: boolean }
   | {
       readonly kind: 'git-commit';
-      readonly message: string;
+      /** Absent pour un commit de fusion sans `-m` (message par défaut). */
+      readonly message?: string;
       readonly stageAllTracked: boolean;
       /** Commit ciblé : `git commit -m "msg" <chemins>`. */
       readonly paths?: readonly string[];
     }
   | { readonly kind: 'git-log'; readonly graph: boolean; readonly oneline: boolean }
+  | {
+      readonly kind: 'git-diff';
+      /** worktree = disque vs index ; staged = index vs HEAD ; head = disque vs HEAD. */
+      readonly target: 'worktree' | 'staged' | 'head';
+      readonly paths: readonly string[];
+    }
   | {
       readonly kind: 'git-branch';
       readonly action: 'list' | 'create' | 'delete';
@@ -202,7 +287,34 @@ export type ParsedCommand =
       readonly start?: string;
     }
   | { readonly kind: 'git-checkout'; readonly target: string }
-  | { readonly kind: 'git-merge'; readonly branch: string }
+  | {
+      readonly kind: 'git-merge';
+      readonly action: 'start' | 'continue' | 'abort';
+      /** Absent pour `--continue` et `--abort`. */
+      readonly branch?: string;
+    }
+  | {
+      readonly kind: 'git-remote';
+      readonly action: 'list' | 'add' | 'remove';
+      readonly name?: string;
+      readonly url?: string;
+      readonly verbose: boolean;
+    }
+  | {
+      readonly kind: 'git-push';
+      readonly remote?: string;
+      /** Branche locale source (`main` dans `git push origin main`). */
+      readonly branch?: string;
+      /** Branche distante cible (`main` dans `git push origin team:main`). */
+      readonly remoteBranch?: string;
+      readonly setUpstream: boolean;
+    }
+  | { readonly kind: 'git-fetch'; readonly remote?: string }
+  | {
+      readonly kind: 'git-pull';
+      readonly remote?: string;
+      readonly branch?: string;
+    }
   | {
       readonly kind: 'git-worktree';
       readonly action: 'add' | 'list' | 'remove';
