@@ -14,9 +14,14 @@
     "ci:dist": "node ci/check-dist.mjs dist",
     "ci:coverage": "node ci/check-coverage.mjs coverage/coverage-summary.json",
     "ci:smoke": "node ci/smoke-preview.mjs",
-    "ci:all": "npm run typecheck && npm run build && npm run ci:dist"
+    "ci:all": "npm run typecheck && npm run build && npm run ci:dist",
+    "build:native": "CAPACITOR=1 npm run build && cap sync android",
+    "android:apk": "npm run build:native && ./scripts/android.sh assembleDebug",
+    "android:install": "npm run android:apk && adb install -r android/app/build/outputs/apk/debug/app-debug.apk",
+    "android:open": "cap open android"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -34,6 +39,12 @@
     "vitest": "^3.0.5"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/keyboard": "^8.0.6",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4",
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/newsreader": "^5.3.0",
