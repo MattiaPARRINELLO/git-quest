@@ -16,7 +16,13 @@ npm test            # Vitest : moteur, layout, composants
 npm run coverage    # couverture du moteur
 npm run build       # typecheck + build PWA
 npm run preview     # sert dist/ (vérifier le mode hors ligne)
+npm run ci:dist     # inspecte dist/ : manifest, service worker, budgets de taille
+npm run ci:coverage # compare la couverture aux planchers de ci/check-coverage.mjs
 ```
+
+La CI GitHub Actions (`.github/workflows/ci.yml`) rejoue tout cela à chaque push
+sur `main` et à chaque pull request. Détail des jobs, des budgets et de la
+reproduction locale : [`docs/CI.md`](docs/CI.md).
 
 Routes : `#/` (carte des chapitres), `#/prologue` (syntaxe des commandes),
 `#/chapter/:id/lesson`, `#/mission/:id`,
