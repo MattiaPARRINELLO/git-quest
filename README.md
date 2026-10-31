@@ -1,161 +1,239 @@
-# GitQuest
+<p align="center">
+  <img src="docs/screenshots/banner.svg" alt="GitQuest — apprendre Git par la pratique" width="100%">
+</p>
 
-PWA pédagogique pour apprendre Git visuellement : un terminal simulé et un graphe de
-commits animé, branchés sur un moteur Git **pur TypeScript**.
+<h1 align="center">GitQuest</h1>
 
-**Démo en ligne : <https://mattiaparrinello.github.io/git-quest/>**
+<p align="center">
+  <strong>Apprends Git sans souffrir.</strong><br>
+  Un jeu gratuit, dans ton navigateur, où chaque commande devient une image.
+</p>
 
-> État : **Phases 0–4 livrées** — moteur (conflits, `diff`, remotes), bac à sable,
-> cours, 19 missions, prédictions, PWA, XP, niveaux et badges.
+<p align="center">
+  <a href="https://mattiaparrinello.github.io/git-quest/"><img alt="Jouer maintenant" src="https://img.shields.io/badge/▶_Jouer_maintenant-en_ligne-ff7a45?style=for-the-badge"></a>
+</p>
 
-## Démarrer
+<p align="center">
+  <img alt="6 chapitres" src="https://img.shields.io/badge/parcours-6_chapitres-0b0d10">
+  <img alt="19 missions" src="https://img.shields.io/badge/missions-19-0b0d10">
+  <img alt="Gratuit" src="https://img.shields.io/badge/prix-gratuit-0b0d10">
+  <img alt="Sans compte" src="https://img.shields.io/badge/compte-aucun-0b0d10">
+  <img alt="Hors ligne" src="https://img.shields.io/badge/PWA-hors_ligne-5A0FC8">
+</p>
 
-```bash
-npm install
-npm run dev         # bac à sable en développement
-npm run typecheck   # tsc --noEmit, strict
-npm test            # Vitest : moteur, layout, composants
-npm run coverage    # couverture du moteur
-npm run build       # typecheck + build PWA
-npm run preview     # sert dist/ (vérifier le mode hors ligne)
-npm run ci:dist     # inspecte dist/ : manifest, service worker, budgets de taille
-npm run ci:coverage # compare la couverture aux planchers de ci/check-coverage.mjs
-```
+<p align="center">
+  <img src="docs/screenshots/demo.gif" alt="Créer une branche, commiter, revenir sur main et fusionner — le graphe se dessine" width="820">
+</p>
 
-La CI GitHub Actions (`.github/workflows/ci.yml`) rejoue tout cela à chaque push
-sur `main` et à chaque pull request. Détail des jobs, des budgets et de la
-reproduction locale : [`docs/CI.md`](docs/CI.md).
+<p align="center">
+  <sub>Tu tapes une vraie commande Git ; le graphe se dessine sous tes yeux.</sub>
+</p>
 
-Routes : `#/` (carte des chapitres), `#/prologue` (syntaxe des commandes),
-`#/chapter/:id/lesson`, `#/mission/:id`,
-`#/sandbox` (bac à sable libre). Thème sombre par défaut, thème clair disponible.
-En local, servir via Portless : `portless gitquest npm run dev` puis
-`https://gitquest.localhost`. `npm run dev` fonctionne aussi sans Portless
-(Vite sur son port local).
+---
 
+## Git, ce n'est pas difficile. C'est invisible.
+
+Tout le monde connaît `git commit`, `git merge`, `git pull`. Et presque personne ne sait
+ce qui se passe vraiment quand on les tape. Alors on apprend des commandes par cœur, on
+copie celles du collègue, et on a peur de casser quelque chose.
+
+GitQuest rend ce mécanisme **visible**.
+
+- Tu tapes `git switch -c feature` → une nouvelle branche apparaît, et tu comprends
+  qu'une branche n'est qu'une étiquette qui bouge.
+- Tu commites → le fichier passe du disque à l'index, puis devient un point dans le
+  graphe. Tu vois enfin les trois zones.
+- Tu merges → la ligne se dessine, avec ou sans commit de fusion. Plus de schéma abstrait
+  à imaginer.
+- Tu fais une erreur → Git répond comme il répondrait vraiment (« local changes would be
+  overwritten », « fetch first »…), et tu comprends pourquoi.
+
+Pas de vidéo à regarder passivement. Pas de quiz à cocher. Tu joues, tu manipules, tu
+retiens.
+
+> **En clair :** GitQuest, c'est un vrai dépôt Git en miniature dans ton navigateur, avec
+> un terminal, un graphe animé et un parcours guidé pour apprendre pas à pas.
+
+---
+
+## C'est fait pour qui ?
+
+- **Tu débutes avec Git** et tu ne sais jamais sur quelle branche tu es.
+- **Tu l'utilises tous les jours** mais tu voudrais comprendre les worktrees, les merges
+  et les conflits.
+- **Tu formes quelqu'un** et tu cherches un support pratique, sans installation.
+- **Tu aimes comprendre** comment les outils marchent, sous le capot.
+
+Aucun prérequis : pas de compte, pas de dépôt à créer, pas de risque de casser quoi que ce
+soit. Le pire qui puisse arriver, c'est de recommencer une mission.
+
+---
+
+## Comment ça se passe
+
+1. **Un cours court** (3 à 5 min) explique un concept avec un schéma animé et une vraie
+   démonstration — pas une capture d'écran, de vraies commandes rejouées.
+2. **Trois ou quatre missions** mettent ce concept en pratique dans une situation
+   d'équipe réaliste : un bug en prod, un collègue qui pousse en même temps, un commit
+   perdu.
+3. **Tu tapes les commandes** dans le terminal. Le graphe, HEAD, l'index et les worktrees
+   réagissent immédiatement, avec une explication en français.
+4. **Tu es noté sur l'efficacité** : une solution de référence, des indices si tu bloques,
+   et jusqu'à 3 étoiles selon le nombre de commandes utilisées.
+
+Deux ou trois heures suffisent pour faire tout le parcours. Et si tu veux juste tester
+sans leçon, le **bac à sable** est toujours ouvert : un terminal Git libre, avec le même
+graphe.
+
+---
+
+## Aperçu
+
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/home.png" alt="Carte de progression, XP, niveaux et badges">
+      <p align="center"><sub><b>La carte</b> — tu vois où tu en es, chapitre par chapitre.</sub></p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/lesson.png" alt="Cours avec diagramme fast-forward et merge commit">
+      <p align="center"><sub><b>Les cours</b> — un concept, un schéma, une démo jouée.</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/mission.png" alt="Mission avec objectif, checklist, terminal, graphe et pipeline">
+      <p align="center"><sub><b>Les missions</b> — une vraie situation, des indices, des étoiles.</sub></p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/sandbox.png" alt="Bac à sable : terminal, worktrees, graphe et pipeline">
+      <p align="center"><sub><b>Le bac à sable</b> — juste toi et Git, sans consigne.</sub></p>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/screenshots/home-mobile.png" alt="GitQuest sur mobile" width="280">
+  <br>
+  <sub>Ça marche aussi sur téléphone, et hors ligne.</sub>
+</p>
+
+---
 
 ## Le parcours
 
-- **6 chapitres** : Sous le capot, Les branches, Fusionner, Worktrees, Raccourcis,
-  Collaborer (remote façon GitHub).
-- **Prologue** « Lire une commande Git » : programme, sous-commande, options,
-  guillemets et placeholders, accessible depuis l'accueil.
-- Chaque chapitre : un cours de 3–5 min (slides texte, diagrammes animés, mini-démo
-  rejouée avec le vrai moteur, antisèche finale), puis 3 à 4 missions.
-- **Terminal** : `git diff` (disque/index/HEAD), `git merge` avec **conflits
-  praticables** (marqueurs, `git add`, `git commit`, `git merge --continue/--abort`).
-- **Distant façon GitHub** : `git remote`, `git push -u`, `git fetch`, `git pull`,
-  refus non fast-forward (`fetch first`), upstream et statut ahead/behind.
-- **19 missions** scénarisées : story d'équipe, objectif, 3 indices progressifs,
-  validation sur l'état final, solution de référence et étoiles selon le nombre de
-  commandes (`par` = longueur de la solution).
-- **Missions verrouillées** tant que la précédente n'est pas terminée ; le bac à
-  sable reste toujours accessible.
-- **Prédictions** sur 1.1–3.2 et 5.1–5.3 : l'exécution est suspendue, on répond en
-  cliquant un commit/une étiquette du graphe ou un bouton, puis la commande
-  s'exécute et le feedback explique.
-- **Progression** persistée localement (missions terminées, étoiles, slide de cours)
-  sous `gitquest.progress.v1`.
-- **XP, niveaux et badges** dérivés de la progression (jamais un compteur séparé) :
-  100 XP par mission + 25 par étoile, 7 paliers de « Novice » à « Maître du dépôt »,
-  badges de chapitre, de série parfaite et de cours lus.
+**6 chapitres, 19 missions, un prologue.** Les missions se débloquent au fur et à mesure,
+et chaque chapitre commence par un cours.
 
-## Le bac à sable
+| Chapitre | Ce que tu vas enfin comprendre |
+|----------|-------------------------------|
+| **1 · Sous le capot** | Ce qu'est vraiment un commit, à quoi servent le working directory, l'index et HEAD. |
+| **2 · Les branches** | Pourquoi une branche n'est qu'un pointeur, comment en changer sans rien perdre, pourquoi un commit peut devenir orphelin. |
+| **3 · Fusionner** | La différence entre avance rapide et merge commit, et comment résoudre un conflit sans paniquer. |
+| **4 · Worktrees** | Travailler sur deux choses à la fois, corriger la prod sans toucher à ton brouillon. |
+| **5 · Raccourcis** | Les commandes qui font plusieurs choses d'un coup, et quand les utiliser. |
+| **6 · Collaborer** | Remote, `push`, `fetch`, `pull`, upstream, et le fameux « fetch first ». |
 
-- **Terminal** : prompt `<worktree> (<branche|hash détaché>) $`, historique ↑/↓,
-  Tab (commandes, sous-commandes, branches, fichiers, worktrees), Ctrl+L, Ctrl+C,
-  `explain <commande>` (dry-run), `undo`, explications en français activables.
-- **Graphe SVG** : temps de gauche à droite, une lane par branche, couleurs stables,
-  étiquettes de branches, un marqueur HEAD par worktree, commits orphelins estompés,
-  pan/zoom, recentrage, infobulle (hash, message, parents, snapshot).
-- **Pipeline** : Working dir → Staging → Dernier commit, puces colorées par statut.
-- **Worktrees** : cartes cliquables (exécutent `cd <chemin>`, visible dans
-  l'historique), branche/HEAD, nombre de modifications.
-- **Persistance** : état, transcript et historique dans IndexedDB
-  (`gitquest.sandbox.v1`), restaurés au chargement. Boutons « Démo » et
-  « Réinitialiser ».
-- **PWA** : manifest, icônes, service worker, fonctionnement hors ligne.
+Un **prologue** est là pour démarrer du bon pied : lire une commande, comprendre les
+options, les guillemets et les placeholders.
 
-## Architecture
+À la fin, tu n'as pas mémorisé une liste de commandes : tu sais **lire un graphe Git et
+prédire ce qu'une commande va faire**.
 
-```
-src/engine/        moteur pur : types, parsing, commandes, worktrees, validations
-src/app/           explain / undo / hint / reset-mission + score + XP/niveaux/badges
-src/explanations/  event -> phrase française
-src/components/
-  graph/           layoutGraph (pur, testé) + CommitGraph (SVG/Framer Motion)
-  terminal/        terminal, complétion
-  pipeline/        working dir / index / commit
-  worktrees/       cartes de worktrees
-src/store/         useRepoStore (état, undo, events), useUiStore (thème, onglets)
-src/storage/       StorageAdapter + IndexedDB + mémoire
-src/content/       chapitres, cours, missions, prédictions, scénario de démo
-src/screens/       HomeScreen (carte), LessonScreen, MissionScreen, SandboxScreen
-docs/ARCHITECTURE.md  contrat détaillé, stabilité du layout, persistance
-docs/VERIFY.md        scénarios à comparer avec un vrai Git
-```
+---
 
-## Ajouter une commande au moteur
+## Une histoire, pas une liste d'exercices
 
-1. Ajouter le cas dans `src/engine/parse/parse-command.ts` (`ParsedCommand` dans
-   `types.ts` si besoin).
-2. Créer `src/engine/commands/<commande>.ts` : fonction pure
-   `(state, command) => ExecuteResult`.
-3. L'enregistrer dans `src/engine/commands/registry.ts`.
-4. Émettre les `events` dans l'ordre fichiers → graphe → HEAD → worktree.
-5. Ajouter un événement dans `GitEvent` et sa phrase dans `src/explanations/fr.ts`.
-6. Ajouter `src/engine/__tests__/<commande>.test.ts` (succès, erreurs, état immutable).
+Les missions suivent une trame continue : une petite équipe, un projet nommé Nova, des
+collègues qui commitent en même temps que toi. Chaque mission a une intro en dialogue et
+un épilogue, pour que les exercices ressemblent à de vraies situations de travail.
 
-## Ajouter une mission
+Au fil du jeu, tu construis **ton** arbre Git. À la fin, l'écran « Ton arbre Nova » te
+montre le graphe complet que tu as créé, avec les commits, les branches, les merges et les
+worktrees — et te laisse l'exporter en image.
 
-Une mission est un fichier dans
-`src/content/chapters/<chapitre>/missions/<id>.ts`, référencé dans le `index.ts`
-du chapitre :
+---
 
-```ts
-export const mission: Mission = {
-  id: 'worktree-hotfix',
-  chapterId: 'worktrees',
-  order: 1,
-  title: 'Le bug de prod',
-  story: '…',                          // 3 phrases max
-  situation: 'HEAD est sur feature avec un WIP non commité.',
-  objective: 'Corrige la prod sans toucher à ton WIP.',
-  steps: [
-    { label: 'Créer le worktree hotfix', done: (state) => worktreePaths(state).length === 2 },
-    { label: 'Commiter le correctif', done: (state) => headFile(state, 'bug.txt') === 'corrigé' },
-  ],
-  takeaway: 'Un worktree est un second bureau sur le même dépôt.',
-  difficulty: 3,
-  par: 8,
-  initialState: scenario()
-    .init()
-    .commit('Initial', { 'bug.txt': 'bug' })
-    .branch('feature')
-    .checkout('feature')
-    .write('src/app.ts', 'wip')
-    .build(),
-  validate: (state) => check(branchFile(state, 'hotfix', 'bug.txt') === 'corrigé', '…'),
-  forbidden: [{ prefix: 'git stash', message: '…' }],
-  hints: ['vague', 'précis', 'solution'],
-  solution: ['git worktree add ../hotfix -b hotfix main', 'cd ../hotfix', '…'],
-  suggestedCommands: ['git status', 'git worktree list', 'git worktree add ../hotfix -b hotfix main'],
-};
+## Ça donne envie de continuer
+
+- **Des étoiles** à chaque mission : 3 si tu atteins l'objectif avec le minimum de
+  commandes, 2 si tu traînes un peu, 1 sinon. Tu peux toujours rejouer pour faire mieux.
+- **De l'XP et des niveaux**, de « Novice » à « Maître du dépôt », calculés à partir de ta
+  vraie progression.
+- **11 badges** : un par chapitre, mais aussi « Sans faute » pour cinq missions à trois
+  étoiles, ou « Érudit » pour avoir lu tous les cours.
+- **Des prédictions** : parfois, avant d'exécuter une commande, le jeu te demande ce qui
+  va se passer. Tu réponds en cliquant sur le graphe, puis tu vérifies. C'est le meilleur
+  moyen de repérer ce qu'on croit avoir compris.
+
+Ta progression est sauvegardée localement, sur ton appareil. Rien ne part sur un serveur.
+
+---
+
+## Commencer
+
+Le plus simple : **<https://mattiaparrinello.github.io/git-quest/>**. Ça s'ouvre tout de
+suite, sans compte.
+
+Tu peux aussi l'installer comme une application : dans ton navigateur, cherche l'icône
+« Installer » dans la barre d'adresse. Une fois installée, GitQuest fonctionne **hors
+ligne**, y compris dans le train.
+
+> **Astuce** : commence par le prologue, puis le chapitre 1. Tu peux aussi ouvrir
+> directement le bac à sable si tu veux juste essayer des commandes.
+
+---
+
+## Questions fréquentes
+
+**Est-ce que je risque de casser quelque chose ?**
+Non. Tout se passe dans ton navigateur, sur un dépôt simulé. Rien n'est réel, rien n'est
+envoyé, et tu peux tout réinitialiser d'un bouton.
+
+**Faut-il connaître Git ?**
+Non. Le prologue et le chapitre 1 partent de zéro. Si tu connais déjà les bases, tu peux
+sauter les cours et attaquer les missions.
+
+**Est-ce que ce sont de vraies commandes Git ?**
+Oui : la syntaxe, les sorties et les messages d'erreur suivent Git. Le moteur est une
+réimplémentation fidèle en TypeScript, pas un habillage.
+
+**Combien de temps ?**
+Environ 2 à 3 heures pour tout le parcours, en plusieurs sessions. La progression est
+conservée.
+
+**Ça marche sur téléphone ?**
+Oui. L'interface s'adapte en onglets Terminal / Graphe / Fichiers.
+
+**C'est gratuit ?**
+Oui, et sans publicité ni compte.
+
+---
+
+## Sous le capot
+
+Pour les curieux et les développeurs : GitQuest est une PWA React + TypeScript, sans
+backend. Le moteur Git (`src/engine/`) est **pur** — aucun accès au DOM, au stockage ou
+à l'horloge système — ce qui le rend entièrement testable et reproductible. Le contenu
+(cours, missions, prédictions) est de la donnée typée, jamais du texte codé dans un
+composant.
+
+```bash
+npm ci
+npm run dev        # développement local
+npm test           # 414 tests
+npm run build      # build PWA
 ```
 
-Chaque mission doit avoir un test qui rejoue `solution`, vérifie
-`validate(state).ok === true`, et vérifie que l'état initial **ne** valide **pas**
-la mission (voir `src/engine/__tests__/missions.test.ts`).
+Documentation technique : [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
+[`docs/VERIFY.md`](docs/VERIFY.md) · [`docs/CI.md`](docs/CI.md) ·
+[`docs/STORY-REPO.md`](docs/STORY-REPO.md).
 
-## Commandes du MVP
+Envie de contribuer ? Les conventions et les guides « ajouter une commande / une
+mission » sont dans [`AGENTS.md`](AGENTS.md) et dans l'architecture.
 
-`git init`, `status`, `add`, `commit -m` / `-am`, `commit -m "msg" <chemins>`,
-`log --oneline --graph`,
-`branch [<nom> [<start>]]` (créer / lister / `-d` / `-D`),
-`switch`, `switch -c [<nom> [<start>]]`, `checkout` (branche ou commit),
-`merge` (fast-forward, merge commit, merge 3-way fichiers), `worktree add` (+ `-b`),
-`worktree list`, `worktree remove`, `git rm`, `touch`, `edit`, `cat`, `rm`, `ls`, `cd`.
-Commandes d’aide : `help`, `explain`, `undo`, `hint`, `reset-mission`.
+---
 
-Hors périmètre MVP : conflits, rebase, cherry-pick, reset/revert, stash, remotes,
-reflog, bisect, comptes, backend.
+<p align="center">
+  <sub>GitQuest — apprendre Git en le voyant. Progression enregistrée uniquement sur ton appareil.</sub>
+</p>
