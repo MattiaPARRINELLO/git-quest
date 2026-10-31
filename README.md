@@ -4,7 +4,7 @@ PWA pédagogique pour apprendre Git visuellement : un terminal simulé et un gra
 commits animé, branchés sur un moteur Git **pur TypeScript**.
 
 > État : **Phases 0–4 livrées** — moteur (conflits, `diff`, remotes), bac à sable,
-> cours, 15 missions, prédictions, PWA, XP, niveaux et badges.
+> cours, 19 missions, prédictions, PWA, XP, niveaux et badges.
 
 ## Démarrer
 
@@ -28,16 +28,17 @@ En local, servir via Portless : `portless gitquest npm run dev` puis
 
 ## Le parcours
 
-- **5 chapitres** : Sous le capot, Les branches, Fusionner, Worktrees, Raccourcis.
+- **6 chapitres** : Sous le capot, Les branches, Fusionner, Worktrees, Raccourcis,
+  Collaborer (remote façon GitHub).
 - **Prologue** « Lire une commande Git » : programme, sous-commande, options,
   guillemets et placeholders, accessible depuis l'accueil.
-- Chaque chapitre : un cours de 4–5 min (slides texte, diagrammes animés, mini-démo
-  rejouée avec le vrai moteur, antisèche finale), puis 3 missions.
+- Chaque chapitre : un cours de 3–5 min (slides texte, diagrammes animés, mini-démo
+  rejouée avec le vrai moteur, antisèche finale), puis 3 à 4 missions.
 - **Terminal** : `git diff` (disque/index/HEAD), `git merge` avec **conflits
   praticables** (marqueurs, `git add`, `git commit`, `git merge --continue/--abort`).
 - **Distant façon GitHub** : `git remote`, `git push -u`, `git fetch`, `git pull`,
   refus non fast-forward (`fetch first`), upstream et statut ahead/behind.
-- **15 missions** scénarisées : story d'équipe, objectif, 3 indices progressifs,
+- **19 missions** scénarisées : story d'équipe, objectif, 3 indices progressifs,
   validation sur l'état final, solution de référence et étoiles selon le nombre de
   commandes (`par` = longueur de la solution).
 - **Missions verrouillées** tant que la précédente n'est pas terminée ; le bac à

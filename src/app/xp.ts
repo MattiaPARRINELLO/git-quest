@@ -30,7 +30,7 @@ export interface LevelDefinition {
 }
 
 /**
- * Sept paliers. Un parcours parfait (15 missions à 3 étoiles = 2 250 XP)
+ * Sept paliers. Un parcours parfait (19 missions à 3 étoiles = 2 850 XP)
  * atteint le dernier niveau, une exploration minimale termine au quatrième.
  */
 export const LEVELS: readonly LevelDefinition[] = [

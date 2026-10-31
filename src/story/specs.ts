@@ -4,6 +4,7 @@ import { chapter02Story } from '../content/story/02';
 import { chapter03Story } from '../content/story/03';
 import { chapter04Story } from '../content/story/04';
 import { chapter05Story } from '../content/story/05';
+import { chapter06Story } from '../content/story/06';
 import type { ChainMission } from './chain';
 
 /** Racine et specs de la chaîne de référence. Complétées chapitre par chapitre. */
@@ -15,4 +16,5 @@ export const STORY_SPECS: readonly ChainMission[] = [
   ...chapter03Story,
   ...chapter04Story,
   ...chapter05Story,
+  ...chapter06Story,
 ];

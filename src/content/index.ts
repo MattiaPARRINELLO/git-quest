@@ -3,6 +3,7 @@ import { chapter02 } from './chapters/02-branches';
 import { chapter03 } from './chapters/03-merging';
 import { chapter04 } from './chapters/04-worktrees';
 import { chapter05 } from './chapters/05-shortcuts';
+import { chapter06 } from './chapters/06-collaboration';
 import { commandLineLesson } from './lessons/command-line';
 import type { Chapter, Lesson, Mission } from './types';
 
@@ -14,6 +15,7 @@ export const chapters: readonly Chapter[] = [
   chapter03,
   chapter04,
   chapter05,
+  chapter06,
 ];
 
 export const allMissions: readonly Mission[] = chapters.flatMap((chapter) => chapter.missions);

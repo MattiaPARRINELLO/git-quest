@@ -105,7 +105,7 @@ export function HomeScreen() {
               Apprends Git en voyant le graphe.
             </h1>
             <p className="mt-4 max-w-[48ch] text-[15px] leading-7 text-muted">
-              Cinq chapitres, quinze missions réalistes. Chaque commande se rejoue sous tes
+              Six chapitres, dix-neuf missions réalistes. Chaque commande se rejoue sous tes
               yeux : le graphe, HEAD, l’index et les worktrees deviennent enfin lisibles.
             </p>
 

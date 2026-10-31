@@ -126,3 +126,40 @@ export function isWorkingTreeClean(state: RepoState): boolean {
   const status = worktreeStatus(state, activeWorktree(state));
   return status.staged.length === 0 && status.unstaged.length === 0 && status.untracked.length === 0;
 }
+
+/** Une fusion (conflit ou résolution en attente) est-elle en cours ? */
+export function isMergeInProgress(state: RepoState): boolean {
+  return activeWorktree(state).merge !== undefined;
+}
+
+/** Conflits non résolus de la fusion en cours. */
+export function mergeConflictPaths(state: RepoState): string[] {
+  return activeWorktree(state).merge?.conflicts.map((conflict) => conflict.path) ?? [];
+}
+
+export function hasRemote(state: RepoState, name: string): boolean {
+  return state.remotes?.[name] !== undefined;
+}
+
+export function remoteUrl(state: RepoState, name: string): string | undefined {
+  return state.remotes?.[name]?.url;
+}
+
+/** Sommet d'une branche sur le serveur (`origin/main`). */
+export function remoteBranchTip(
+  state: RepoState,
+  remote: string,
+  branch: BranchName,
+): CommitHash | undefined {
+  return state.remotes?.[remote]?.branches[branch];
+}
+
+/** Référence amont d'une branche locale (`origin/main`). */
+export function upstreamRef(state: RepoState, branch: BranchName): string | undefined {
+  return state.upstream?.[branch];
+}
+
+/** Dernier état connu du serveur pour une référence de suivi. */
+export function remoteTrackingTip(state: RepoState, ref: string): CommitHash | undefined {
+  return state.remoteTracking?.[ref];
+}

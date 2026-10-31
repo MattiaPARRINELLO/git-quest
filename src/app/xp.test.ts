@@ -61,9 +61,9 @@ describe('XP et niveaux', () => {
     expect(summary.level.level).toBe(7);
   });
 
-  it('un parcours minimal termine au niveau 4', () => {
+  it('un parcours minimal termine au niveau 6', () => {
     const summary = progressSummary(allWith(1));
-    expect(summary.level.level).toBe(5);
+    expect(summary.level.level).toBe(6);
   });
 });
 

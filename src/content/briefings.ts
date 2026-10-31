@@ -204,6 +204,55 @@ export const missionBriefings: Readonly<Record<string, MissionBriefing>> = {
       },
     ],
     outcome: 'Tout le sprint tient dans un commit ; le dépôt est propre.',
+    teaser: 'Le guide a été réécrit deux fois, sur deux branches.',
+  },
+  'conflit-docs': {
+    title: 'Nova, acte III : le guide déchiré',
+    lines: [
+      { speaker: 'samir', text: 'J’ai réécrit le guide sur doc-conflit pendant que tu corrigeais la même page sur main.' },
+      {
+        speaker: 'narrateur',
+        text: 'Fusionne sa branche : Git va s’arrêter sur README.md. À toi de choisir la version finale.',
+      },
+    ],
+    outcome: 'Une seule version du guide est livrée, et le commit de fusion garde les deux histoires.',
+    teaser: 'Nova doit maintenant quitter ta machine.',
+  },
+  'premier-push': {
+    title: 'Nova, acte VI : mettre Nova en ligne',
+    lines: [
+      { speaker: 'lea', text: 'Le dépôt GitHub est créé mais vide. Il faut y envoyer notre historique.' },
+      {
+        speaker: 'narrateur',
+        text: 'Ajoute origin, publie main, et relie ta branche à origin/main pour les prochains push.',
+      },
+    ],
+    outcome: 'Nova vit sur GitHub : origin/main pointe sur ton dernier commit.',
+    teaser: 'Pendant que tu poussais, Léa a poussé elle aussi.',
+  },
+  'pull-equipe': {
+    title: 'Nova, acte VI : le commit du coéquipier',
+    lines: [
+      { speaker: 'lea', text: 'J’ai ajouté un préfixe aux notifications et poussé sur main.' },
+      {
+        speaker: 'narrateur',
+        text: 'Ton main est en retard. Récupère son commit : ici, aucune divergence, l’avance rapide suffit.',
+      },
+    ],
+    outcome: 'main a rejoint origin/main sans commit de fusion.',
+    teaser: 'Cette fois, vous avez touché le même fichier.',
+  },
+  'conflit-de-pull': {
+    title: 'Nova, acte VI : le même fichier, deux versions',
+    lines: [
+      { speaker: 'lea', text: 'J’ai retravaillé notify.ts et poussé sur main.' },
+      { speaker: 'samir', text: 'Et toi tu as commité ta propre version du même fichier sans récupérer.' },
+      {
+        speaker: 'narrateur',
+        text: 'Fais le pull, résous le conflit, et termine la fusion.',
+      },
+    ],
+    outcome: 'Le préfixe de Léa et ton nettoyage cohabitent dans une seule version.',
     teaser: 'Ton arbre Nova t’attend sur la carte.',
   },
 };
