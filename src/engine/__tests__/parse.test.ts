@@ -81,7 +81,14 @@ describe('parseCommand', () => {
       kind: 'git-checkout',
       target: 'abc1234',
     });
-    expect(parsed('git merge feature')).toEqual({ kind: 'git-merge', branch: 'feature' });
+    expect(parsed('git merge feature')).toEqual({
+      kind: 'git-merge',
+      action: 'start',
+      branch: 'feature',
+    });
+    expect(parsed('git merge --continue')).toEqual({ kind: 'git-merge', action: 'continue' });
+    expect(parsed('git merge --abort')).toEqual({ kind: 'git-merge', action: 'abort' });
+    expect(parsed('git commit')).toEqual({ kind: 'git-commit', stageAllTracked: false });
     expect(parsed('git worktree add ../hotfix -b hotfix')).toEqual({
       kind: 'git-worktree',
       action: 'add',

@@ -6,7 +6,7 @@ import type {
   RepoState,
   Worktree,
 } from '../types';
-import { gitError } from '../errors';
+import { gitError, unmergedFilesError } from '../errors';
 import { DEFAULT_AUTHOR, hashFor, timestampFor } from '../hashes';
 import { diffTrees, worktreeStatus } from '../ops/diff';
 import { stageAllTracked, stagePaths } from '../ops/index';
@@ -16,6 +16,7 @@ import {
   shortHash,
   snapshotOf,
 } from '../ops/refs';
+import { concludeMerge } from './merge';
 import {
   describeChanges,
   failure,
@@ -33,6 +34,16 @@ export function gitCommit(state: RepoState, command: CommitCommand): ExecuteResu
   let worktree: Worktree = activeWorktree(state);
   let baseState = state;
 
+  const merge = worktree.merge;
+  if (merge !== undefined && merge.conflicts.length > 0) {
+    return failure(state, unmergedFilesError(merge.conflicts.map((conflict) => conflict.path)));
+  }
+
+  const message = command.message ?? (merge === undefined ? undefined : `Merge branch '${merge.branch}'`);
+  if (message === undefined || message.trim() === '') {
+    return failure(state, gitError('invalid-commit-message', "error: switch `m' requires a value"));
+  }
+
   if (command.stageAllTracked) {
     const staged = stageAllTracked(worktree);
     worktree = staged.worktree;
@@ -40,6 +51,11 @@ export function gitCommit(state: RepoState, command: CommitCommand): ExecuteResu
       ...state,
       worktrees: { ...state.worktrees, [worktree.id]: worktree },
     };
+  }
+
+  // Fusion en cours, tous les conflits résolus : l'index est déjà l'arbre final.
+  if (merge !== undefined) {
+    return concludeMerge(baseState, worktree, merge, message);
   }
 
   const headHash = headCommitOf(baseState, worktree.head);
@@ -122,7 +138,7 @@ export function gitCommit(state: RepoState, command: CommitCommand): ExecuteResu
       [hash]: {
         hash,
         parents: headHash === undefined ? [] : [headHash],
-        message: command.message,
+        message,
         snapshot: commitSnapshot,
         author: DEFAULT_AUTHOR,
         timestamp: timestampFor(baseState.clock + 1),
@@ -137,7 +153,7 @@ export function gitCommit(state: RepoState, command: CommitCommand): ExecuteResu
     {
       type: 'commit-created',
       commit: hash,
-      message: command.message,
+      message,
       worktree: worktree.id,
       ...(branch === undefined ? {} : { branch }),
     },
@@ -173,7 +189,7 @@ export function gitCommit(state: RepoState, command: CommitCommand): ExecuteResu
   return success(
     finalState,
     [
-      line(`[${label} ${shortHash(hash)}] ${command.message}`, 'success'),
+      line(`[${label} ${shortHash(hash)}] ${message}`, 'success'),
       line(` ${describeChanges(changes.length)}`, 'muted'),
     ],
     events,

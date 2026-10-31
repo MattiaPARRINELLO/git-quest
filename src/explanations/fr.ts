@@ -35,6 +35,12 @@ export function explainEvent(event: GitEvent): string {
     }
     case 'merge-commit':
       return `Un commit de fusion « ${event.commit} » est créé : il a deux parents.`;
+    case 'merge-conflict':
+      return `La fusion avec « ${event.branch} » s'arrête : ${event.paths.join(', ')} ${event.paths.length > 1 ? 'ont été modifiés' : 'a été modifié'} des deux côtés. Git a écrit les deux versions dans le fichier, entre les marqueurs <<<<<<<, ======= et >>>>>>>.`;
+    case 'conflict-resolved':
+      return `« ${event.path} » est marqué comme résolu : c'est maintenant la version du disque qui sera commitée.`;
+    case 'merge-aborted':
+      return `La fusion avec « ${event.branch} » est annulée : le dépôt revient exactement à l'état d'avant.`;
     case 'up-to-date':
       return `Rien à fusionner : « ${event.branch} » est déjà à jour.`;
     case 'worktree-added':
@@ -62,7 +68,13 @@ export function explainError(error: GitError): string {
     case 'branch-not-fully-merged':
       return 'La branche contient des commits absents de HEAD. « -d » refuse de les perdre ; « -D » force la suppression.';
     case 'merge-would-conflict':
-      return 'Les deux branches ont modifié le même fichier de façon différente. Les conflits ne sont pas gérés dans cette version.';
+      return 'Les deux branches ont modifié le même fichier de façon différente. Résous le conflit, puis « git add » et « git commit » (ou « git merge --abort » pour tout annuler).';
+    case 'unmerged-files':
+      return 'Des fichiers sont encore en conflit. Édite-les pour retirer les marqueurs <<<<<<<, ======= et >>>>>>>, puis marque-les résolus avec « git add ».';
+    case 'no-merge-in-progress':
+      return 'Aucune fusion n’est en cours : il n’y a rien à poursuivre ni à annuler.';
+    case 'merge-in-progress':
+      return 'Une fusion est en cours. Termine-la avec « git commit » ou abandonne-la avec « git merge --abort » avant de changer de branche.';
     case 'worktree-has-local-modifications':
       return 'Ce worktree contient des modifications ou des fichiers non suivis. Ajoute « --force » pour les jeter.';
     case 'worktree-remove-main':

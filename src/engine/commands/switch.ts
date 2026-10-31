@@ -6,7 +6,7 @@ import type {
   TerminalLine,
   Worktree,
 } from '../types';
-import { branchCheckedOutElsewhere, gitError } from '../errors';
+import { branchCheckedOutElsewhere, gitError, mergeInProgress } from '../errors';
 import {
   activeWorktree,
   headCommitOf,
@@ -123,6 +123,9 @@ export function switchToBranch(
   if (!create && worktree.head.kind === 'branch' && worktree.head.branch === branch) {
     return success(state, [line(`Already on '${branch}'`)], []);
   }
+
+  // Une fusion non conclue fige le HEAD : on la termine ou on l'annule d'abord.
+  if (worktree.merge !== undefined) return failure(state, mergeInProgress());
 
   if (create) {
     if (!isValidBranchName(branch)) {

@@ -46,14 +46,25 @@ export function noSuchPath(target: string): GitError {
   return gitError('directory-not-found', `cd: no such file or directory: ${target}`);
 }
 
-export function conflictError(paths: readonly string[]): GitError {
+export function unmergedFilesError(paths: readonly string[]): GitError {
   return gitError(
-    'merge-would-conflict',
+    'unmerged-files',
     [
-      ...paths.map((path) => `Auto-merging ${path}`),
-      ...paths.map((path) => `CONFLICT (content): Merge conflict in ${path}`),
-      'Automatic merge failed; fix conflicts and then commit the result.',
-      '(Les conflits ne sont pas gérés dans cette version de GitQuest.)',
+      'error: Committing is not possible because you have unmerged files.',
+      'hint: Fix them up in the work tree, and then use \'git add/rm <file>\'',
+      'hint: as appropriate to mark resolution and make a commit.',
+      'fatal: Exiting because of an unresolved conflict.',
+      ...paths.map((path) => `\t${path}`),
+    ].join('\n'),
+  );
+}
+
+export function mergeInProgress(): GitError {
+  return gitError(
+    'merge-in-progress',
+    [
+      'fatal: You have not concluded your merge (MERGE_HEAD exists).',
+      'Please, commit your changes before you switch branches.',
     ].join('\n'),
   );
 }

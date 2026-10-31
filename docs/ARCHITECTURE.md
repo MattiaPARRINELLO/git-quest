@@ -155,8 +155,22 @@ Règle fidèle à Git, implémentée dans `ops/checkout.ts` :
 - Sinon, **merge 3-way fichier par fichier** relativement à la merge-base :
   - un seul côté a modifié (ou ajouté/supprimé) → on prend ce côté ;
   - les deux côtés ont fait la même chose → OK ;
-  - sinon → erreur `merge-would-conflict` (les conflits sont hors MVP, on refuse
-    explicitement plutôt que de produire un état faux).
+  - sinon → **conflit** : la fusion s'arrête, elle n'est pas une erreur.
+- **Conflits praticables** (comme Git) :
+  - `Worktree.merge` retient la branche fusionnée, la merge-base, les deux sommets
+    et les conflits non résolus (`MERGE_HEAD` dans un vrai dépôt) ;
+  - le disque reçoit les marqueurs `<<<<<<< HEAD` / `=======` / `>>>>>>> <branche>`
+    (`conflictMarkers`), l'index reste sur la version de HEAD ;
+  - `git status` affiche `Unmerged paths` et la nature du conflit (`both modified`,
+    `deleted by us`, `deleted by them`, `both added`) ;
+  - `git add <fichier>` marque le conflit résolu (`conflict-resolved`) : c'est la
+    version du disque, marqueurs compris, qui sera commitée ;
+  - `git commit` / `git merge --continue` crée le commit de fusion dès qu'il ne
+    reste aucun conflit ; `git merge --abort` restaure exactement l'état d'avant ;
+  - `git switch` / `git checkout` sont refusés tant que la fusion n'est pas conclue.
+- Écart assumé : pour un conflit modification/suppression, Git ne pose pas de
+  marqueurs et garde le côté modifié ; GitQuest écrit les marqueurs avec une section
+  vide pour rendre le conflit visible. Le statut, lui, est fidèle.
 - Un merge commit a exactement deux parents.
 - Les modifications locales sont emportées si elles ne sont pas écrasées par le
   résultat de la fusion, refusées sinon.
@@ -246,8 +260,8 @@ minimal (`completed`, `lessonSlides`) pour les anciens builds et le rollback.
 
 ## 9. Hors périmètre MVP (prévu dans l'archi, non implémenté)
 
-Conflits de merge, rebase, cherry-pick, reset/revert, stash, remotes, reflog,
-bisect, comptes utilisateurs, backend, partage de progression.
+Rebase, cherry-pick, reset/revert, stash, remotes, reflog, bisect, comptes
+utilisateurs, backend, partage de progression.
 
 ## 10. Contraintes de qualité
 

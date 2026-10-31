@@ -83,11 +83,17 @@ function parseCommit(args: readonly string[]): ParseResult {
     );
   }
 
-  if (message === undefined || message.trim() === '') {
+  if (message !== undefined && message.trim() === '') {
     return fail('invalid-commit-message', "error: switch `m' requires a value");
   }
 
-  const base = { kind: 'git-commit' as const, message, stageAllTracked };
+  // Sans `-m`, le message par défaut n'est valable que pour un commit de fusion :
+  // le moteur le sait, pas le parseur.
+  const base = {
+    kind: 'git-commit' as const,
+    ...(message === undefined ? {} : { message }),
+    stageAllTracked,
+  };
   if (pathspecs.length === 0) return { ok: true, command: base };
   return { ok: true, command: { ...base, paths: pathspecs } };
 }
@@ -333,7 +339,16 @@ function parseGit(args: readonly string[]): ParseResult {
       if (rest.length > 1) {
         return fail('invalid-option', 'fatal: too many arguments');
       }
-      return { ok: true, command: { kind: 'git-merge', branch } };
+      if (branch === '--continue' || branch === '--abort') {
+        return {
+          ok: true,
+          command: { kind: 'git-merge', action: branch === '--abort' ? 'abort' : 'continue' },
+        };
+      }
+      if (branch.startsWith('-')) {
+        return fail('invalid-option', `error: unknown option \`${branch}'`);
+      }
+      return { ok: true, command: { kind: 'git-merge', action: 'start', branch } };
     }
 
     case 'worktree':

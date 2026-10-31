@@ -126,7 +126,38 @@ $ echo $?
 1
 ```
 
-GitQuest refuse avec `merge-would-conflict` et **ne crée pas** de merge commit partiel.
+GitQuest produit les mêmes lignes, écrit les marqueurs dans `base.txt`, laisse
+`git status` afficher `Unmerged paths`, puis conclut la fusion après
+`git add base.txt` et `git commit` (ou `git merge --continue`). `git merge --abort`
+restaure l'état d'avant, sans commit partiel.
+
+### 3d. Résolution de conflit, puis fusion
+
+```bash
+$ cat base.txt
+<<<<<<< HEAD
+main
+=======
+feature3
+>>>>>>> feature3
+$ echo "main + feature3" > base.txt
+$ git add base.txt
+$ git commit -m "merge: base"
+[main <sha>] merge: base
+$ git log --oneline --graph
+*   <sha> merge: base
+|\
+| * <sha3> feature3
+* | <sha2> main
+|/
+* <sha1> Initial
+$ git status
+On branch main
+nothing to commit, working tree clean
+```
+
+GitQuest : commit à deux parents, contenu `main + feature3`, plus aucun conflit
+dans le worktree.
 
 ---
 

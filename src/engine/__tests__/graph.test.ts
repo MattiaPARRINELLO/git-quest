@@ -71,9 +71,11 @@ describe('mergeTrees', () => {
     expect(result.tree).toEqual({ a: 'même' });
   });
 
-  it('signale un conflit', () => {
+  it('signale un conflit avec les trois versions', () => {
     const result = mergeTrees({ a: 'base' }, { a: 'main' }, { a: 'feature' });
-    expect(result.conflicts).toEqual(['a']);
+    expect(result.conflicts).toEqual([
+      { path: 'a', base: 'base', ours: 'main', theirs: 'feature' },
+    ]);
   });
 
   it('gère ajouts et suppressions', () => {
