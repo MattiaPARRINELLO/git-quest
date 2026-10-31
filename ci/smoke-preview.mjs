@@ -10,7 +10,7 @@
  * Usage: node ci/smoke-preview.mjs [baseUrl]
  */
 const BASE = (process.argv[2] ?? 'http://127.0.0.1:4173').replace(/\/$/, '');
-const STARTUP_TIMEOUT_MS = 60_000;
+const STARTUP_TIMEOUT_MS = Number(process.env.SMOKE_TIMEOUT_MS ?? 60_000);
 const REQUEST_TIMEOUT_MS = 10_000;
 
 const failures = [];
@@ -37,18 +37,22 @@ async function get(pathname) {
 // starts, and a cold CI runner can take a few seconds.
 // ---------------------------------------------------------------------------
 let home = null;
+let lastError = 'no attempt made';
 const deadline = Date.now() + STARTUP_TIMEOUT_MS;
 while (Date.now() < deadline) {
   try {
     home = await get('/');
     break;
-  } catch {
+  } catch (error) {
+    lastError = error.cause?.code ?? error.message;
     await new Promise((resolve) => setTimeout(resolve, 1_000));
   }
 }
 
 if (!home) {
-  console.error(`✗ ${BASE} never answered within ${STARTUP_TIMEOUT_MS / 1000}s.`);
+  console.error(`✗ ${BASE} never answered within ${STARTUP_TIMEOUT_MS / 1000}s (${lastError}).`);
+  console.error('  Is the server running and bound to this address? `vite preview` binds');
+  console.error('  `localhost` (possibly ::1 only) unless you pass --host 127.0.0.1.');
   process.exit(1);
 }
 

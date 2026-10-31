@@ -99,7 +99,7 @@ Le script écrit aussi un tableau récapitulatif dans le résumé de la run
 ### `smoke`
 
 Télécharge l'artefact `dist-node-22.x`, relance `npm ci` (pour `vite preview`),
-démarre `npx vite preview --port 4173 --strictPort` en arrière-plan, puis
+démarre `npx vite preview --host 127.0.0.1 --port 4173 --strictPort` en arrière-plan, puis
 `ci/smoke-preview.mjs` vérifie en HTTP réel :
 
 - `GET /` → 200, `text/html`, jamais une page 404 ;
@@ -140,7 +140,7 @@ npm test -- --coverage --coverage.reporter=json-summary
 npm run ci:coverage    # compare aux planchers
 
 # smoke test : deux terminaux
-npm run preview -- --port 4173 --strictPort
+npm run preview -- --host 127.0.0.1 --port 4173 --strictPort
 npm run ci:smoke -- http://127.0.0.1:4173
 ```
 
@@ -169,6 +169,7 @@ Ces quatre points s'ajoutent sans toucher aux jobs existants si le besoin arrive
 | --- | --- |
 | `npm ci` échoue | `package-lock.json` non régénéré après une modification de `package.json` |
 | `smoke` échoue sur `vite preview exited immediately` | port 4173 occupé ou build refusé plus tôt |
+| `never answered within 60s (ECONNREFUSED)` | `vite preview` écoute sur `localhost`/`::1` : ajouter `--host 127.0.0.1` |
 | `check-dist` échoue sur un budget | une dépendance ou un import a gonflé le bundle ; vérifier `dist/assets` |
 | `check-coverage` échoue sur un groupe absent | dossier `src/<groupe>/` renommé : mettre à jour `GROUP_FLOORS` |
 | `audit` rouge mais job vert | advisory dans les dépendances de développement uniquement |

@@ -166,7 +166,9 @@ jobs:
 
       - name: Serve the build
         run: |
-          nohup npx vite preview --port 4173 --strictPort > preview.log 2>&1 &
+          # Bind explicitly to IPv4: on the runners `localhost` can resolve to
+          # ::1 first, and the smoke test would then hit a closed 127.0.0.1.
+          nohup npx vite preview --host 127.0.0.1 --port 4173 --strictPort > preview.log 2>&1 &
           echo $! > preview.pid
           # Fail fast if the process dies before binding the port.
           sleep 2
