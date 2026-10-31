@@ -1,0 +1,303 @@
+name: CI
+
+# Runs on every push to main, on every pull request targeting main, and on
+# demand from the Actions tab. No deploy, no publishing: this pipeline only
+# proves that the build is type-safe, tested, installable as a PWA and small
+# enough to ship.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege: nothing here needs to write to the repository.
+permissions:
+  contents: read
+
+# A newer push on the same ref cancels the previous run.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: 'true'
+  TZ: 'UTC'
+  FORCE_COLOR: '1'
+  NPM_CONFIG_FUND: 'false'
+  NPM_CONFIG_AUDIT: 'false'
+  NPM_CONFIG_UPDATE_NOTIFIER: 'false'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Typecheck, unit tests and production build, on both supported Node LTS
+  # lines. The engine is pure TypeScript, so no browser is required here.
+  # ---------------------------------------------------------------------------
+  verify:
+    name: Verify (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22.x', '24.x']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Show toolchain versions
+        run: |
+          node --version
+          npm --version
+          git --version
+
+      - name: Install dependencies (clean, from the lockfile)
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck (tsc --noEmit, strict)
+        run: npm run typecheck
+
+      - name: Unit tests (vitest)
+        run: npm test
+
+      - name: Production build (typecheck + PWA)
+        run: npm run build
+
+      - name: Inspect the build output (manifest, service worker, budgets)
+        run: node ci/check-dist.mjs dist
+
+      - name: Upload the build for the smoke test
+        if: matrix.node == '22.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-node-22.x
+          path: dist
+          retention-days: 7
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Coverage is measured once, against the oldest supported Node, and compared
+  # to explicit floors. Kept separate so a coverage regression is visibly
+  # distinct from a test failure.
+  # ---------------------------------------------------------------------------
+  coverage:
+    name: Coverage budget
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Run tests with coverage
+        run: |
+          npx vitest run \
+            --coverage \
+            --coverage.reporter=text \
+            --coverage.reporter=json-summary \
+            --coverage.reporter=json
+
+      - name: Enforce coverage floors
+        run: node ci/check-coverage.mjs coverage/coverage-summary.json
+
+      - name: Upload the coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage
+          retention-days: 7
+          if-no-files-found: warn
+
+  # ---------------------------------------------------------------------------
+  # Serves the real build with `vite preview` and asserts what a browser gets:
+  # shell, manifest, service worker, workbox runtime, icons and SPA fallback.
+  # ---------------------------------------------------------------------------
+  smoke:
+    name: PWA smoke test
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Download the build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-node-22.x
+          path: dist
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Serve the build
+        run: |
+          nohup npx vite preview --port 4173 --strictPort > preview.log 2>&1 &
+          echo $! > preview.pid
+          # Fail fast if the process dies before binding the port.
+          sleep 2
+          if ! kill -0 "$(cat preview.pid)" 2>/dev/null; then
+            echo "vite preview exited immediately"
+            cat preview.log
+            exit 1
+          fi
+
+      - name: Smoke-test the served PWA
+        run: node ci/smoke-preview.mjs http://127.0.0.1:4173
+
+      - name: Show preview logs
+        if: always()
+        run: cat preview.log || true
+
+      - name: Upload preview logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-log
+          path: preview.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Stop the preview server
+        if: always()
+        run: |
+          if [ -f preview.pid ]; then kill "$(cat preview.pid)" 2>/dev/null || true; fi
+          pkill -f "vite preview" 2>/dev/null || true
+
+  # ---------------------------------------------------------------------------
+  # Runtime dependencies reach the browser: a high-severity advisory there is a
+  # blocker. Dev-only advisories are reported but never block, so a transitive
+  # tooling CVE can never freeze the project.
+  # ---------------------------------------------------------------------------
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Audit shipped dependencies (blocking)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Audit the full tree (advisory)
+        continue-on-error: true
+        run: npm audit --audit-level=high
+
+  # ---------------------------------------------------------------------------
+  # Reviews the dependency changes of a pull request against the GitHub advisory
+  # database. Advisory: a fresh advisory should never brick an unrelated PR.
+  # ---------------------------------------------------------------------------
+  dependencyReview:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  # ---------------------------------------------------------------------------
+  # Single required check for branch protection: green only when every other
+  # job is green (or legitimately skipped).
+  # ---------------------------------------------------------------------------
+  gate:
+    name: CI
+    if: always()
+    needs: [verify, coverage, smoke, audit, dependencyReview]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Summarize results
+        env:
+          VERIFY: ${{ needs.verify.result }}
+          COVERAGE: ${{ needs.coverage.result }}
+          SMOKE: ${{ needs.smoke.result }}
+          AUDIT: ${{ needs.audit.result }}
+          DEPENDENCY_REVIEW: ${{ needs.dependencyReview.result }}
+        run: |
+          {
+            echo "| Job | Result |"
+            echo "| --- | --- |"
+            echo "| verify | $VERIFY |"
+            echo "| coverage | $COVERAGE |"
+            echo "| smoke | $SMOKE |"
+            echo "| audit | $AUDIT |"
+            echo "| dependencyReview | $DEPENDENCY_REVIEW |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          failed=0
+          check() {
+            local name="$1" result="$2"
+            if [ "$result" != "success" ]; then
+              echo "::error title=CI::$name finished with '$result'"
+              return 1
+            fi
+          }
+          check verify "$VERIFY" || failed=1
+          check coverage "$COVERAGE" || failed=1
+          check smoke "$SMOKE" || failed=1
+          check audit "$AUDIT" || failed=1
+
+          if [ "$DEPENDENCY_REVIEW" != "success" ] && [ "$DEPENDENCY_REVIEW" != "skipped" ]; then
+            echo "::warning title=CI::dependency-review finished with '$DEPENDENCY_REVIEW' (advisory)"
+          fi
+
+          if [ "$failed" -ne 0 ]; then
+            exit 1
+          fi
+          echo "All required jobs passed."

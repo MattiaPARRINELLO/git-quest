@@ -10,7 +10,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "ci:dist": "node ci/check-dist.mjs dist",
+    "ci:coverage": "node ci/check-coverage.mjs coverage/coverage-summary.json",
+    "ci:smoke": "node ci/smoke-preview.mjs",
+    "ci:all": "npm run typecheck && npm run build && npm run ci:dist"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
