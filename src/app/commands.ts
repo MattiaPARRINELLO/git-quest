@@ -75,10 +75,12 @@ export function countsTowardScore(input: string, failed: boolean): boolean {
   const name = tokens[0];
   if (name === undefined) return false;
   if (isAppCommand(name)) return false;
-  if (name === 'status' || name === 'log' || name === 'ls') return false;
+  if (name === 'status' || name === 'log' || name === 'ls' || name === 'cat' || name === 'diff') {
+    return false;
+  }
   if (name === 'git') {
     const subcommand = tokens[1];
-    if (subcommand === 'status' || subcommand === 'log') return false;
+    if (subcommand === 'status' || subcommand === 'log' || subcommand === 'diff') return false;
     if (subcommand === 'worktree' && tokens[2] === 'list') return false;
   }
   return true;

@@ -187,6 +187,37 @@ GitQuest : aucun commit supplémentaire en fast-forward, puis `Already up to dat
 
 ---
 
+## 4b. `git diff` : disque, index, HEAD
+
+```bash
+$ cd "$(mktemp -d)" && git init -q -b main && git config user.email q@q && git config user.name q
+$ printf 'v1\n' > f.txt && git add . && git commit -qm "Initial"
+$ printf 'v2\n' > f.txt
+$ git diff
+diff --git a/f.txt b/f.txt
+index 944a466..974a4b2 100644
+--- a/f.txt
++++ b/f.txt
+@@ -1 +1 @@
+-v1
++v2
+$ git add f.txt && git diff
+$ git diff --staged
+diff --git a/f.txt b/f.txt
+...
+-v1
++v2
+$ printf 'v3\n' > f.txt && git diff HEAD
+...
+-v1
++v3
+```
+
+GitQuest produit les mêmes en-têtes, hunks et lignes préfixées `-`/`+`, avec les
+mêmes trois lignes de contexte. Les hashes de l'en-tête `index` sont cosmétiques.
+
+---
+
 ## 5. HEAD détaché, commit orphelin, worktree sale
 
 ### 5a. Commit orphelin

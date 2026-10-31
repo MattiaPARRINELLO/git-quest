@@ -33,6 +33,8 @@ En local, servir via Portless : `portless gitquest npm run dev` puis
   guillemets et placeholders, accessible depuis l'accueil.
 - Chaque chapitre : un cours de 4–5 min (slides texte, diagrammes animés, mini-démo
   rejouée avec le vrai moteur, antisèche finale), puis 3 missions.
+- **Terminal** : `git diff` (disque/index/HEAD), `git merge` avec **conflits
+  praticables** (marqueurs, `git add`, `git commit`, `git merge --continue/--abort`).
 - **15 missions** scénarisées : story d'équipe, objectif, 3 indices progressifs,
   validation sur l'état final, solution de référence et étoiles selon le nombre de
   commandes (`par` = longueur de la solution).

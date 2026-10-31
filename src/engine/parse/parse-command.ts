@@ -284,6 +284,27 @@ function parseGit(args: readonly string[]): ParseResult {
       return { ok: true, command: { kind: 'git-log', graph, oneline } };
     }
 
+    case 'diff': {
+      let target: 'worktree' | 'staged' | 'head' = 'worktree';
+      const paths: string[] = [];
+      for (const arg of rest) {
+        if (arg === '--staged' || arg === '--cached') {
+          target = 'staged';
+          continue;
+        }
+        if (arg === 'HEAD') {
+          target = 'head';
+          continue;
+        }
+        if (arg === '--') continue;
+        if (arg.startsWith('-')) {
+          return fail('invalid-option', `error: unknown option \`${arg}'`);
+        }
+        paths.push(arg);
+      }
+      return { ok: true, command: { kind: 'git-diff', target, paths } };
+    }
+
     case 'branch':
       return parseBranch(rest);
 

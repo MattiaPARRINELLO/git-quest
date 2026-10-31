@@ -4,6 +4,7 @@ import { gitStatus } from './status';
 import { gitAdd } from './add';
 import { gitCommit } from './commit';
 import { gitLog } from './log';
+import { gitDiff } from './diff';
 import { gitBranch } from './branch';
 import { gitSwitch } from './switch';
 import { gitCheckout } from './checkout';
@@ -25,6 +26,7 @@ const handlers: Handlers = {
   'git-add': gitAdd,
   'git-commit': gitCommit,
   'git-log': gitLog,
+  'git-diff': gitDiff,
   'git-branch': gitBranch,
   'git-switch': gitSwitch,
   'git-checkout': gitCheckout,

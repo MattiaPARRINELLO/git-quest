@@ -108,7 +108,7 @@ Un commit en HEAD détaché produit `commit-created` + `head-moved`.
 | Domaine | Commandes |
 | --- | --- |
 | Dépôt | `git init`, `git status` |
-| Index / commits | `git add`, `git commit -m`, `git commit -am`, `git commit -m "msg" <chemins>`, `git log --oneline --graph` |
+| Index / commits | `git add`, `git commit -m`, `git commit -am`, `git commit -m "msg" <chemins>`, `git log --oneline --graph`, `git diff [--staged\|HEAD] [<chemins>]` |
 | Branches | `git branch [<nom> [<start>]]`, `-d`, `-D`, `git switch`, `git switch -c [<nom> [<start>]]`, `git checkout` |
 | Fusion | `git merge` (fast-forward et merge commit) |
 | Fichiers | `git rm` (working dir + index) |
@@ -126,6 +126,18 @@ pour `git add`. `-a` et un chemin ensemble sont refusés (message Git réel).
 Écart assumé : quand **aucun** chemin demandé n'existe, le moteur renvoie
 `commit-message-not-quoted` — c'est presque toujours un message non quoté
 (`git commit -m feat: login`). Git, lui, renvoie une erreur de pathspec.
+
+### `git diff`
+
+- `git diff` compare le **disque à l'index** ; `--staged`/`--cached` compare
+  l'**index à HEAD** ; `HEAD` compare le disque à HEAD. Les fichiers non suivis
+  n'apparaissent jamais, comme dans Git.
+- Sortie au format unifié : `diff --git a/… b/…`, `index a..b 100644`,
+  `---`/`+++`, hunks `@@ -a,b +c,d @@` avec 3 lignes de contexte, `new file mode`
+  et `deleted file mode` pour les ajouts/suppressions.
+- Le diff est calculé par LCS (`engine/ops/unified-diff.ts`), sans dépendance ni
+  I/O : pur et testé. Les hashes des en-têtes `index` sont cosmétiques (FNV-1a).
+- `git diff` ne produit aucun événement : il ne modifie pas le dépôt.
 
 ### Worktrees
 

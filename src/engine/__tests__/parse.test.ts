@@ -86,6 +86,17 @@ describe('parseCommand', () => {
       action: 'start',
       branch: 'feature',
     });
+    expect(parsed('git diff')).toEqual({ kind: 'git-diff', target: 'worktree', paths: [] });
+    expect(parsed('git diff --staged')).toEqual({
+      kind: 'git-diff',
+      target: 'staged',
+      paths: [],
+    });
+    expect(parsed('git diff HEAD src/app.ts')).toEqual({
+      kind: 'git-diff',
+      target: 'head',
+      paths: ['src/app.ts'],
+    });
     expect(parsed('git merge --continue')).toEqual({ kind: 'git-merge', action: 'continue' });
     expect(parsed('git merge --abort')).toEqual({ kind: 'git-merge', action: 'abort' });
     expect(parsed('git commit')).toEqual({ kind: 'git-commit', stageAllTracked: false });

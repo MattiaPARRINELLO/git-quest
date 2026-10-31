@@ -227,6 +227,12 @@ export type ParsedCommand =
     }
   | { readonly kind: 'git-log'; readonly graph: boolean; readonly oneline: boolean }
   | {
+      readonly kind: 'git-diff';
+      /** worktree = disque vs index ; staged = index vs HEAD ; head = disque vs HEAD. */
+      readonly target: 'worktree' | 'staged' | 'head';
+      readonly paths: readonly string[];
+    }
+  | {
       readonly kind: 'git-branch';
       readonly action: 'list' | 'create' | 'delete';
       readonly name?: string;
