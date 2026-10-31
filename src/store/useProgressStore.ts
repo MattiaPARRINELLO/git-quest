@@ -14,6 +14,7 @@ import { lastCompletedMission as lastCompletedInJournal } from '../story/journal
 import { associateSlots, buildSlotTable } from '../story/slots';
 import { STORY_SPECS } from '../story/specs';
 import type { MissionDraft, PersistedStory } from '../story/types';
+import type { ProgressSnapshot } from './progress-file';
 
 const PROGRESS_KEY = 'gitquest.progress.v2';
 /** Miroir de compatibilité : d'anciens builds et des tests lisent encore v1. */
@@ -67,6 +68,8 @@ export interface ProgressStore {
    * Nova (journal/slots suivants) et conserve les étoiles déjà acquises.
    */
   adoptIsolated(state: RepoState): void;
+  /** Remplace la progression par une sauvegarde importée (tout ou rien). */
+  restoreProgress(snapshot: ProgressSnapshot): void;
   hydrate(): Promise<void>;
 }
 
@@ -353,6 +356,16 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       isolated: null,
     };
     set({ story });
+    persist();
+  },
+
+  restoreProgress(snapshot) {
+    set({
+      completed: { ...snapshot.completed },
+      lessonSlides: { ...snapshot.lessonSlides },
+      story: snapshot.story,
+      draft: snapshot.story.activeMission,
+    });
     persist();
   },
 

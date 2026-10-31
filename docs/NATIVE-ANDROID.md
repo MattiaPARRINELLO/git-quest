@@ -39,6 +39,17 @@ La seule vraie discipline : **tester une nouveauté tactile sur les deux
 cibles** (web mobile + APK) avant commit, car la WebView Android peut différer
 du Chrome desktop sur le clavier et les safe areas.
 
+## État
+
+| Phase | État |
+| --- | --- |
+| 0 — Fondations natives | livrée (commit `e23356a`) |
+| 1 — Pipeline de build | livrée (dans `e23356a`) |
+| 2 — Comportement natif | livrée (commit `7383b7b`) |
+| 3 — Terminal et graphe tactiles | livrée (commit `7a2a7a0`) |
+| 4 — Données et robustesse | livrée |
+| 5 — Release Play Store | hors périmètre de cette session |
+
 ## Règles du chantier
 
 - Une phase = un commit (typecheck + tests + build avant commit).
