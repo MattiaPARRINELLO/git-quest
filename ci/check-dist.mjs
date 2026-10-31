@@ -14,6 +14,16 @@ import { gzipSync } from 'node:zlib';
 
 const DIST = process.argv[2] ?? 'dist';
 
+/**
+ * Public base path the build was generated for (`VITE_BASE_PATH`) — "/" locally
+ * and on root deployments, "/git-quest/" on GitHub Pages. Only used to resolve
+ * URLs written in index.html and the manifest back to files in `dist/`.
+ */
+const BASE = `/${(process.env['PUBLIC_BASE'] ?? '/').replaceAll('/', '')}/`.replaceAll('//', '/');
+
+const stripBase = (url) => (url.startsWith(BASE) ? url.slice(BASE.length) : url);
+
+
 /** Hard limits. Raise them deliberately, never to unblock a red build. */
 const BUDGETS = {
   /** Whole `dist/` on disk, uncompressed. */
@@ -34,7 +44,7 @@ const ok = (message) => notes.push(`  ok   ${message}`);
 const bytes = (n) => `${(n / 1024).toFixed(1)} kB`;
 
 function requireFile(path, label = path) {
-  const full = join(DIST, path);
+  const full = join(DIST, stripBase(path));
   if (!existsSync(full)) {
     fail(`missing ${label} (${full})`);
     return false;
@@ -44,13 +54,13 @@ function requireFile(path, label = path) {
 }
 
 function readIfPresent(path) {
-  const full = join(DIST, path);
+  const full = join(DIST, stripBase(path));
   return existsSync(full) ? readFileSync(full, 'utf8') : null;
 }
 
 /** Reads width/height from a PNG IHDR chunk, without any image library. */
 function pngSize(path) {
-  const buffer = readFileSync(join(DIST, path));
+  const buffer = readFileSync(join(DIST, stripBase(path)));
   const signature = buffer.subarray(0, 8).toString('hex');
   if (signature !== '89504e470d0a1a0a') return null;
   if (buffer.subarray(12, 16).toString('ascii') !== 'IHDR') return null;
@@ -105,7 +115,7 @@ if (html === null) {
   const expectations = [
     ['<div id="root"></div>', 'React mount point'],
     ['lang="fr"', 'French document language'],
-    ['<link rel="manifest" href="/manifest.webmanifest">', 'web manifest link'],
+    [`<link rel="manifest" href="${BASE}manifest.webmanifest">`, 'web manifest link'],
     ['registerSW.js', 'service worker registration'],
     ['viewport-fit=cover', 'safe-area viewport meta'],
   ];
@@ -114,12 +124,16 @@ if (html === null) {
     else fail(`index.html is missing ${label} (expected "${needle}")`);
   }
 
-  const scriptMatch = html.match(/<script type="module"[^>]+src="(\/assets\/[^"]+\.js)"/);
+  const scriptMatch = html.match(/<script type="module"[^>]+src="([^"]*\/assets\/[^"]+\.js)"/);
   if (scriptMatch) {
-    ok(`index.html: entry bundle ${scriptMatch[1]}`);
-    requireFile(scriptMatch[1].slice(1), 'entry bundle file');
+    if (!scriptMatch[1].startsWith(BASE)) {
+      fail(`index.html entry bundle ${scriptMatch[1]} ignores the public base ${BASE}`);
+    } else {
+      ok(`index.html: entry bundle ${scriptMatch[1]}`);
+      requireFile(scriptMatch[1], 'entry bundle file');
+    }
   } else {
-    fail('index.html has no hashed module entry script under /assets/');
+    fail('index.html has no hashed module entry script under <base>/assets/');
   }
 
   if (!html.includes('crossorigin')) {

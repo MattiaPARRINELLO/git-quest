@@ -153,11 +153,31 @@ soit vert avant merge, et interdire le merge si des conversations sont non
 résolues. Le job `gate` n'est vert que si `verify`, `coverage`, `smoke` et `audit`
 le sont : c'est le seul nom à référencer.
 
+## Déploiement — GitHub Pages
+
+`.github/workflows/pages.yml` publie le build sur
+**https://mattiaparrinello.github.io/git-quest/** à chaque push sur `main`
+(et à la demande). Pages sert un site de projet sous `/<repo>/`, donc le workflow
+exporte `VITE_BASE_PATH=/git-quest/` ; `vite.config.ts` lit cette variable dans
+`base`, ce qui préfixe tous les URLs générés (assets, manifest, service worker).
+
+Conséquences à garder en tête :
+
+- en local et sur un hébergement racine, `VITE_BASE_PATH` est absent → `base = '/'` ;
+- `ci/check-dist.mjs` accepte `PUBLIC_BASE` (même valeur) pour résoudre les URLs
+  préfixées vers les fichiers de `dist/` ;
+- le manifest garde `start_url: "./"` et `scope: "./"`, donc l'app s'installe et
+  fonctionne sous le sous-dossier ;
+- après merge, compter une à deux minutes avant que le site ne soit à jour.
+
+Un domaine à racine (Vercel, Netlify, domaine perso) ne demande aucun changement
+de code : ne pas définir `VITE_BASE_PATH`, et le build fonctionne tel quel.
+
 ## Ce que la CI ne fait pas
 
 - Pas de test bout-en-bout dans un vrai navigateur (pas de Playwright) : les
   composants sont testés en jsdom et le build est vérifié en HTTP.
-- Pas de déploiement, pas de publication npm, pas de release.
+- Pas de publication npm ni de release (le déploiement Pages a son propre workflow).
 - Pas de scan de secrets ni d'analyse statique au-delà de TypeScript.
 - Pas de vérification du style des messages de commit.
 

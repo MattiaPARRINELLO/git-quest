@@ -3,7 +3,13 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Root deployments (local, Vercel, custom domain) keep "/". GitHub Pages serves
+// the app from https://<user>.github.io/<repo>/, so the deploy workflow sets
+// VITE_BASE_PATH=/git-quest/ — every generated URL then carries the prefix.
+const base = process.env['VITE_BASE_PATH'] ?? '/';
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     tailwindcss(),

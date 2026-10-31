@@ -3,6 +3,8 @@
 PWA pédagogique pour apprendre Git visuellement : un terminal simulé et un graphe de
 commits animé, branchés sur un moteur Git **pur TypeScript**.
 
+**Démo en ligne : <https://mattiaparrinello.github.io/git-quest/>**
+
 > État : **Phases 0–4 livrées** — moteur (conflits, `diff`, remotes), bac à sable,
 > cours, 19 missions, prédictions, PWA, XP, niveaux et badges.
 
