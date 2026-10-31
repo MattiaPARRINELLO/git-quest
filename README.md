@@ -3,8 +3,8 @@
 PWA pédagogique pour apprendre Git visuellement : un terminal simulé et un graphe de
 commits animé, branchés sur un moteur Git **pur TypeScript**.
 
-> État : **Phases 0–3 livrées** — moteur, bac à sable, cours, 15 missions,
-> prédictions et PWA. L'XP, les niveaux et les badges arrivent en Phase 4.
+> État : **Phases 0–4 livrées** — moteur (conflits, `diff`, remotes), bac à sable,
+> cours, 15 missions, prédictions, PWA, XP, niveaux et badges.
 
 ## Démarrer
 
@@ -47,6 +47,9 @@ En local, servir via Portless : `portless gitquest npm run dev` puis
   s'exécute et le feedback explique.
 - **Progression** persistée localement (missions terminées, étoiles, slide de cours)
   sous `gitquest.progress.v1`.
+- **XP, niveaux et badges** dérivés de la progression (jamais un compteur séparé) :
+  100 XP par mission + 25 par étoile, 7 paliers de « Novice » à « Maître du dépôt »,
+  badges de chapitre, de série parfaite et de cours lus.
 
 ## Le bac à sable
 
@@ -68,7 +71,7 @@ En local, servir via Portless : `portless gitquest npm run dev` puis
 
 ```
 src/engine/        moteur pur : types, parsing, commandes, worktrees, validations
-src/app/           explain / undo / hint / reset-mission + score
+src/app/           explain / undo / hint / reset-mission + score + XP/niveaux/badges
 src/explanations/  event -> phrase française
 src/components/
   graph/           layoutGraph (pur, testé) + CommitGraph (SVG/Framer Motion)
