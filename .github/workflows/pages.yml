@@ -1,0 +1,93 @@
+name: Deploy to GitHub Pages
+
+# Publishes the production build of the PWA to
+# https://mattiaparrinello.github.io/git-quest/
+#
+# Only `main` is deployed. Pull requests are validated by `.github/workflows/ci.yml`
+# (which also proves the build is installable), so this workflow does not re-run
+# the test suite: it builds the same sources with the Pages base path and ships
+# the artifact.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a deployment in flight; queue the next one instead.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  CI: 'true'
+  # GitHub Pages serves project sites under /<repo>/, so every URL written by
+  # Vite (assets, manifest, service worker) must carry this prefix.
+  VITE_BASE_PATH: /git-quest/
+  NPM_CONFIG_FUND: 'false'
+  NPM_CONFIG_AUDIT: 'false'
+  NPM_CONFIG_UPDATE_NOTIFIER: 'false'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: Build the Pages artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Production build (with the Pages base path)
+        run: npm run build
+
+      - name: Inspect the build output
+        run: node ci/check-dist.mjs dist
+        env:
+          PUBLIC_BASE: /git-quest/
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy to Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Summarize
+        run: |
+          echo "Deployed to ${{ steps.deployment.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
