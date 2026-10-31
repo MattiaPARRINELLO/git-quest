@@ -2,6 +2,7 @@ import type { ExecuteResult, MergeConflict, RepoState, TerminalLine } from '../t
 import { activeWorktree, headCommitOf, shortHash } from '../ops/refs';
 import { worktreeStatus } from '../ops/diff';
 import type { FileChange } from '../ops/diff';
+import { aheadBehind, upstreamOf } from '../ops/remotes';
 import { failure, line, requireRepository, success } from './shared';
 
 const LABELS: Record<FileChange['status'], string> = {
@@ -12,6 +13,42 @@ const LABELS: Record<FileChange['status'], string> = {
 
 function changeLines(changes: readonly FileChange[]): TerminalLine[] {
   return changes.map((change) => line(`\t${LABELS[change.status]}${change.path}`));
+}
+
+/** Ligne « Your branch is ahead/behind… », comme Git après un fetch. */
+function upstreamLines(state: RepoState, branch: string): TerminalLine[] {
+  const upstream = upstreamOf(state, branch);
+  if (upstream === undefined) return [];
+  const remoteTip = state.remoteTracking?.[upstream.ref];
+  const localTip = state.branches[branch];
+  if (remoteTip === undefined || localTip === undefined) return [];
+
+  const { ahead, behind } = aheadBehind(state, localTip, remoteTip);
+
+  if (ahead === 0 && behind === 0) {
+    return [line(`Your branch is up to date with '${upstream.ref}'.`)];
+  }
+  if (ahead > 0 && behind === 0) {
+    return [
+      line(
+        `Your branch is ahead of '${upstream.ref}' by ${ahead} ${ahead === 1 ? 'commit' : 'commits'}.`,
+      ),
+      line('  (use "git push" to publish your local commits)'),
+    ];
+  }
+  if (ahead === 0) {
+    return [
+      line(
+        `Your branch is behind '${upstream.ref}' by ${behind} ${behind === 1 ? 'commit' : 'commits'}, and can be fast-forwarded.`,
+      ),
+      line('  (use "git pull" to update your local branch)'),
+    ];
+  }
+  return [
+    line(`Your branch and '${upstream.ref}' have diverged,`),
+    line(`and have ${ahead} and ${behind} different commits each, respectively.`),
+    line('  (use "git pull" if you want to integrate the remote branch with yours)'),
+  ];
 }
 
 function conflictKind(conflict: MergeConflict): string {
@@ -37,6 +74,7 @@ export function gitStatus(state: RepoState): ExecuteResult {
   } else {
     output.push(line(`On branch ${worktree.head.branch}`));
     if (head === undefined) output.push(line(''), line('No commits yet'));
+    else output.push(...upstreamLines(state, worktree.head.branch));
   }
 
   if (merge !== undefined) {

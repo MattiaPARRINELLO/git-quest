@@ -133,7 +133,7 @@ describe('parseCommand', () => {
   });
 
   it('refuse les commandes inconnues et les options invalides', () => {
-    const unknown = parseCommand('git push');
+    const unknown = parseCommand('git rebase');
     expect(unknown.ok).toBe(false);
     if (!unknown.ok) expect(unknown.error.code).toBe('unknown-command');
 

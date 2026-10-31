@@ -81,6 +81,7 @@ export function countsTowardScore(input: string, failed: boolean): boolean {
   if (name === 'git') {
     const subcommand = tokens[1];
     if (subcommand === 'status' || subcommand === 'log' || subcommand === 'diff') return false;
+    if (subcommand === 'remote' && tokens[2] !== 'add' && tokens[2] !== 'remove') return false;
     if (subcommand === 'worktree' && tokens[2] === 'list') return false;
   }
   return true;

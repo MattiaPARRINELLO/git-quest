@@ -218,6 +218,42 @@ mêmes trois lignes de contexte. Les hashes de l'en-tête `index` sont cosmétiq
 
 ---
 
+## 4c. Remote façon GitHub : push refusé, puis pull
+
+```bash
+$ git remote add origin git@github.com:nova/nova.git
+$ git push -u origin main
+To github.com:nova/nova.git
+ * [new branch]      main -> main
+$ git push
+Everything up-to-date
+```
+
+Un coéquipier pousse sur `main`, puis :
+
+```bash
+$ git push
+To github.com:nova/nova.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'git@github.com:nova/nova.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. ...
+$ git pull
+From git@github.com:nova/nova.git
+   1a2b3c4..5d6e7f8  main -> origin/main
+Updating 1a2b3c4..5d6e7f8
+Fast-forward
+ $ git status
+On branch main
+Your branch is up to date with 'origin/main'.
+```
+
+GitQuest produit les mêmes messages, les mêmes refus non fast-forward, et met à
+jour `origin/main` avant de fusionner. Les objets sont partagés dans le modèle :
+aucun transfert réseau n'est simulé.
+
+---
+
 ## 5. HEAD détaché, commit orphelin, worktree sale
 
 ### 5a. Commit orphelin

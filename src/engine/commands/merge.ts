@@ -35,6 +35,51 @@ function stats(before: FileTree, after: FileTree): string {
   return describeChanges(diffTrees(before, after).length);
 }
 
+function updateHead(
+  state: RepoState,
+  worktree: Worktree,
+  hash: string,
+  ours: string,
+  message: string,
+): { state: RepoState; events: GitEvent[] } {
+  const currentBranch = worktree.head.kind === 'branch' ? worktree.head.branch : null;
+  const events: GitEvent[] = [
+    {
+      type: 'commit-created',
+      commit: hash,
+      message,
+      worktree: worktree.id,
+      ...(currentBranch === null ? {} : { branch: currentBranch }),
+    },
+  ];
+
+  let finalState = state;
+  let head = worktree.head;
+
+  if (currentBranch !== null) {
+    finalState = {
+      ...state,
+      branches: { ...state.branches, [currentBranch]: hash },
+    };
+    events.push(branchMoved(currentBranch, ours, hash));
+  } else {
+    const next = { kind: 'detached' as const, commit: hash };
+    head = next;
+    events.push(headMoved(worktree.head, next));
+  }
+
+  return {
+    state: {
+      ...finalState,
+      worktrees: {
+        ...finalState.worktrees,
+        [worktree.id]: { ...worktree, head },
+      },
+    },
+    events,
+  };
+}
+
 /**
  * Termine une fusion : crée le commit de fusion à deux parents à partir de
  * l'index courant (les conflits doivent avoir été résolus par `git add`).
@@ -50,10 +95,9 @@ export function concludeMerge(
   }
 
   const hash = hashFor(state.nextId);
-  const currentBranch = worktree.head.kind === 'branch' ? worktree.head.branch : null;
   const snapshot = worktree.index;
 
-  const newState: RepoState = {
+  const withCommit: RepoState = {
     ...state,
     commits: {
       ...state.commits,
@@ -64,57 +108,37 @@ export function concludeMerge(
         snapshot,
         author: DEFAULT_AUTHOR,
         timestamp: timestampFor(state.clock + 1),
-        ...(currentBranch === null ? {} : { branch: currentBranch }),
+        ...(worktree.head.kind === 'branch' ? { branch: worktree.head.branch } : {}),
       },
     },
     clock: state.clock + 1,
     nextId: state.nextId + 1,
   };
 
-  const events: GitEvent[] = [
-    {
-      type: 'commit-created',
-      commit: hash,
-      message,
-      worktree: worktree.id,
-      ...(currentBranch === null ? {} : { branch: currentBranch }),
-    },
-  ];
-
-  let finalState = newState;
-  let head = worktree.head;
-
-  if (currentBranch !== null) {
-    finalState = {
-      ...newState,
-      branches: { ...newState.branches, [currentBranch]: hash },
-    };
-    events.push(branchMoved(currentBranch, merge.ours, hash));
-  } else {
-    const next = { kind: 'detached' as const, commit: hash };
-    head = next;
-    finalState = newState;
-    events.push(headMoved(worktree.head, next));
-  }
+  const updated = updateHead(withCommit, worktree, hash, merge.ours, message);
 
   const { merge: _discarded, ...rest } = worktree;
-  finalState = {
-    ...finalState,
+  const finalState: RepoState = {
+    ...updated.state,
     worktrees: {
-      ...finalState.worktrees,
-      [worktree.id]: { ...rest, head },
+      ...updated.state.worktrees,
+      [worktree.id]: { ...rest, head: updated.state.worktrees[worktree.id]?.head ?? worktree.head },
     },
   };
-
-  events.push({ type: 'merge-commit', commit: hash, parents: [merge.ours, merge.theirs] });
 
   return success(
     finalState,
     [
-      line(`[${currentBranch ?? 'detached HEAD'} ${shortHash(hash)}] ${message}`, 'success'),
+      line(
+        `[${worktree.head.kind === 'branch' ? worktree.head.branch : 'detached HEAD'} ${shortHash(hash)}] ${message}`,
+        'success',
+      ),
       line(` ${describeChanges(diffTrees(snapshotOf(state, merge.ours), snapshot).length)}`, 'muted'),
     ],
-    events,
+    [
+      ...updated.events,
+      { type: 'merge-commit', commit: hash, parents: [merge.ours, merge.theirs] },
+    ],
   );
 }
 
@@ -134,46 +158,17 @@ function abortMerge(state: RepoState, worktree: Worktree, merge: MergeState): Ex
   );
 }
 
-export function gitMerge(state: RepoState, command: MergeCommand): ExecuteResult {
-  const repoError = requireRepository(state);
-  if (repoError) return failure(state, repoError);
-
-  const worktree = activeWorktree(state);
-
-  if (command.action === 'abort' || command.action === 'continue') {
-    const merge = worktree.merge;
-    if (merge === undefined) {
-      return failure(
-        state,
-        gitError(
-          'no-merge-in-progress',
-          'fatal: There is no merge in progress (MERGE_HEAD missing).',
-        ),
-      );
-    }
-    if (command.action === 'abort') return abortMerge(state, worktree, merge);
-    return concludeMerge(state, worktree, merge, `Merge branch '${merge.branch}'`);
-  }
-
-  if (worktree.merge !== undefined) return failure(state, mergeInProgress());
-
-  const branch = command.branch;
-  if (branch === undefined) {
-    return failure(state, gitError('invalid-option', 'fatal: missing branch to merge'));
-  }
-
+/**
+ * Cœur de la fusion : fusionne `theirs` dans le HEAD du worktree.
+ * `label` sert au message par défaut et aux marqueurs (`origin/main` pour un pull).
+ */
+export function mergeTargets(
+  state: RepoState,
+  worktree: Worktree,
+  theirs: string,
+  label: string,
+): ExecuteResult {
   const ours = activeHeadCommit(state);
-  const theirs = state.branches[branch];
-
-  if (theirs === undefined) {
-    return failure(
-      state,
-      gitError(
-        'branch-not-found',
-        `merge: ${branch} - not something we can merge`,
-      ),
-    );
-  }
 
   if (ours === undefined) {
     return failure(
@@ -260,12 +255,12 @@ export function gitMerge(state: RepoState, command: MergeCommand): ExecuteResult
   // Conflits : Git s'arrête au milieu de la fusion, écrit les deux versions et
   // laisse le dépôt dans un état « fusion en cours » (MERGE_HEAD).
   if (merged.conflicts.length > 0) {
-    const workingTree = conflictedTree(merged.tree, merged.conflicts, branch);
+    const workingTree = conflictedTree(merged.tree, merged.conflicts, label);
     const plan = planCheckout(worktree, oursSnapshot, workingTree);
     if (!plan.ok) return failure(state, plan.error);
 
     const merge: MergeState = {
-      branch,
+      branch: label,
       base,
       ours,
       theirs,
@@ -300,7 +295,7 @@ export function gitMerge(state: RepoState, command: MergeCommand): ExecuteResult
       [
         {
           type: 'merge-conflict',
-          branch,
+          branch: label,
           paths: merged.conflicts.map((conflict) => conflict.path),
           worktree: worktree.id,
         },
@@ -312,8 +307,8 @@ export function gitMerge(state: RepoState, command: MergeCommand): ExecuteResult
   if (!plan.ok) return failure(state, plan.error);
 
   const hash = hashFor(state.nextId);
-  const message = `Merge branch '${branch}'`;
-  const newState: RepoState = {
+  const message = `Merge branch '${label}'`;
+  const withCommit: RepoState = {
     ...state,
     commits: {
       ...state.commits,
@@ -331,46 +326,19 @@ export function gitMerge(state: RepoState, command: MergeCommand): ExecuteResult
     nextId: state.nextId + 1,
   };
 
-  const events: GitEvent[] = [
-    {
-      type: 'commit-created',
-      commit: hash,
-      message,
-      worktree: worktree.id,
-      ...(currentBranch === null ? {} : { branch: currentBranch }),
-    },
-  ];
-
-  let finalState = newState;
-  let head = worktree.head;
-
-  if (currentBranch !== null) {
-    finalState = {
-      ...newState,
-      branches: { ...newState.branches, [currentBranch]: hash },
-    };
-    events.push(branchMoved(currentBranch, ours, hash));
-  } else {
-    const next = { kind: 'detached' as const, commit: hash };
-    head = next;
-    finalState = newState;
-    events.push(headMoved(worktree.head, next));
-  }
-
-  finalState = {
-    ...finalState,
+  const updated = updateHead(withCommit, worktree, hash, ours, message);
+  const finalState: RepoState = {
+    ...updated.state,
     worktrees: {
-      ...finalState.worktrees,
+      ...updated.state.worktrees,
       [worktree.id]: {
         ...worktree,
-        head,
+        head: updated.state.worktrees[worktree.id]?.head ?? worktree.head,
         index: plan.index,
         workingDir: plan.workingDir,
       },
     },
   };
-
-  events.push({ type: 'merge-commit', commit: hash, parents: [ours, theirs] });
 
   return success(
     finalState,
@@ -378,6 +346,48 @@ export function gitMerge(state: RepoState, command: MergeCommand): ExecuteResult
       line("Merge made by the 'ort' strategy.", 'success'),
       line(` ${stats(oursSnapshot, merged.tree)}`, 'muted'),
     ],
-    events,
+    [
+      ...updated.events,
+      { type: 'merge-commit', commit: hash, parents: [ours, theirs] },
+    ],
   );
+}
+
+export function gitMerge(state: RepoState, command: MergeCommand): ExecuteResult {
+  const repoError = requireRepository(state);
+  if (repoError) return failure(state, repoError);
+
+  const worktree = activeWorktree(state);
+
+  if (command.action === 'abort' || command.action === 'continue') {
+    const merge = worktree.merge;
+    if (merge === undefined) {
+      return failure(
+        state,
+        gitError(
+          'no-merge-in-progress',
+          'fatal: There is no merge in progress (MERGE_HEAD missing).',
+        ),
+      );
+    }
+    if (command.action === 'abort') return abortMerge(state, worktree, merge);
+    return concludeMerge(state, worktree, merge, `Merge branch '${merge.branch}'`);
+  }
+
+  if (worktree.merge !== undefined) return failure(state, mergeInProgress());
+
+  const branch = command.branch;
+  if (branch === undefined) {
+    return failure(state, gitError('invalid-option', 'fatal: missing branch to merge'));
+  }
+
+  const theirs = state.branches[branch];
+  if (theirs === undefined) {
+    return failure(
+      state,
+      gitError('branch-not-found', `merge: ${branch} - not something we can merge`),
+    );
+  }
+
+  return mergeTargets(state, worktree, theirs, branch);
 }

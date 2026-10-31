@@ -78,6 +78,17 @@ export interface Worktree {
   readonly merge?: MergeState;
 }
 
+/**
+ * Un dépôt distant (GitHub, GitLab…). Version simplifiée : les objets sont
+ * partagés avec le dépôt local (pas de transfert réseau), seules les références
+ * distantes comptent. `origin/main` pointe sur `branches.main`.
+ */
+export interface Remote {
+  readonly name: string;
+  readonly url: string;
+  readonly branches: Readonly<Record<BranchName, CommitHash>>;
+}
+
 export interface RepoState {
   readonly version: 1;
   readonly initialized: boolean;
@@ -92,6 +103,12 @@ export interface RepoState {
   readonly clock: number;
   /** Compteur de génération des hashes déterministes. */
   readonly nextId: number;
+  /** Dépôts distants, par nom (`origin`). */
+  readonly remotes?: Readonly<Record<string, Remote>>;
+  /** Références de suivi (`origin/main`) : dernier état connu du serveur. */
+  readonly remoteTracking?: Readonly<Record<string, CommitHash>>;
+  /** Branche locale → référence amont (`main` → `origin/main`). */
+  readonly upstream?: Readonly<Record<BranchName, string>>;
 }
 
 export type OutputTone = 'default' | 'muted' | 'success' | 'error' | 'warning';
@@ -122,6 +139,13 @@ export type GitErrorCode =
   | 'unmerged-files'
   | 'no-merge-in-progress'
   | 'merge-in-progress'
+  | 'remote-not-found'
+  | 'remote-already-exists'
+  | 'remote-ref-not-found'
+  | 'no-upstream'
+  | 'push-rejected'
+  | 'not-on-a-branch'
+  | 'no-push-destination'
   | 'worktree-path-exists'
   | 'worktree-not-found'
   | 'worktree-has-local-modifications'
@@ -191,6 +215,21 @@ export type GitEvent =
     }
   | { readonly type: 'conflict-resolved'; readonly path: FilePath }
   | { readonly type: 'merge-aborted'; readonly branch: BranchName }
+  | { readonly type: 'remote-added'; readonly name: string; readonly url: string }
+  | { readonly type: 'remote-removed'; readonly name: string }
+  | {
+      readonly type: 'remote-fetched';
+      readonly remote: string;
+      readonly branches: readonly string[];
+    }
+  | {
+      readonly type: 'remote-updated';
+      readonly remote: string;
+      readonly branch: BranchName;
+      readonly from: CommitHash | null;
+      readonly to: CommitHash;
+    }
+  | { readonly type: 'upstream-set'; readonly branch: BranchName; readonly upstream: string }
   | { readonly type: 'up-to-date'; readonly branch: BranchName }
   | {
       readonly type: 'worktree-added';
@@ -252,6 +291,28 @@ export type ParsedCommand =
       readonly kind: 'git-merge';
       readonly action: 'start' | 'continue' | 'abort';
       /** Absent pour `--continue` et `--abort`. */
+      readonly branch?: string;
+    }
+  | {
+      readonly kind: 'git-remote';
+      readonly action: 'list' | 'add' | 'remove';
+      readonly name?: string;
+      readonly url?: string;
+      readonly verbose: boolean;
+    }
+  | {
+      readonly kind: 'git-push';
+      readonly remote?: string;
+      /** Branche locale source (`main` dans `git push origin main`). */
+      readonly branch?: string;
+      /** Branche distante cible (`main` dans `git push origin team:main`). */
+      readonly remoteBranch?: string;
+      readonly setUpstream: boolean;
+    }
+  | { readonly kind: 'git-fetch'; readonly remote?: string }
+  | {
+      readonly kind: 'git-pull';
+      readonly remote?: string;
       readonly branch?: string;
     }
   | {

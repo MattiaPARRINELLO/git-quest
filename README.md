@@ -35,6 +35,8 @@ En local, servir via Portless : `portless gitquest npm run dev` puis
   rejouée avec le vrai moteur, antisèche finale), puis 3 missions.
 - **Terminal** : `git diff` (disque/index/HEAD), `git merge` avec **conflits
   praticables** (marqueurs, `git add`, `git commit`, `git merge --continue/--abort`).
+- **Distant façon GitHub** : `git remote`, `git push -u`, `git fetch`, `git pull`,
+  refus non fast-forward (`fetch first`), upstream et statut ahead/behind.
 - **15 missions** scénarisées : story d'équipe, objectif, 3 indices progressifs,
   validation sur l'état final, solution de référence et étoiles selon le nombre de
   commandes (`par` = longueur de la solution).
