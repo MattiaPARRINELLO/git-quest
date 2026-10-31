@@ -13,6 +13,8 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- Fond de fenêtre sombre : pas d'écran blanc entre le splash et le rendu React. -->
+        <item name="android:windowBackground">@color/gitquest_background</item>
     </style>
 
 

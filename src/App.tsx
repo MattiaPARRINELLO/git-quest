@@ -10,6 +10,7 @@ import { NovaScreen } from './screens/NovaScreen';
 import { InterludeScreen } from './screens/InterludeScreen';
 import { FinalScreen } from './screens/FinalScreen';
 import { useUiStore } from './store/useUiStore';
+import { syncStatusBar } from './native';
 
 export default function App() {
   const theme = useUiStore((store) => store.theme);
@@ -37,6 +38,7 @@ export default function App() {
     const root = document.documentElement;
     root.classList.toggle('light', theme === 'light');
     root.classList.toggle('dark', theme === 'dark');
+    void syncStatusBar(theme);
   }, [theme]);
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-bg text-text">
+    <div className="safe-frame flex h-dvh min-h-0 flex-col overflow-hidden bg-bg text-text">
       <a
         href="#contenu-principal"
         className="sr-only rounded-lg border border-border bg-panel px-3 py-2 text-sm text-text focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[60]"
