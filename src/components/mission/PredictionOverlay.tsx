@@ -72,7 +72,7 @@ export function PredictionOverlay({ prediction, onAnswer, onSkip }: PredictionOv
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="pointer-events-none absolute inset-0 bg-bg/65" />
+      <div className="pointer-events-none absolute inset-0 bg-black/60" />
 
       <div
         ref={card}
@@ -158,7 +158,7 @@ export function PredictionFeedback({ correct, explanation, onContinue }: Predict
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="pointer-events-none absolute inset-0 bg-bg/60" />
+      <div className="pointer-events-none absolute inset-0 bg-black/60" />
       <div
         ref={dialog}
         tabIndex={-1}

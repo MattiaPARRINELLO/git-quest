@@ -68,14 +68,14 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
   useDialogKeyboard(dialog, { onConfirm: onClose, onCancel: onClose });
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-bg/85 p-4">
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4">
       <motion.div
         ref={dialog}
         tabIndex={-1}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.24, ease: [0.2, 0.7, 0.2, 1] }}
-        className="scrollbar-thin max-h-[86vh] w-full max-w-lg overflow-y-auto bg-panel-2 outline-none"
+        className="scrollbar-thin max-h-[86vh] w-full max-w-lg overflow-y-auto bg-panel outline-none"
         role="dialog"
         aria-modal="true"
         aria-label={`Briefing ${mission.number}`}
