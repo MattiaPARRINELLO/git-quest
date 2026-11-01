@@ -7,7 +7,6 @@ import { promptFor } from '../../lib/prompt';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useKeyboardOpen } from '../../hooks/useKeyboardOpen';
 import { cn } from '../../lib/cn';
-import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { applySuggestion, completeInput } from './autocomplete';
 import { KeyBar } from './KeyBar';
 import type { OutputTone } from '../../engine/types';
@@ -63,7 +62,6 @@ export function Terminal({ onCommand }: TerminalProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
-  const isMobile = useMediaQuery('(max-width: 767px)');
 
   useEffect(() => {
     const element = logRef.current;

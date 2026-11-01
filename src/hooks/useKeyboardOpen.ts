@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react';
+import { onKeyboardVisibility } from '../native/keyboard';
 
 /** En dessous de cette réduction du viewport, on considère qu'aucun clavier n'est ouvert. */
 const KEYBOARD_THRESHOLD = 140;
 
 /**
- * Détecte un clavier virtuel ouvert sur mobile. Le viewport visuel rétrécit
- * alors que la fenêtre garde sa hauteur : les écrans peuvent rendre la place
- * occupée par leurs panneaux secondaires au contenu utile.
+ * Détecte un clavier virtuel ouvert sur mobile. Deux signaux se complètent :
+ * le viewport visuel qui rétrécit dans le navigateur, et l'événement du plugin
+ * Capacitor `Keyboard` dans l'APK (où `adjustResize` réduit la WebView, donc
+ * l'écart entre `innerHeight` et le viewport visuel reste nul).
  */
 export function useKeyboardOpen(): boolean {
-  const [open, setOpen] = useState(false);
+  const [viewportOpen, setViewportOpen] = useState(false);
+  const [nativeOpen, setNativeOpen] = useState(false);
 
   useEffect(() => {
     const viewport = window.visualViewport;
     if (!viewport) return;
 
     const update = () => {
-      setOpen(window.innerHeight - viewport.height > KEYBOARD_THRESHOLD);
+      setViewportOpen(window.innerHeight - viewport.height > KEYBOARD_THRESHOLD);
     };
 
     update();
@@ -28,5 +31,7 @@ export function useKeyboardOpen(): boolean {
     };
   }, []);
 
-  return open;
+  useEffect(() => onKeyboardVisibility(setNativeOpen), []);
+
+  return viewportOpen || nativeOpen;
 }

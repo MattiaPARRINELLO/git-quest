@@ -1,4 +1,5 @@
 import type { CapacitorConfig } from '@capacitor/cli';
+import type { KeyboardResize } from '@capacitor/keyboard';
 
 /**
  * Coquille Android de GitQuest.
@@ -43,7 +44,7 @@ const config: CapacitorConfig = {
     Keyboard: {
       // Le layout se redimensionne au lieu de passer sous le clavier : le
       // terminal garde sa zone de saisie visible.
-      resize: 'native',
+      resize: 'native' as KeyboardResize,
     },
   },
 };
