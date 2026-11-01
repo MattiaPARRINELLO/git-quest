@@ -1,50 +1,89 @@
 @import 'tailwindcss';
 
+/*
+ * GitQuest — un dépôt qu'on lit.
+ *
+ * Trois idées tiennent la palette :
+ *  - un sol neutre presque noir (ou papier froid), une encre franche ;
+ *  - six champs de chapitre, un par voie du graphe, dans le même vocabulaire
+ *    de teintes que `branchColor()` ;
+ *  - un seul accent, le surligneur de HEAD, réservé à l'action.
+ * Aucune bordure décorative : les surfaces se séparent par un pas de ton.
+ */
 :root {
   color-scheme: dark;
-  --bg: #0e100e;
-  --panel: #141714;
-  --panel-2: #1a1e1a;
-  --panel-3: #222722;
-  --border: #272d27;
-  --border-strong: #3b433b;
-  --text: #e9ece6;
-  --muted: #99a299;
-  --accent: #ec6a40;
-  --accent-soft: #ec6a4019;
-  --on-accent: #180e08;
-  --accent-2: #a9c0b2;
-  --success: #63bb8e;
-  --warning: #d9a94f;
-  --danger: #e07a6f;
-  --graph-grid: #1b201b;
-  --shadow: 0 26px 70px -34px rgb(0 0 0 / 0.9);
-  --branch-sat: 54%;
-  --branch-light: 62%;
+  --bg: #0b0d0b;
+  --panel: #121512;
+  --panel-2: #181c18;
+  --panel-3: #202520;
+  --border: #232823;
+  --border-strong: #333a33;
+  --text: #eef1e9;
+  --muted: #a3ada0;
+  --accent: #d6f24b;
+  --accent-ink: #d6f24b;
+  --accent-soft: #d6f24b1f;
+  --on-accent: #10130a;
+  --accent-2: #9fc4b4;
+  --success: #7bd3a0;
+  --warning: #e8c36a;
+  --danger: #ff8a7a;
+  --graph-grid: #1a1f1a;
+  --shadow: 0 30px 80px -40px rgb(0 0 0 / 0.9);
+  --branch-sat: 46%;
+  --branch-light: 64%;
   --font-display: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
+
+  /* Les six voies : teal, violet, rose, ambre, vert, bleu. */
+  --field-1: hsl(178 34% 14%);
+  --field-1-ink: #e4f1ec;
+  --field-2: hsl(265 30% 17%);
+  --field-2-ink: #ebe6f5;
+  --field-3: hsl(340 30% 16%);
+  --field-3-ink: #f6e4e9;
+  --field-4: hsl(60 32% 15%);
+  --field-4-ink: #f2efdc;
+  --field-5: hsl(130 26% 15%);
+  --field-5-ink: #e5f0e2;
+  --field-6: hsl(210 34% 16%);
+  --field-6-ink: #e2ecf7;
 }
 
 html.light {
   color-scheme: light;
-  --bg: #f3f1ea;
-  --panel: #fbfaf5;
-  --panel-2: #eeede4;
-  --panel-3: #e4e2d8;
-  --border: #dcd9cd;
-  --border-strong: #c2bfb1;
-  --text: #1b1d19;
-  --muted: #5f665d;
-  --accent: #c1461f;
-  --accent-soft: #c1461f14;
-  --on-accent: #fffaf6;
-  --accent-2: #356752;
+  --bg: #eff1ec;
+  --panel: #f7f8f3;
+  --panel-2: #e6e9e1;
+  --panel-3: #dbe0d6;
+  --border: #d9ddd3;
+  --border-strong: #bcc3b6;
+  --text: #12150f;
+  --muted: #4e564b;
+  --accent: #c7e03c;
+  --accent-ink: #55690a;
+  --accent-soft: #c7e03c33;
+  --on-accent: #14180b;
+  --accent-2: #2f6a52;
   --success: #2f7d59;
-  --warning: #9a6a12;
+  --warning: #8a6410;
   --danger: #ad3a32;
-  --graph-grid: #e6e3d8;
-  --shadow: 0 20px 50px -34px rgb(40 36 20 / 0.28);
-  --branch-sat: 62%;
-  --branch-light: 40%;
+  --graph-grid: #e2e6dc;
+  --shadow: 0 24px 60px -40px rgb(24 28 20 / 0.35);
+  --branch-sat: 52%;
+  --branch-light: 38%;
+
+  --field-1: hsl(178 42% 82%);
+  --field-1-ink: hsl(178 48% 13%);
+  --field-2: hsl(265 40% 85%);
+  --field-2-ink: hsl(265 45% 16%);
+  --field-3: hsl(340 46% 87%);
+  --field-3-ink: hsl(340 45% 18%);
+  --field-4: hsl(52 48% 82%);
+  --field-4-ink: hsl(52 55% 15%);
+  --field-5: hsl(130 32% 82%);
+  --field-5-ink: hsl(130 45% 14%);
+  --field-6: hsl(210 44% 85%);
+  --field-6-ink: hsl(210 50% 16%);
 }
 
 @theme inline {
@@ -57,6 +96,7 @@ html.light {
   --color-text: var(--text);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
   --color-accent-2: var(--accent-2);
   --color-success: var(--success);
@@ -66,6 +106,7 @@ html.light {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
   --font-display: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
+  --radius-none: 0px;
 }
 
 @layer base {
@@ -84,20 +125,20 @@ html.light {
     background: var(--bg);
     color: var(--text);
     font-family: var(--font-sans);
-    font-size: 14px;
+    font-size: 15px;
     font-feature-settings: 'cv05';
     -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
   }
 
   ::selection {
-    background: var(--accent-soft);
-    color: var(--text);
+    background: var(--accent);
+    color: var(--on-accent);
   }
 
   :focus-visible {
     outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline-offset: 3px;
   }
 
   button {
@@ -119,35 +160,47 @@ html.light {
 }
 
 @layer components {
+  /* Surface : un pas de ton, jamais un trait. */
   .panel {
     background: var(--panel);
-    border: 1px solid var(--border);
-  }
-
-  .hairline {
-    background: var(--border);
   }
 
   .display {
     font-family: var(--font-display);
     font-weight: 400;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.022em;
   }
 
+  /* Titre de page et de chapitre : la même taille, la même ligne de base. */
+  .display-xl {
+    font-size: clamp(2.4rem, 4vw, 3.5rem);
+    line-height: 0.98;
+  }
+
+  /* Métadonnées : sans-serif, chiffres tabulaires. Le mono est réservé au code. */
+  .meta {
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  /* Ancien nom conservé le temps de la migration des écrans. */
   .mono-meta {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.01em;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
     font-variant-numeric: tabular-nums;
     color: var(--muted);
   }
 
   .btn {
-    @apply inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border bg-transparent px-2.5 text-[12.5px] font-medium text-muted transition-colors;
+    @apply inline-flex h-9 items-center justify-center gap-2 px-3 text-[13px] font-medium transition-colors;
+    background: var(--panel-2);
+    color: var(--text);
+    border-radius: 0;
   }
 
   .btn:hover:not(:disabled) {
-    @apply border-border-strong text-text;
+    background: var(--panel-3);
   }
 
   .btn:disabled {
@@ -155,32 +208,63 @@ html.light {
   }
 
   .btn-accent {
-    @apply border-transparent font-medium;
     background: var(--accent);
     color: var(--on-accent);
+    font-weight: 600;
   }
 
   .btn-accent:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--accent) 86%, white);
     color: var(--on-accent);
-    background: color-mix(in oklab, var(--accent) 90%, white);
+  }
+
+  .btn-quiet {
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .btn-quiet:hover:not(:disabled) {
+    background: var(--panel-2);
+    color: var(--text);
   }
 
   .tab {
-    @apply relative flex-1 px-3 py-2 text-center text-[12.5px] font-medium text-muted transition-colors;
+    @apply relative flex-1 px-3 py-2.5 text-center text-[13px] font-medium transition-colors;
+    color: var(--muted);
   }
 
   .tab-active {
     color: var(--text);
   }
 
-  .rule {
-    height: 1px;
-    background: var(--border);
+  .zone {
+    @apply bg-panel-2;
   }
 
-  .zone {
-    @apply rounded-lg border border-border bg-panel-2;
+  /* Action sur un champ de chapitre : l'encre du champ devient le fond. */
+  .ink-btn {
+    background: var(--field-ink, var(--text));
+    color: var(--field, var(--bg));
   }
+
+  .ink-btn:hover {
+    opacity: 0.86;
+  }
+
+  /* Champs de chapitre : la couleur est le sujet, l'encre est choisie pour elle. */
+  .field {
+    position: relative;
+    isolation: isolate;
+    background: var(--field);
+    color: var(--field-ink);
+  }
+
+  .field-1 { --field: var(--field-1); --field-ink: var(--field-1-ink); }
+  .field-2 { --field: var(--field-2); --field-ink: var(--field-2-ink); }
+  .field-3 { --field: var(--field-3); --field-ink: var(--field-3-ink); }
+  .field-4 { --field: var(--field-4); --field-ink: var(--field-4-ink); }
+  .field-5 { --field: var(--field-5); --field-ink: var(--field-5-ink); }
+  .field-6 { --field: var(--field-6); --field-ink: var(--field-6-ink); }
 }
 
 @layer utilities {
@@ -200,7 +284,6 @@ html.light {
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: var(--border-strong);
-    border-radius: 999px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -232,5 +315,11 @@ html.light {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
   }
 }

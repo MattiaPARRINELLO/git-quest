@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { TopBar } from './components/layout/TopBar';
+import { cn } from './lib/cn';
 import { routePaths, useHashRoute } from './router/useHashRoute';
 import { HomeScreen } from './screens/HomeScreen';
 import { LessonScreen } from './screens/LessonScreen';
@@ -28,11 +29,18 @@ export default function App() {
    * démonté. On le pose sur le contenu, sauf si un écran a déjà pris la main
    * (le terminal focalise sa saisie au montage).
    */
+  /**
+   * L'accueil est une page : c'est le document qui défile. Les écrans de travail
+   * gardent une coquille fixe, chacun gérant son propre défilement.
+   */
+  const isPage = route.name === 'home';
+
   useEffect(() => {
     if (document.activeElement === document.body || document.activeElement === null) {
       mainRef.current?.focus();
     }
-  }, [routeKey]);
+    if (isPage) window.scrollTo(0, 0);
+  }, [routeKey, isPage]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -85,7 +93,12 @@ export default function App() {
   }
 
   return (
-    <div className="safe-frame flex h-dvh min-h-0 flex-col overflow-hidden bg-bg text-text">
+    <div
+      className={cn(
+        'safe-frame flex flex-col bg-bg text-text',
+        isPage ? 'min-h-dvh' : 'h-dvh min-h-0 overflow-hidden',
+      )}
+    >
       <a
         href="#contenu-principal"
         className="sr-only rounded-lg border border-border bg-panel px-3 py-2 text-sm text-text focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[60]"
@@ -97,7 +110,7 @@ export default function App() {
         id="contenu-principal"
         ref={mainRef}
         tabIndex={-1}
-        className="min-h-0 flex-1 outline-none"
+        className={cn('outline-none', isPage ? 'flex-1' : 'min-h-0 flex-1')}
       >
         {screen}
       </main>

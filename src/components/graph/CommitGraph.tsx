@@ -447,7 +447,7 @@ export function CommitGraph({
             ))}
 
             <AnimatePresence initial={false}>
-              {layout.branchLabels.map((label) => (
+              {!preview && layout.branchLabels.map((label) => (
                 <BranchLabelView
                   key={label.name}
                   label={label}
@@ -627,8 +627,8 @@ function CommitNodeView({
         x={node.x}
         y={node.y + 22}
         textAnchor="middle"
-        className="fill-[var(--muted)] font-mono"
-        fontSize={9}
+        className="fill-[var(--muted)] tabular-nums"
+        fontSize={11}
         stroke="var(--panel)"
         strokeWidth={3}
         paintOrder="stroke"
@@ -641,7 +641,7 @@ function CommitNodeView({
           y={node.y - 14}
           textAnchor="middle"
           className="fill-[var(--muted)]"
-          fontSize={9}
+          fontSize={11}
         >
           racine
         </text>
@@ -703,18 +703,18 @@ function BranchLabelView({
         x={0}
         y={0}
         width={width}
-        height={18}
-        rx={9}
+        height={20}
+        rx={0}
         fill={label.current ? label.color : 'var(--panel)'}
         stroke={label.color}
         strokeOpacity={label.current ? 1 : 0.85}
       />
       <text
         x={9}
-        y={12.5}
+        y={14}
         fill={label.current ? 'var(--bg)' : label.color}
-        fontSize={10}
-        className="font-mono font-semibold"
+        fontSize={12}
+        fontWeight={600}
       >
         {text}
       </text>
