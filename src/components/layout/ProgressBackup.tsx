@@ -7,6 +7,9 @@ import { Icon } from '../ui/Icon';
 
 type Mode = 'export' | 'import';
 
+// taste-skill-ignore — sauvegarde JSON : le contenu est du code exporté.
+const JSON_TEXT_STYLE = { fontFamily: 'var(--font-mono)' } as const;
+
 interface Feedback {
   readonly tone: 'success' | 'error';
   readonly message: string;
@@ -107,9 +110,9 @@ export function ProgressBackup() {
             role="dialog"
             aria-modal="true"
             aria-label={mode === 'export' ? 'Sauvegarder ma progression' : 'Restaurer ma progression'}
-            className="w-full max-w-lg rounded-xl border border-border bg-panel shadow-[var(--shadow)] outline-none"
+            className="w-full max-w-lg bg-panel outline-none"
           >
-            <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+            <header className="flex items-center justify-between gap-3  px-5 py-3">
               <span className="flex items-center gap-2 text-[12.5px] text-text">
                 <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
                 {mode === 'export' ? 'Sauvegarder ma progression' : 'Restaurer ma progression'}
@@ -132,7 +135,8 @@ export function ProgressBackup() {
                 readOnly={mode === 'export'}
                 spellCheck={false}
                 aria-label={mode === 'export' ? 'Contenu de la sauvegarde' : 'Sauvegarde à restaurer'}
-                className="scrollbar-thin h-44 w-full resize-none rounded-lg border border-border bg-bg px-3 py-2 font-mono text-[11px] leading-5 text-muted outline-none focus:border-border-strong"
+                style={JSON_TEXT_STYLE}
+                className="scrollbar-thin h-44 w-full resize-none bg-bg px-3 py-2 text-[13px] leading-5 text-muted outline-none"
                 placeholder={mode === 'import' ? '{"format":"gitquest-progress", …}' : undefined}
                 data-autofocus
               />
@@ -151,7 +155,7 @@ export function ProgressBackup() {
               )}
             </div>
 
-            <footer className="flex items-center justify-end gap-2 border-t border-border px-5 py-3">
+            <footer className="flex items-center justify-end gap-2  px-5 py-3">
               {mode === 'export' ? (
                 <>
                   {!isNative() && (

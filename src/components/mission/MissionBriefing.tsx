@@ -43,13 +43,13 @@ function DialogueLine({ line }: { readonly line: BriefingLine }) {
     <div className="flex items-start gap-2.5">
       <span
         aria-hidden="true"
-        className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-medium"
+        className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-medium"
         style={{ border: `1px solid ${color}`, color, background: `${color}14` }}
       >
         {initials(teammate.name)}
       </span>
       <div className="min-w-0">
-        <p className="text-[11.5px] text-text">
+        <p className="text-[13px] text-text">
           {teammate.name}
           <span className="ml-1.5 text-muted">· {teammate.role}</span>
         </p>
@@ -75,19 +75,19 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.24, ease: [0.2, 0.7, 0.2, 1] }}
-        className="scrollbar-thin max-h-[86vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-panel shadow-[var(--shadow)] outline-none"
+        className="scrollbar-thin max-h-[86vh] w-full max-w-lg overflow-y-auto bg-panel-2 outline-none"
         role="dialog"
         aria-modal="true"
         aria-label={`Briefing ${mission.number}`}
       >
-        <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
-          <span className="flex items-center gap-2 font-mono text-[11px] text-muted">
+        <header className="flex items-center justify-between gap-3  px-5 py-3">
+          <span className="flex items-center gap-2 text-[13px] text-muted">
             <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
             Mission {mission.number}
           </span>
           <button
             type="button"
-            className="btn h-7 px-2 text-[11.5px]"
+            className="btn h-7 px-2 text-[13px]"
             onClick={onClose}
             title="Fermer l’intro"
           >
@@ -105,16 +105,16 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
           </div>
 
           {prepared.length > 0 && (
-            <div className="mt-5 border-t border-border pt-3">
+            <div className="mt-5  pt-3">
               <p className="mono-meta">Déjà dans ton working dir</p>
               <ul className="mt-2 space-y-1.5">
                 {prepared.map((file) => (
-                  <li key={file.path} className="text-[11.5px] leading-relaxed">
+                  <li key={file.path} className="text-[13px] leading-relaxed">
                     <div className="flex items-baseline gap-2">
-                      <span className="font-mono text-[11.5px] text-text">{file.path}</span>
-                      <span className="font-mono text-[9.5px] text-muted">{file.status}</span>
+                      <span className="text-[13px] text-text">{file.path}</span>
+                      <span className="text-[13px] text-muted">{file.status}</span>
                     </div>
-                    <span className="mt-0.5 block truncate font-mono text-[10.5px] text-muted/75">
+                    <span className="mt-0.5 block truncate text-[13px] text-muted/75">
                       {file.preview}
                     </span>
                   </li>
@@ -124,7 +124,7 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
           )}
         </div>
 
-        <div className="flex flex-col-reverse gap-2 border-t border-border px-5 py-3 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-2  px-5 py-3 sm:flex-row sm:justify-end">
           <button type="button" className="btn h-9 justify-center px-3 text-[13px]" onClick={onClose}>
             Passer l’intro
           </button>
@@ -139,7 +139,7 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
           </button>
         </div>
 
-        <p className="mt-3 text-center text-[10px] text-muted/80" aria-hidden="true">
+        <p className="mt-3 text-center text-[12px] text-muted/80" aria-hidden="true">
           Entrée pour entrer · Échap pour passer l’intro
         </p>
       </motion.div>

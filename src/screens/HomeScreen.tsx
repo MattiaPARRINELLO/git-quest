@@ -53,7 +53,7 @@ export function HomeScreen() {
     <div>
       <article>
         {/* OUVERTURE — ce que c'est, où tu en es, l'objet qui le prouve. */}
-        <section className="mx-auto grid max-w-[1180px] items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:min-h-[78svh] lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16">
+        <section className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:min-h-[78svh] lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16">
           <Reveal y={22}>
             <h1 className="display display-xl max-w-[17ch] text-balance">
               Apprends Git en voyant le graphe.
@@ -109,7 +109,7 @@ export function HomeScreen() {
                 <span className="block text-[17px] font-medium text-text">
                   Prologue · Lire une commande Git
                 </span>
-                <span className="mt-1.5 block text-[15px] leading-relaxed text-muted">
+                <span className="mt-1.5 block text-[16px] leading-relaxed text-muted">
                   Options, guillemets, placeholders : décoder n’importe quelle commande avant de
                   commencer. {estimatedLessonMinutes(commandLineLesson)} min.
                 </span>
@@ -132,7 +132,7 @@ export function HomeScreen() {
             <h2 id="parcours" className="display text-[30px] leading-none">
               Le parcours
             </h2>
-            <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-muted">
+            <p className="mt-3 max-w-[52ch] text-[16px] leading-relaxed text-muted">
               Six voies, du premier commit aux conflits de pull. Une mission ne s’ouvre qu’une
               fois la précédente terminée.
             </p>
@@ -159,7 +159,7 @@ export function HomeScreen() {
           <h2 id="dedans" className="display text-[clamp(2rem,3.4vw,2.8rem)] leading-none">
             Ce que tu regardes
           </h2>
-          <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-muted">
+          <p className="mt-3 max-w-[52ch] text-[16px] leading-relaxed text-muted">
             Quatre panneaux, un seul dépôt. Le terminal écrit, le graphe répond, le pipeline
             montre le fichier qui traverse l’index, la prédiction te fait parier avant de voir.
           </p>
@@ -204,14 +204,14 @@ export function HomeScreen() {
               <ProgressPanel summary={summary} />
             </Reveal>
 
-            <Reveal className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+            <Reveal className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
               {lastCompleted !== undefined && lastBriefing?.outcome !== undefined && (
                 <section className="bg-panel-2 p-6" aria-label="Dernier épisode">
                   <p className="text-[13px] text-muted">
                     Dernier épisode · {lastCompleted.number}
                   </p>
                   <p className="mt-1.5 text-[17px] font-medium text-text">{lastCompleted.title}</p>
-                  <p className="mt-2 text-[15px] leading-relaxed text-muted">
+                  <p className="mt-2 text-[16px] leading-relaxed text-muted">
                     {lastBriefing.outcome}
                   </p>
                   {lastBriefing.teaser !== undefined && (
@@ -226,7 +226,7 @@ export function HomeScreen() {
               <section className="bg-panel-2 p-6" aria-label="Ton arbre Nova">
                 <p className="text-[13px] text-muted">Le dépôt que tu construis</p>
                 <p className="mt-1.5 text-[17px] font-medium text-text">L’arbre de Nova</p>
-                <p className="mt-2 text-[15px] leading-relaxed text-muted">
+                <p className="mt-2 text-[16px] leading-relaxed text-muted">
                   Chaque mission laisse un commit. À la fin, tu ouvres l’arbre complet et tu le
                   lis comme une histoire.
                 </p>

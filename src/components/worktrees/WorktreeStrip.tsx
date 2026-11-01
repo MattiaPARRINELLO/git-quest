@@ -14,14 +14,14 @@ export function WorktreeStrip() {
   return (
     <section
       aria-label="Worktrees"
-      className="shrink-0 border-b border-border bg-panel px-3 py-2.5"
+      className="shrink-0  bg-panel px-3 py-2.5"
     >
       <div className="mb-2 flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-[12px] font-medium text-text">
           <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
           Worktrees
         </h2>
-        <span className="font-mono text-[10px] text-muted/70">
+        <span className="text-[12px] text-muted">
           cliquer = <span className="text-text">cd &lt;chemin&gt;</span>
         </span>
       </div>
@@ -46,17 +46,17 @@ export function WorktreeStrip() {
                 aria-pressed={active}
                 aria-label={`Aller au worktree ${worktree.path}`}
                 className={cn(
-                  'group flex min-w-[190px] max-w-[260px] flex-col gap-1 rounded-lg border px-3 py-2 text-left transition-colors',
+                  'group flex min-w-[190px] max-w-[260px] flex-col gap-1  border px-3 py-2 text-left transition-colors',
                   active
                     ? 'border-accent/70 bg-accent-soft'
                     : 'border-border bg-panel-2 hover:border-border-strong',
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="truncate font-mono text-[11px] text-text">{worktree.path}</span>
+                  <span className="truncate text-[13px] text-text">{worktree.path}</span>
                   <span
                     className={cn(
-                      'rounded px-1.5 py-0.5 font-mono text-[10px]',
+                      'rounded px-1.5 py-0.5 text-[12px]',
                       active ? 'bg-accent/20 text-accent' : 'bg-panel-3 text-muted',
                     )}
                   >
@@ -64,12 +64,12 @@ export function WorktreeStrip() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="truncate font-mono text-[10.5px] text-muted">
+                  <span className="truncate text-[13px] text-muted">
                     {headLabel(worktree.head)}
                   </span>
                   <span
                     className={cn(
-                      'shrink-0 font-mono text-[10px]',
+                      'shrink-0 text-[12px]',
                       modified > 0 ? 'text-warning' : 'text-muted/70',
                     )}
                   >

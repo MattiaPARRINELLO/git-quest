@@ -29,7 +29,7 @@
   --warning: #e8c36a;
   --danger: #ff8a7a;
   --graph-grid: #1a1f1a;
-  --shadow: 0 30px 80px -40px rgb(0 0 0 / 0.9);
+  --shadow: 0 18px 40px -24px rgb(0 0 0 / 0.45);
   --branch-sat: 46%;
   --branch-light: 64%;
   --font-display: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
@@ -68,7 +68,7 @@ html.light {
   --warning: #8a6410;
   --danger: #ad3a32;
   --graph-grid: #e2e6dc;
-  --shadow: 0 24px 60px -40px rgb(24 28 20 / 0.35);
+  --shadow: 0 18px 40px -24px rgb(24 28 20 / 0.22);
   --branch-sat: 52%;
   --branch-light: 38%;
 
@@ -104,7 +104,7 @@ html.light {
   --color-danger: var(--danger);
   --color-on-accent: var(--on-accent);
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', monospace; /* taste-skill-ignore : police du code */
   --font-display: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
   --radius-none: 0px;
 }

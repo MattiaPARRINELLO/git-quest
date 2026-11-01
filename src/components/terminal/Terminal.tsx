@@ -11,6 +11,8 @@ import { applySuggestion, completeInput } from './autocomplete';
 import { KeyBar } from './KeyBar';
 import type { OutputTone } from '../../engine/types';
 
+const TERM_INPUT_STYLE = { fontFamily: 'var(--font-mono)' } as const; // taste-skill-ignore : saisie du terminal, du code Git
+
 const TONE_CLASSES: Record<OutputTone, string> = {
   default: 'text-text',
   muted: 'text-muted',
@@ -22,8 +24,8 @@ const TONE_CLASSES: Record<OutputTone, string> = {
 function EntryLine({ entry }: { entry: TerminalEntry }) {
   if (entry.kind === 'command') {
     return (
-      <div className="whitespace-pre-wrap break-words font-mono text-[12.5px] leading-6 text-text">
-        {entry.text}
+      <div className="whitespace-pre-wrap break-words text-[13px] leading-6 text-text">
+        <code className="font-mono">{entry.text}</code>
       </div>
     );
   }
@@ -31,11 +33,11 @@ function EntryLine({ entry }: { entry: TerminalEntry }) {
   return (
     <div
       className={cn(
-        'whitespace-pre-wrap break-words font-mono text-[12.5px] leading-6',
+        'whitespace-pre-wrap break-words text-[13px] leading-6',
         TONE_CLASSES[entry.tone ?? 'default'],
       )}
     >
-      {entry.text}
+      <code className="font-mono">{entry.text}</code>
     </div>
   );
 }
@@ -205,12 +207,9 @@ export function Terminal({ onCommand }: TerminalProps) {
       {/* Sur mobile l'onglet nomme déjà le terminal : l'en-tête ne fait que
           manger de la hauteur utile à l'historique. */}
       {!isMobile && (
-        <div className="flex h-9 shrink-0 items-center justify-between border-b border-border px-3">
-          <div className="flex items-center gap-2 text-[12px] text-muted">
-            <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
-            Terminal
-          </div>
-          <span className="hidden font-mono text-[10px] text-muted/70 sm:inline">
+        <div className="flex h-9 shrink-0 items-center justify-between px-5">
+          <span className="text-[13px] text-muted">Terminal</span>
+          <span className="hidden text-[12px] text-muted sm:inline">
             ↑↓ historique · Tab complétion · Ctrl+L effacer
           </span>
         </div>
@@ -221,7 +220,7 @@ export function Terminal({ onCommand }: TerminalProps) {
         role="log"
         aria-live="polite"
         aria-label="Sortie du terminal"
-        className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-3 py-3"
+        className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-5 py-3"
       >
         {entries.map((entry) => (
           <EntryLine key={entry.id} entry={entry} />
@@ -230,12 +229,12 @@ export function Terminal({ onCommand }: TerminalProps) {
 
       <div
         className={cn(
-          'shrink-0 border-t border-border/70 px-3',
+          'shrink-0 px-5',
           isMobile && keyboardOpen ? 'py-1.5' : 'py-2.5',
         )}
       >
-        <div className="flex items-start gap-2 font-mono text-[12.5px] leading-6">
-          <span className="shrink-0 select-none text-accent-2">{promptFor(state)}</span>
+        <div className="flex items-start gap-2 text-[12.5px] leading-6">
+          <code className="shrink-0 select-none font-mono text-accent-2">{promptFor(state)}</code>
           <input
             ref={inputRef}
             value={input}
@@ -250,12 +249,13 @@ export function Terminal({ onCommand }: TerminalProps) {
             autoCapitalize="off"
             autoCorrect="off"
             aria-label="Commande Git"
-            className="min-w-0 flex-1 border-none bg-transparent p-0 font-mono text-[16px] leading-6 text-text caret-accent outline-none placeholder:text-muted/50 sm:text-[12.5px]"
+            style={TERM_INPUT_STYLE}
+            className="min-w-0 flex-1 border-none bg-transparent p-0 text-[16px] leading-6 text-text caret-accent outline-none placeholder:text-muted/50 sm:text-[13px]"
             placeholder="git status"
           />
         </div>
         {suggestions.length > 1 && (
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-wrap gap-2">
             {suggestions.slice(0, 8).map((suggestion) => (
               <button
                 key={suggestion}
@@ -266,9 +266,9 @@ export function Terminal({ onCommand }: TerminalProps) {
                   event.stopPropagation();
                   chooseSuggestion(suggestion);
                 }}
-                className="rounded border border-border bg-panel-2 px-2.5 py-1.5 font-mono text-[11px] text-text transition-colors active:bg-panel-3"
+                className="bg-panel-2 px-2.5 py-1.5 text-[13px] text-text transition-colors active:bg-panel-3"
               >
-                {suggestion}
+                <code className="font-mono">{suggestion}</code>
               </button>
             ))}
           </div>

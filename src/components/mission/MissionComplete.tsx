@@ -46,24 +46,28 @@ export function MissionCompleteBar({
 }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center p-3">
-      <div className="pointer-events-auto flex w-full max-w-lg flex-wrap items-center justify-between gap-2 rounded-2xl border border-success/40 bg-panel px-3 py-2 shadow-xl">
+      <div className="pointer-events-auto flex w-full max-w-lg flex-wrap items-center justify-between gap-2 rounded-2xl border border-success/40 bg-panel px-3 py-2 ">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-success">
+          <span className="text-[13px] text-success">
             Mission accomplie
           </span>
-          <span className="text-sm text-warning" aria-label={`${stars} étoile(s) sur 3`}>
-            {'★'.repeat(stars)}
-            <span className="text-muted/25">{'★'.repeat(3 - stars)}</span>
+          <span className="flex items-center gap-1" aria-label={`${stars} étoile(s) sur 3`}>
+            {[0, 1, 2].map((index) => (
+              <span
+                key={index}
+                className={cn('h-2.5 w-2.5', index < stars ? 'bg-warning' : 'bg-border-strong/50')}
+              />
+            ))}
           </span>
-          <span className="truncate text-[11px] text-muted">
+          <span className="truncate text-[13px] text-muted">
             {mission.number} — {mission.title}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" className="btn px-2 py-1 text-[11px]" onClick={onResume}>
+          <button type="button" className="btn px-2 py-1 text-[13px]" onClick={onResume}>
             Revoir
           </button>
-          <a href={afterHref(after)} className="btn btn-accent px-2 py-1 text-[11px]">
+          <a href={afterHref(after)} className="btn btn-accent px-2 py-1 text-[13px]">
             Continuer
             <Icon name="arrow-right" size={13} />
           </a>
@@ -94,26 +98,26 @@ export function MissionComplete({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: [0.2, 0.7, 0.2, 1] }}
-        className="scrollbar-thin max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-xl border border-border bg-panel shadow-[var(--shadow)] outline-none"
+        className="scrollbar-thin max-h-[90vh] w-full max-w-xl overflow-y-auto bg-panel  outline-none"
         role="dialog"
         aria-modal="true"
         aria-label={`Mission ${mission.number} réussie`}
       >
-        <header className="flex items-center justify-between gap-2 border-b border-border px-5 py-3">
+        <header className="flex items-center justify-between gap-2  px-5 py-3">
           <span className="flex items-center gap-2 text-[12px] text-success">
-            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-success" />
+            <span aria-hidden="true" className="h-1.5 w-1.5  bg-success" />
             Mission accomplie
           </span>
-          <button type="button" className="btn h-7 px-2 text-[11.5px]" onClick={onInspect}>
+          <button type="button" className="btn btn-quiet h-9 px-3 text-[13px]" onClick={onInspect}>
             Inspecter
           </button>
         </header>
 
         <div className="px-5 py-4">
-          <span className="font-mono text-[11px] text-muted">{mission.number}</span>
-          <h2 className="display mt-1 text-[28px] leading-[1.15] text-text">{mission.title}</h2>
+          <span className="text-[13px] text-muted">Mission {mission.number}</span>
+          <h2 className="display mt-1 text-[32px] leading-[1.12] text-text">{mission.title}</h2>
 
-          <div className="mt-3 flex items-center gap-4 border-y border-border py-2.5">
+          <div className="mt-3 flex items-center gap-4  py-2.5">
             <div className="flex items-center gap-1" aria-label={`${stars} étoile(s) sur 3`}>
               {[1, 2, 3].map((value) => (
                 <motion.span
@@ -121,13 +125,14 @@ export function MissionComplete({
                   initial={{ opacity: 0, scale: 0.7 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.06 * value, duration: 0.22 }}
-                  className={cn('text-[20px] leading-none', value <= stars ? 'text-warning' : 'text-border-strong')}
-                >
-                  ★
-                </motion.span>
+                  className={cn(
+                    'h-3.5 w-3.5',
+                    value <= stars ? 'bg-warning' : 'bg-border-strong/50',
+                  )}
+                />
               ))}
             </div>
-            <p className="font-mono text-[11px] tabular-nums text-muted">
+            <p className="text-[13px] tabular-nums text-muted">
               {commandsUsed} commande{commandsUsed > 1 ? 's' : ''} · par {mission.par}
             </p>
           </div>
@@ -150,35 +155,35 @@ export function MissionComplete({
           )}
 
           {teaser !== undefined && (
-            <p className="mt-2 text-[11.5px] leading-relaxed text-muted">
+            <p className="mt-2 text-[13.5px] leading-relaxed text-muted">
               <span className="text-text">À suivre · </span>
               {teaser}
             </p>
           )}
 
           <div className="mt-4">
-            <h3 className="flex items-center gap-1.5 text-[11.5px] text-muted">
+            <h3 className="flex items-center gap-1.5 text-[13.5px] text-muted">
               <Icon name="book" size={12} />
               Solution de référence
             </h3>
-            <ol className="mt-1.5 divide-y divide-border border-y border-border">
+            <ol className="mt-1.5  ">
               {solution.map((command, index) => (
                 <li
                   key={`${command}-${index}`}
-                  className="flex items-baseline gap-3 py-1.5 font-mono text-[11.5px]"
+                  className="flex items-baseline gap-3 py-1.5 text-[13.5px]"
                 >
-                  <span className="w-4 shrink-0 text-right text-[10px] tabular-nums text-muted/60">
+                  <span className="w-4 shrink-0 text-right text-[12px] tabular-nums text-muted">
                     {index + 1}
                   </span>
-                  <span className="break-all text-text">{command}</span>
+                  <code className="break-all text-text">{command}</code>
                 </li>
               ))}
             </ol>
           </div>
         </div>
 
-        <div className="flex flex-col-reverse gap-2 border-t border-border px-5 py-3 sm:flex-row sm:justify-end">
-          <a href={routePaths.home} className="btn h-9 justify-center px-3 text-[13px]">
+        <div className="flex flex-col-reverse gap-2  px-5 py-3 sm:flex-row sm:justify-end">
+          <a href={routePaths.home} className="btn btn-quiet h-11 justify-center px-4 text-[14px]">
             Carte des chapitres
           </a>
           <a
@@ -191,7 +196,7 @@ export function MissionComplete({
           </a>
         </div>
 
-        <p className="mt-3 text-center text-[10px] text-muted/80" aria-hidden="true">
+        <p className="mt-3 text-center text-[12px] text-muted/80" aria-hidden="true">
           Entrée pour continuer · Échap pour rester dans le dépôt
         </p>
       </motion.div>

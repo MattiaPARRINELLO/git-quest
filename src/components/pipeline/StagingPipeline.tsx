@@ -71,8 +71,8 @@ function Zone({
   readonly onPin: (chip: Chip) => void;
 }) {
   return (
-    <section className="flex min-h-[92px] min-w-0 flex-1 flex-col rounded-lg border border-border bg-panel-2/40 sm:min-h-0">
-      <header className="flex items-baseline justify-between gap-2 border-b border-border px-3 py-2">
+    <section className="flex min-h-[92px] min-w-0 flex-1 flex-col bg-panel-2/40 sm:min-h-0">
+      <header className="flex items-baseline justify-between gap-2  px-3 py-2">
         <div className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full" style={{ background: accent }} />
           <h3 className="text-[12px] font-medium text-text">{title}</h3>
@@ -81,7 +81,7 @@ function Zone({
       </header>
       <div className="scrollbar-thin flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2">
         {chips.length === 0 && (
-          <span className="px-1 py-1 text-[11.5px] text-muted/60">{emptyLabel}</span>
+          <span className="px-1 py-1 text-[13px] text-muted/60">{emptyLabel}</span>
         )}
         <AnimatePresence initial={false}>
           {chips.map((chip) => (
@@ -95,7 +95,7 @@ function Zone({
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.22 }}
               className={cn(
-                'inline-flex max-w-full items-center gap-1 rounded-md border px-1.5 py-0.5 text-left font-mono text-[10.5px] transition-colors hover:border-border-strong',
+                'inline-flex max-w-full items-center gap-1  border px-1.5 py-0.5 text-left text-[13px] transition-colors hover:border-border-strong',
                 CHIP_STYLES[chip.status],
               )}
               aria-label={`${ZONE_LABEL[chip.zone]} — ${chip.path}`}
@@ -110,7 +110,7 @@ function Zone({
               </span>
               <span className="truncate">{chip.path}</span>
               {chip.diffLabel && (
-                <span className="shrink-0 rounded bg-warning/15 px-1 text-[9px] text-warning">
+                <span className="shrink-0 rounded bg-warning/15 px-1 text-[12px] text-warning">
                   {chip.diffLabel}
                 </span>
               )}
@@ -130,7 +130,7 @@ export function StagingPipeline() {
 
   if (!worktree) {
     return (
-      <div className="border-t border-border bg-panel px-3 py-4 text-xs text-muted">
+      <div className=" bg-panel px-3 py-4 text-xs text-muted">
         Aucun worktree actif.
       </div>
     );
@@ -194,7 +194,7 @@ export function StagingPipeline() {
 
   return (
     <section
-      className="relative flex shrink-0 flex-col gap-2 border-t border-border bg-panel px-2 py-2.5 sm:h-[210px] sm:px-3"
+      className="relative flex shrink-0 flex-col gap-2 bg-panel px-5 py-3 sm:h-[210px]"
       onKeyDown={(event) => {
         if (event.key !== 'Escape' || preview === null) return;
         event.preventDefault();
@@ -202,13 +202,13 @@ export function StagingPipeline() {
         setPreview(null);
       }}
     >
-      <div className="flex items-center justify-between gap-2 px-0.5">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
-          <h2 className="text-[12px] font-medium text-text">Pipeline</h2>
-          <span className="font-mono text-[10.5px] text-muted">{worktree.path}</span>
+          <h2 className="text-[13.5px] font-medium text-text">Pipeline</h2>
+          <span className="text-[13px] text-muted">{worktree.path}</span>
         </div>
-        <span className="hidden font-mono text-[10px] text-muted/70 sm:inline">
+        <span className="hidden text-[12.5px] text-muted sm:inline">
           survol ou clic pour voir un fichier
         </span>
       </div>
@@ -225,7 +225,7 @@ export function StagingPipeline() {
           onPin={pin}
         />
         <div className="hidden items-center text-muted/40 sm:flex" aria-hidden="true">
-          <span className="font-mono text-[12px]">→</span>
+          <span className="text-[14px]">→</span>
         </div>
         <Zone
           title="Staging"
@@ -238,7 +238,7 @@ export function StagingPipeline() {
           onPin={pin}
         />
         <div className="hidden items-center text-muted/40 sm:flex" aria-hidden="true">
-          <span className="font-mono text-[12px]">→</span>
+          <span className="text-[14px]">→</span>
         </div>
         <Zone
           title="Dernier commit"
@@ -253,13 +253,13 @@ export function StagingPipeline() {
       </div>
 
       {preview && (
-        <div className="absolute bottom-2 right-2 z-30 w-[min(22rem,calc(100%-1rem))] overflow-hidden rounded-lg border border-border-strong bg-panel shadow-[var(--shadow)] sm:right-3">
-          <header className="flex items-center justify-between gap-2 border-b border-border px-2.5 py-1.5">
+        <div className="absolute bottom-2 right-2 z-30 w-[min(22rem,calc(100%-1rem))] overflow-hidden -strong bg-panel sm:right-3">
+          <header className="flex items-center justify-between gap-2 px-1 py-1.5">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="shrink-0 rounded bg-panel-2 px-1 py-0.5 font-mono text-[9px] text-muted">
+              <span className="shrink-0 rounded bg-panel-2 px-1 py-0.5 text-[13px] text-muted">
                 {ZONE_LABEL[preview.zone]}
               </span>
-              <span className="truncate font-mono text-[11px] text-text">{preview.path}</span>
+              <span className="truncate text-[13px] text-text">{preview.path}</span>
             </div>
             <button
               type="button"
@@ -275,7 +275,7 @@ export function StagingPipeline() {
           </header>
           <pre
             aria-live="polite"
-            className="scrollbar-thin max-h-24 overflow-auto whitespace-pre-wrap break-words px-2.5 py-2 font-mono text-[10px] leading-relaxed text-muted"
+            className="scrollbar-thin max-h-24 overflow-auto whitespace-pre-wrap break-words px-3 py-2 text-[12.5px] leading-relaxed text-muted"
           >
             {previewContent === undefined ? '— absent dans cette zone' : previewContent || '(fichier vide)'}
           </pre>

@@ -44,30 +44,30 @@ export function MiniDemo({ slide }: { readonly slide: DemoSlide }) {
   const lastCommand = step === 0 ? undefined : slide.steps[step - 1]?.command;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-panel">
+    <div className="overflow-hidden bg-panel">
       <div className="h-56 sm:h-64">
         <CommitGraph state={current.state} batch={{ id: step, events: current.events }} />
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-border px-3.5 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2  px-3.5 py-2.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           {step === 0 ? (
             <p className="text-[12px] text-muted">État initial du dépôt. Lance la démo pour voir chaque étape.</p>
           ) : (
-            <p className="font-mono text-[12px] text-text">
-              <span className="text-muted/70">$ </span>
-              {lastCommand}
+            <p className="text-[13px] text-text">
+              <span className="text-muted">$ </span>
+              <code className="font-mono">{lastCommand}</code>
             </p>
           )}
           {current.explanation && (
             <p className="mt-1 text-[12px] leading-relaxed text-muted">{current.explanation}</p>
           )}
           {current.events.length > 0 && (
-            <p className="mt-1 text-[11px] text-muted/70">{explainEvent(current.events[0]!)}</p>
+            <p className="mt-1 text-[13px] text-muted/70">{explainEvent(current.events[0]!)}</p>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2.5">
-          <span className="font-mono text-[10.5px] tabular-nums text-muted">
+          <span className="text-[13px] tabular-nums text-muted">
             {step} / {slide.steps.length}
           </span>
           {done ? (

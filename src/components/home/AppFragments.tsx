@@ -86,7 +86,7 @@ export function TerminalFragment() {
           {logLines.map((line) => line.text).join('\n')}
         </code>
       </pre>
-      <p className="mt-3 text-[13.5px] leading-relaxed text-muted">
+      <p className="mt-3 text-[14px] leading-relaxed text-muted">
         Une ligne par commit, du plus récent au plus ancien. Chaque empreinte pointe vers un
         snapshot complet.
       </p>
@@ -137,7 +137,7 @@ export function PredictionFragment() {
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-[13.5px] leading-relaxed text-muted">
+      <p className="mt-3 text-[14px] leading-relaxed text-muted">
         L’exécution attend ta réponse. Tu peux passer : rien ne bloque.
       </p>
     </Frame>
@@ -167,7 +167,7 @@ export function PipelineFragment() {
           </div>
         ))}
       </div>
-      <p className="mt-3 text-[13.5px] leading-relaxed text-muted">
+      <p className="mt-3 text-[14px] leading-relaxed text-muted">
         Un fichier ne rejoint le graphe qu’en traversant les deux premières zones.
       </p>
     </Frame>

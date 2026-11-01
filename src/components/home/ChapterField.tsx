@@ -51,7 +51,7 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
         aria-labelledby={headingId}
         className={cn('field', `field-${lane}`)}
       >
-        <div className="mx-auto grid max-w-[1180px] gap-10 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-20">
+        <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-20">
           <div>
             <Reveal>
               <h2 id={headingId} className="display display-xl max-w-[18ch] text-balance">
@@ -60,7 +60,7 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
             </Reveal>
             <Reveal delay={0.06}>
               <p className="mt-5 max-w-[40ch] text-[17px] leading-[1.45]">{chapter.tagline}</p>
-              <p className="mt-3 max-w-[52ch] text-[15px] leading-[1.65] opacity-85">
+              <p className="mt-3 max-w-[52ch] text-[16px] leading-[1.65] opacity-85">
                 {chapter.description}
               </p>
             </Reveal>
@@ -127,7 +127,7 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
                               {mission.title}
                             </span>
                             {isHead && (
-                              <span className="bg-current px-1.5 py-px text-[10.5px] font-semibold tracking-[0.06em] text-bg">
+                              <span className="bg-current px-1.5 py-px text-[13px] font-semibold tracking-[0.06em] text-bg">
                                 HEAD
                               </span>
                             )}

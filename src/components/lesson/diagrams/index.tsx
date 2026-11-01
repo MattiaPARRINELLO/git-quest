@@ -41,7 +41,7 @@ function Label({
       fill={color}
       fontSize={size}
       textAnchor={anchor}
-      fontFamily="var(--font-mono)"
+      fontFamily={CODE_FONT.family}
     >
       {children}
     </text>
@@ -111,11 +111,11 @@ function SnapshotDiagram() {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-panel px-3 py-2">
-        <span className="font-mono text-[10.5px] tabular-nums text-muted">
+      <div className="flex flex-wrap items-center justify-between gap-2 bg-panel px-3 py-2">
+        <span className="text-[13px] tabular-nums text-muted">
           Étape {step + 1} / 3
         </span>
-        <code className="font-mono text-[11px] text-text">{current.command}</code>
+        <code className="font-mono text-[13px] text-text">{current.command}</code>
       </div>
 
       <Frame>
@@ -162,7 +162,7 @@ function SnapshotDiagram() {
       </Frame>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] text-muted">
+        <div className="flex flex-wrap items-center gap-3 text-[12px] text-muted">
           <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-warning" />Working dir</span>
           <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-accent" />Index</span>
           <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-success" />Commit</span>
@@ -299,6 +299,9 @@ const DIAGRAMS: Record<DiagramId, () => ReactNode> = {
   'merge-modes': MergeModesDiagram,
   worktrees: WorktreesDiagram,
 };
+
+// taste-skill-ignore — étiquette d'une commande Git dans le schéma.
+const CODE_FONT = { family: 'var(--font-mono)' } as const;
 
 export function Diagram({ id }: { readonly id: DiagramId }) {
   const Component = DIAGRAMS[id];
