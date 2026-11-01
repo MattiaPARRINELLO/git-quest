@@ -202,7 +202,9 @@ export function Terminal({ onCommand }: TerminalProps) {
       className="flex h-full min-h-0 flex-col bg-bg text-text"
       onClick={() => inputRef.current?.focus()}
     >
-      {!(isMobile && keyboardOpen) && (
+      {/* Sur mobile l'onglet nomme déjà le terminal : l'en-tête ne fait que
+          manger de la hauteur utile à l'historique. */}
+      {!isMobile && (
         <div className="flex h-9 shrink-0 items-center justify-between border-b border-border px-3">
           <div className="flex items-center gap-2 text-[12px] text-muted">
             <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
