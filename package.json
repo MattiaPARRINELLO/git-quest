@@ -18,7 +18,9 @@
     "build:native": "CAPACITOR=1 npm run build && cap sync android",
     "android:apk": "npm run build:native && ./scripts/android.sh assembleDebug",
     "android:install": "npm run android:apk && adb install -r android/app/build/outputs/apk/debug/app-debug.apk",
-    "android:open": "cap open android"
+    "android:open": "cap open android",
+    "android:aab": "npm run build:native && ./scripts/android.sh bundleRelease assembleRelease",
+    "android:assets": "npx --yes @capacitor/assets generate --android --iconBackgroundColor '#0a0b0f' --iconBackgroundColorDark '#0a0b0f' --splashBackgroundColor '#0e100e' --splashBackgroundColorDark '#0e100e'"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.6.0",
