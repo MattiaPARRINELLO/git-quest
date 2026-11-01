@@ -99,6 +99,10 @@ Livrables :
   procédure locale.
 - `.gitignore` : `android/app/build/`, `android/build/`, `.gradle/`,
   `*.keystore`, `keystore.properties`.
+- **`dist/` est écrasé par le dernier build.** Après `npm run android:apk`,
+  `dist/` contient un build natif (sans service worker) : relancer `npm run build`
+  avant `npm run preview` ou `npm run ci:smoke`. La CI reconstruit toujours côté
+  web, elle n'est donc pas concernée.
 
 Critère d'acceptation : `npm run android:apk` enchaîne build + sync + APK sans
 intervention, et `chrome://inspect` ne montre **aucun** service worker actif.
