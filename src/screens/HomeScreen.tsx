@@ -3,60 +3,28 @@ import {
   chapters,
   commandLineLesson,
   estimatedLessonMinutes,
-  isMissionUnlocked,
   missionSequence,
 } from '../content';
 import { briefingFor } from '../content/briefings';
-import { scenario } from '../engine/scenario';
 import { resumeContext, resumeTarget } from '../app/resume';
 import { progressSummary } from '../app/xp';
 import { ProgressPanel } from '../components/progress/ProgressPanel';
 import { useProgressStore } from '../store/useProgressStore';
 import { useMissionDraftStore } from '../store/useMissionDraftStore';
 import { routePaths } from '../router/useHashRoute';
-import { branchColor } from '../lib/colors';
 import { Icon } from '../components/ui/Icon';
-import { CommitGraph } from '../components/graph/CommitGraph';
 import { ProgressBackup } from '../components/layout/ProgressBackup';
-import { cn } from '../lib/cn';
+import { ChapterField } from '../components/home/ChapterField';
+import { Reveal } from '../components/home/Reveal';
+import {
+  GraphFragment,
+  MissionFragment,
+  PipelineFragment,
+  PredictionFragment,
+  TerminalFragment,
+} from '../components/home/AppFragments';
 
-/** Trois repères pleins ou vides : la note se lit d'un coup d'œil. */
-function StarDots({
-  count,
-  max = 3,
-  className,
-}: {
-  readonly count: number;
-  readonly max?: number;
-  readonly className?: string;
-}) {
-  return (
-    <span
-      className={cn('inline-flex items-center gap-[3px]', className)}
-      aria-label={`${count} étoile${count > 1 ? 's' : ''} sur ${max}`}
-    >
-      {Array.from({ length: max }, (_, index) => (
-        <span
-          key={index}
-          className={cn(
-            'h-[5px] w-[5px] rounded-full',
-            index < count ? 'bg-warning' : 'bg-border-strong/60',
-          )}
-        />
-      ))}
-    </span>
-  );
-}
-
-function LaneTick({ color }: { readonly color: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="h-3 w-[2px] shrink-0 rounded-full"
-      style={{ background: color }}
-    />
-  );
-}
+const MISSION_ROUTE = '#/mission/';
 
 export function HomeScreen() {
   const completed = useProgressStore((store) => store.completed);
@@ -77,296 +45,236 @@ export function HomeScreen() {
   const percent = totalMissions === 0 ? 0 : Math.round((done / totalMissions) * 100);
   const prologueRead =
     (lessonSlides[commandLineLesson.id] ?? 0) >= commandLineLesson.slides.length - 1;
-  const preview = useMemo(
-    () =>
-      scenario()
-        .init()
-        .commit('docs: cadrage du projet', { 'README.md': '# Nova\n\nNotes partagées.' })
-        .branch('feature/notes')
-        .checkout('feature/notes')
-        .commit('feat: notes partagées', { 'src/notes.ts': 'export const notes = [];' })
-        .checkout('main')
-        .commit('fix: cache hors-ligne', { 'src/cache.ts': 'export const cache = new Map();' })
-        .run('git merge feature/notes')
-        .build(),
-    [],
-  );
-  const emptyBatch = useMemo(() => ({ id: 0, events: [] }), []);
+  const headMissionId = target.route.startsWith(MISSION_ROUTE)
+    ? target.route.slice(MISSION_ROUTE.length)
+    : null;
 
   return (
-    <div className="scrollbar-thin h-full overflow-y-auto">
-      <div className="mx-auto max-w-[1160px] px-5 py-9 sm:px-8 sm:py-12">
-        <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] lg:gap-12">
-          <div>
-            <p className="flex items-center gap-2 text-[11.5px] text-muted">
-              <LaneTick color="var(--accent)" />
-              Apprendre Git par la pratique
-            </p>
-            <h1 className="display mt-3 max-w-[20ch] text-[40px] leading-[1.04] text-text sm:text-[52px]">
+    <div>
+      <article>
+        {/* OUVERTURE — ce que c'est, où tu en es, l'objet qui le prouve. */}
+        <section className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] lg:gap-16">
+          <Reveal y={22}>
+            <h1 className="display display-xl max-w-[17ch] text-balance">
               Apprends Git en voyant le graphe.
             </h1>
-            <p className="mt-4 max-w-[48ch] text-[15px] leading-7 text-muted">
-              Six chapitres, dix-neuf missions réalistes. Chaque commande se rejoue sous tes
-              yeux : le graphe, HEAD, l’index et les worktrees deviennent enfin lisibles.
+            <p className="mt-6 max-w-[44ch] text-[17px] leading-[1.55] text-text">
+              Six chapitres, dix-neuf missions. Tu tapes une vraie commande, le dépôt se
+              redessine : branches, HEAD, index et worktrees deviennent lisibles.
             </p>
 
-            <div className="mt-7 flex flex-wrap items-center gap-2">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               {hydrated ? (
                 <a
                   href={target.route}
-                  className="btn btn-accent h-9 min-w-60 justify-between px-3.5 text-[13px]"
+                  className="btn btn-accent h-12 gap-4 px-5 text-[15px]"
                 >
                   {target.label}
-                  <Icon name="arrow-right" size={15} />
+                  <Icon name="arrow-right" size={16} />
                 </a>
               ) : (
                 <span
-                  className="btn btn-accent invisible h-9 min-w-60 justify-between px-3.5 text-[13px]"
+                  className="btn btn-accent invisible h-12 gap-4 px-5 text-[15px]"
                   aria-hidden="true"
                 >
                   Chargement
                 </span>
               )}
-              <a href={routePaths.sandbox} className="btn h-9 gap-2 px-3 text-[13px]">
-                <Icon name="terminal" size={14} />
+              <a href={routePaths.sandbox} className="btn btn-quiet h-12 px-4 text-[15px]">
+                <Icon name="terminal" size={15} />
                 Ouvrir le bac à sable
               </a>
             </div>
-            <p className="mt-2.5 min-h-4 text-[11.5px] text-muted" aria-live="polite">
+            <p className="mt-4 min-h-4 text-[13px] text-muted" aria-live="polite">
               {hydrated ? context : '\u00a0'}
             </p>
-          </div>
+          </Reveal>
 
-          <div className="hidden overflow-hidden rounded-xl border border-border bg-panel lg:block">
-            <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5">
-              <div className="flex items-center gap-2">
-                <LaneTick color="var(--accent)" />
-                <span className="font-mono text-[11.5px] text-text">nova</span>
-                <span className="mono-meta">sur main</span>
-              </div>
-              <span className="mono-meta">4 commits · 2 branches</span>
-            </div>
-            <div className="h-[248px]">
-              <CommitGraph state={preview} batch={emptyBatch} preview bare />
-            </div>
-            <div className="flex items-center gap-4 border-t border-border px-4 py-2">
-              <span className="flex items-center gap-1.5 font-mono text-[10.5px] text-muted">
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
-                main
-              </span>
-              <span className="flex items-center gap-1.5 font-mono text-[10.5px] text-muted">
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--success)' }} />
-                feature/notes
-              </span>
-              <span className="ml-auto flex items-center gap-1.5 font-mono text-[10.5px] text-muted">
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--warning)' }} />
-                merge
-              </span>
-            </div>
-          </div>
+          <Reveal delay={0.12} className="min-w-0">
+            <GraphFragment />
+            <p className="mt-3 text-[13px] text-muted">
+              Le dépôt de Nova : quatre commits, une branche fusionnée. Chaque mission en ajoute
+              un.
+            </p>
+          </Reveal>
         </section>
 
-        <dl className="mt-9 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
-          <div className="bg-panel px-4 py-3.5">
-            <dt className="mono-meta">Missions</dt>
-            <dd className="mt-1 font-mono text-[22px] leading-none tabular-nums text-text">
-              {done}
-              <span className="text-[13px] text-muted"> / {totalMissions}</span>
-            </dd>
-          </div>
-          <div className="bg-panel px-4 py-3.5">
-            <dt className="mono-meta">Étoiles</dt>
-            <dd className="mt-1 font-mono text-[22px] leading-none tabular-nums text-text">
-              {totalStars}
-              <span className="text-[13px] text-muted"> / {totalMissions * 3}</span>
-            </dd>
-          </div>
-          <div className="col-span-2 bg-panel px-4 py-3.5 sm:col-span-1">
-            <dt className="mono-meta">Parcours</dt>
-            <dd className="mt-1.5 flex items-center gap-3">
-              <span className="h-1 flex-1 overflow-hidden rounded-full bg-panel-3">
-                <span
-                  className="block h-full rounded-full bg-accent"
-                  style={{ width: `${percent}%` }}
-                />
-              </span>
-              <span className="font-mono text-[13px] tabular-nums text-text">{percent}%</span>
-            </dd>
-          </div>
-        </dl>
-
-        <ProgressPanel summary={summary} />
-
-        <section className="mt-4" aria-label="Prologue">
-          <a
-            href={routePaths.prologue}
-            className="group flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-panel px-4 py-3 transition-colors hover:border-border-strong"
-          >
-            <span className="flex min-w-0 items-start gap-2.5">
-              <span aria-hidden="true" className="mt-1 h-3.5 w-[2px] shrink-0 rounded-full bg-accent" />
-              <span className="min-w-0">
-                <span className="text-[13px] font-medium text-text">
+        {/* PROLOGUE — chapitre zéro : décoder avant de taper. */}
+        <section className="mx-auto max-w-[1180px] px-5 pb-16 sm:px-8" aria-labelledby="prologue">
+          <Reveal className="bg-panel px-5 py-6 sm:px-7 sm:py-7">
+            <h2 id="prologue" className="display text-[30px] leading-tight">
+              Avant de taper
+            </h2>
+            <a
+              href={routePaths.prologue}
+              className="group mt-4 flex flex-wrap items-end justify-between gap-4"
+            >
+              <span className="min-w-0 max-w-[58ch]">
+                <span className="block text-[17px] font-medium text-text">
                   Prologue · Lire une commande Git
                 </span>
-                <span className="mt-0.5 block text-[12px] leading-relaxed text-muted">
+                <span className="mt-1.5 block text-[16px] leading-relaxed text-muted">
                   Options, guillemets, placeholders : décoder n’importe quelle commande avant de
                   commencer. {estimatedLessonMinutes(commandLineLesson)} min.
                 </span>
               </span>
-            </span>
-            <span className="inline-flex shrink-0 items-center gap-1 text-[12px] text-muted transition-colors group-hover:text-text">
-              {prologueRead ? 'Relire' : 'Lire'}
-              <Icon name="arrow-right" size={12} />
-            </span>
-          </a>
+              <span className="inline-flex items-center gap-2 text-[15px] text-text">
+                {prologueRead ? 'Relire' : 'Lire'}
+                <Icon
+                  name="arrow-right"
+                  size={15}
+                  className="transition-transform group-hover:translate-x-0.5"
+                />
+              </span>
+            </a>
+          </Reveal>
         </section>
 
-        {lastCompleted !== undefined && lastBriefing?.outcome !== undefined && (
-          <section
-            className="mt-4 rounded-xl border border-border bg-panel px-4 py-3.5"
-            aria-label="Dernier épisode"
-          >
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="flex items-center gap-2 text-[11.5px] text-muted">
-                <LaneTick color="var(--accent)" />
-                Dernier épisode
-              </p>
-              <a href={routePaths.nova} className="text-[11.5px] text-muted hover:text-text">
-                Ton arbre Nova
+        {/* LE PARCOURS — six champs, six voies, la progression dessus. */}
+        <section aria-labelledby="parcours">
+          <div className="mx-auto max-w-[1180px] px-5 pb-10 sm:px-8">
+            <h2 id="parcours" className="display text-[30px] leading-none">
+              Le parcours
+            </h2>
+            <p className="mt-3 max-w-[52ch] text-[16px] leading-relaxed text-muted">
+              Six voies, du premier commit aux conflits de pull. Une mission ne s’ouvre qu’une
+              fois la précédente terminée.
+            </p>
+          </div>
+
+          <ol className="list-none">
+            {chapters.map((chapter, index) => (
+              <ChapterField
+                key={chapter.id}
+                chapter={chapter}
+                lane={index + 1}
+                completed={completed}
+                headMissionId={headMissionId}
+              />
+            ))}
+          </ol>
+        </section>
+
+        {/* CE QUE TU REGARDES — trois écrans réels, pas des captures. */}
+        <section
+          className="mx-auto max-w-[1180px] px-5 py-20 sm:px-8"
+          aria-labelledby="dedans"
+        >
+          <h2 id="dedans" className="display text-[clamp(2rem,3.4vw,2.8rem)] leading-none">
+            Ce que tu regardes
+          </h2>
+          <p className="mt-3 max-w-[52ch] text-[16px] leading-relaxed text-muted">
+            Quatre panneaux, un seul dépôt. Le terminal écrit, le graphe répond, le pipeline
+            montre le fichier qui traverse l’index, la prédiction te fait parier avant de voir.
+          </p>
+          <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-12">
+            <Reveal className="lg:col-span-7">
+              <TerminalFragment />
+            </Reveal>
+            <Reveal delay={0.08} className="lg:col-span-5">
+              <MissionFragment />
+            </Reveal>
+            <Reveal delay={0.16} className="lg:col-span-5">
+              <PipelineFragment />
+            </Reveal>
+            <Reveal delay={0.24} className="lg:col-span-7">
+              <PredictionFragment />
+            </Reveal>
+          </div>
+        </section>
+
+        {/* OÙ TU EN ES — niveau, badges, dernier épisode, ton arbre. */}
+        <section className="bg-panel" aria-labelledby="etat">
+          <div className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 sm:py-20">
+            <h2 id="etat" className="display text-[30px] leading-none">
+              Où tu en es
+            </h2>
+
+            <p className="mt-8 text-[15px] leading-none text-muted">
+              <span className="mr-2 text-[32px] tabular-nums text-text">{done}</span>
+              missions sur {totalMissions}
+              <span className="mx-6 inline-block" aria-hidden="true" />
+              <span className="mr-2 text-[32px] tabular-nums text-text">{totalStars}</span>
+              étoiles sur {totalMissions * 3}
+              <span className="mx-6 inline-block" aria-hidden="true" />
+              <span className="mr-2 text-[32px] tabular-nums text-text">{percent}%</span>
+              du parcours
+            </p>
+            <div className="mt-4 h-1 w-full max-w-[520px] bg-panel-3">
+              <span className="block h-full bg-accent" style={{ width: `${percent}%` }} />
+            </div>
+
+            <Reveal>
+              <ProgressPanel summary={summary} />
+            </Reveal>
+
+            <Reveal className="mt-4 space-y-4">
+              {lastCompleted !== undefined && lastBriefing?.outcome !== undefined && (
+                <section className="bg-panel-2 p-6 lg:p-7" aria-label="Dernier épisode">
+                  <p className="text-[13px] text-muted">
+                    Dernier épisode · {lastCompleted.number}
+                  </p>
+                  <p className="mt-1.5 text-[18px] font-medium text-text">{lastCompleted.title}</p>
+                  <p className="mt-2 max-w-[72ch] text-[16px] leading-relaxed text-muted">
+                    {lastBriefing.outcome}
+                  </p>
+                  {lastBriefing.teaser !== undefined && (
+                    <p className="mt-3 max-w-[72ch] text-[14px] leading-relaxed text-muted">
+                      <span className="text-text">À suivre · </span>
+                      {lastBriefing.teaser}
+                    </p>
+                  )}
+                </section>
+              )}
+
+              <section
+                className="bg-panel-2 p-6 lg:flex lg:items-center lg:justify-between lg:gap-12 lg:p-7"
+                aria-label="Ton arbre Nova"
+              >
+                <div>
+                  <p className="text-[13px] text-muted">Le dépôt que tu construis</p>
+                  <p className="mt-1.5 text-[18px] font-medium text-text">L’arbre de Nova</p>
+                  <p className="mt-2 max-w-[60ch] text-[16px] leading-relaxed text-muted">
+                    Chaque mission laisse un commit. À la fin, tu ouvres l’arbre complet et tu le
+                    lis comme une histoire.
+                  </p>
+                </div>
+                <a
+                  href={routePaths.nova}
+                  className="btn btn-quiet mt-4 h-11 w-fit shrink-0 gap-2 px-4 text-[15px] lg:mt-0"
+                >
+                  Ton arbre Nova
+                  <Icon name="arrow-right" size={14} />
+                </a>
+              </section>
+            </Reveal>
+          </div>
+        </section>
+
+        <footer className="mx-auto max-w-[1180px] px-5 pb-14 pt-16 sm:px-8">
+          <p className="display text-[clamp(3rem,11vw,8rem)] leading-[0.8] text-text">GitQuest</p>
+          <div className="mt-8 flex flex-wrap items-start justify-between gap-8">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[15px]">
+              <a href={routePaths.home} className="text-text hover:text-accent-ink">
+                Chapitres
+              </a>
+              <a href={routePaths.prologue} className="text-text hover:text-accent-ink">
+                Prologue
+              </a>
+              <a href={routePaths.sandbox} className="text-text hover:text-accent-ink">
+                Bac à sable
+              </a>
+              <a href={routePaths.nova} className="text-text hover:text-accent-ink">
+                Mon arbre
               </a>
             </div>
-            <p className="mt-1.5 text-[13px] text-text">
-              <span className="font-mono text-[11px] text-muted">{lastCompleted.number}</span>{' '}
-              <span className="font-medium">{lastCompleted.title}</span>
-            </p>
-            <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{lastBriefing.outcome}</p>
-            {lastBriefing.teaser !== undefined && (
-              <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted/85">
-                <span className="text-text">À suivre · </span>
-                {lastBriefing.teaser}
-              </p>
-            )}
-          </section>
-        )}
-
-        <section className="mt-10" aria-label="Chapitres">
-          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-[15px] font-medium text-text">Ta carte de progression</h2>
-            <span className="text-[11.5px] text-muted">Les missions se déverrouillent dans l’ordre.</span>
+            <div className="flex flex-col gap-2 text-[13px] text-muted">
+              <span>Progression enregistrée sur cet appareil. Hors ligne, sans compte.</span>
+              <ProgressBackup />
+            </div>
           </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {chapters.map((chapter) => {
-              const chapterDone = chapter.missions.filter(
-                (mission) => completed[mission.id] !== undefined,
-              ).length;
-              const chapterStars = chapter.missions.reduce(
-                (sum, mission) => sum + (completed[mission.id]?.stars ?? 0),
-                0,
-              );
-              const color = branchColor(chapter.id);
-
-              return (
-                <article
-                  key={chapter.id}
-                  className="flex flex-col rounded-xl border border-border bg-panel p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-start gap-2.5">
-                      <LaneTick color={color} />
-                      <div className="min-w-0">
-                        <span className="mono-meta">Chapitre {chapter.number}</span>
-                        <h3 className="mt-0.5 truncate text-[14px] font-medium text-text">
-                          {chapter.title}
-                        </h3>
-                      </div>
-                    </div>
-                    <span className="mono-meta shrink-0 tabular-nums">
-                      {chapterStars} / {chapter.missions.length * 3}
-                    </span>
-                  </div>
-
-                  <p className="mt-2 text-[12px] text-muted">{chapter.tagline}</p>
-                  <p className="mt-2 text-[12.5px] leading-relaxed text-muted">
-                    {chapter.description}
-                  </p>
-
-                  <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-border pt-3">
-                    <span className="mono-meta">
-                      {chapterDone} / {chapter.missions.length} missions ·{' '}
-                      {estimatedLessonMinutes(chapter.lesson)} min de cours
-                    </span>
-                    <a
-                      href={routePaths.lesson(chapter.id)}
-                      className="btn h-7 gap-1.5 px-2 text-[11.5px]"
-                    >
-                      <Icon name="book" size={12} />
-                      Cours
-                    </a>
-                  </div>
-
-                  <ul className="mt-2 space-y-0.5">
-                    {chapter.missions.map((mission) => {
-                      const unlocked = isMissionUnlocked(mission.id, completed);
-                      const completion = completed[mission.id];
-
-                      return (
-                        <li key={mission.id}>
-                          {unlocked ? (
-                            <a
-                              href={routePaths.mission(mission.id)}
-                              className="group flex h-8 items-center justify-between gap-2 rounded-md px-1.5 transition-colors hover:bg-panel-2"
-                            >
-                              <span className="flex min-w-0 items-center gap-2.5">
-                                <span className="font-mono text-[10.5px] text-muted">
-                                  {mission.number}
-                                </span>
-                                <span className="truncate text-[12.5px] text-text">{mission.title}</span>
-                              </span>
-                              <span className="flex shrink-0 items-center gap-2">
-                                {completion ? (
-                                  <StarDots count={completion.stars} />
-                                ) : (
-                                  <span className="mono-meta">à faire</span>
-                                )}
-                                <Icon
-                                  name="arrow-right"
-                                  size={12}
-                                  className="text-muted transition-transform group-hover:translate-x-0.5"
-                                />
-                              </span>
-                            </a>
-                          ) : (
-                            <div className="flex h-8 items-center justify-between gap-2 px-1.5 opacity-55">
-                              <span className="flex min-w-0 items-center gap-2.5">
-                                <span className="font-mono text-[10.5px] text-muted">
-                                  {mission.number}
-                                </span>
-                                <span className="truncate text-[12.5px] text-muted">{mission.title}</span>
-                              </span>
-                              <Icon name="lock" size={12} className="shrink-0 text-muted" />
-                            </div>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        <footer className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[11.5px] text-muted">
-          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>GitQuest — progression enregistrée sur cet appareil.</span>
-            <ProgressBackup />
-          </span>
-          <a href={routePaths.sandbox} className="inline-flex items-center gap-1 hover:text-text">
-            Terminal libre <Icon name="arrow-right" size={12} />
-          </a>
         </footer>
-      </div>
+      </article>
     </div>
   );
 }

@@ -61,7 +61,7 @@ function Key({
       onPointerDown={handlePointerDown}
       onClick={handleClick}
       className={cn(
-        'flex h-10 min-w-10 shrink-0 items-center justify-center rounded-md border px-2.5 font-mono text-[13px] transition-colors',
+        'flex h-10 min-w-10 shrink-0 items-center justify-center  border px-2.5 text-[14px] transition-colors',
         variant === 'accent'
           ? 'border-accent/40 bg-accent/15 text-accent'
           : 'border-border bg-panel-2 text-text active:bg-panel-3',
@@ -81,7 +81,7 @@ export function KeyBar({ onInsert, onComplete, onHistory, onSubmit }: KeyBarProp
     <div
       role="toolbar"
       aria-label="Touches rapides du terminal"
-      className="flex shrink-0 items-center gap-1.5 border-t border-border/70 bg-panel/40 px-2 py-1.5"
+      className="flex shrink-0 items-center gap-1.5 /70 bg-panel/40 px-2 py-1.5"
     >
       <div className="scrollbar-thin flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
         <Key ariaLabel="compléter la saisie" onPress={onComplete}>

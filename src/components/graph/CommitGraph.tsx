@@ -447,7 +447,7 @@ export function CommitGraph({
             ))}
 
             <AnimatePresence initial={false}>
-              {layout.branchLabels.map((label) => (
+              {!preview && layout.branchLabels.map((label) => (
                 <BranchLabelView
                   key={label.name}
                   label={label}
@@ -462,29 +462,29 @@ export function CommitGraph({
 
         {hovered && tooltipStyle && !preview && (
           <div
-            className="pointer-events-none absolute z-30 w-64 -translate-x-1/2 -translate-y-full rounded-lg border border-border bg-panel p-2.5 text-[11px] shadow-[var(--shadow)]"
+            className="pointer-events-none absolute z-30 w-64 -translate-x-1/2 -translate-y-full bg-panel p-2.5 text-[13px]"
             style={tooltipStyle}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="font-mono text-[10.5px] text-muted">{hovered.shortHash}</span>
+              <span className="text-[13px] tabular-nums text-muted">{hovered.shortHash}</span>
               {hovered.orphan && (
-                <span className="rounded bg-warning/12 px-1.5 py-0.5 text-[9px] text-warning">
+                <span className="rounded bg-warning/12 px-1.5 py-0.5 text-[12px] text-warning">
                   orphelin
                 </span>
               )}
             </div>
             <p className="mt-1 font-medium text-text">{hovered.message}</p>
-            <p className="mt-1 font-mono text-[10px] text-muted">
+            <p className="mt-1 text-[12px] text-muted">
               parents : {hovered.parents.length === 0 ? 'aucun' : hovered.parents.map((parent) => parent.slice(0, 7)).join(', ')}
             </p>
-            <div className="mt-1.5 border-t border-border/70 pt-1.5 font-mono text-[10px] text-muted">
+            <div className="mt-1.5 /70 pt-1.5 text-[12px] text-muted">
               {hovered.files.length === 0
                 ? 'snapshot vide'
                 : hovered.files.slice(0, 6).join(' · ') +
                   (hovered.files.length > 6 ? ` +${hovered.files.length - 6}` : '')}
             </div>
             {hovered.orphan && (
-              <p className="mt-1.5 text-[10px] text-warning/90">
+              <p className="mt-1.5 text-[12px] text-warning/90">
                 Commit orphelin : aucune branche ne pointe ici.
               </p>
             )}
@@ -493,7 +493,7 @@ export function CommitGraph({
 
         {layout.nodes.length === 0 && !preview && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
-            <div className="w-full max-w-[24rem] rounded-lg border border-border bg-panel px-5 py-4">
+            <div className="w-full max-w-[24rem] bg-panel px-5 py-4">
               <p className="text-[13px] font-medium text-text">Ton dépôt n’a encore aucun commit</p>
               <p className="mt-1 text-[12px] leading-relaxed text-muted">
                 Trois commandes suffisent pour créer la première photo.
@@ -504,9 +504,9 @@ export function CommitGraph({
                   ['2', 'git add app.ts'],
                   ['3', 'git commit -m "feat: app"'],
                 ].map(([step, command]) => (
-                  <li key={command} className="flex items-baseline gap-2.5 font-mono text-[11.5px]">
-                    <span className="w-3 shrink-0 text-[10px] tabular-nums text-muted">{step}</span>
-                    <span className="text-text">{command}</span>
+                  <li key={command} className="flex items-baseline gap-2.5 text-[13px]">
+                    <span className="w-3 shrink-0 text-[12px] tabular-nums text-muted">{step}</span>
+                    <code className="font-mono text-text">{command}</code>
                   </li>
                 ))}
               </ol>
@@ -518,11 +518,11 @@ export function CommitGraph({
 
         {!preview && (
           <>
-            <div className="pointer-events-none absolute bottom-2.5 left-4 font-mono text-[10px] text-muted/70">
+            <div className="pointer-events-none absolute bottom-2.5 left-4 text-[12px] text-muted/70">
               <span className="sm:hidden">pincer = zoom · glisser = déplacer</span>
               <span className="hidden sm:inline">molette = zoom · glisser = déplacer</span>
             </div>
-            <label className="absolute bottom-2.5 right-4 flex items-center gap-1.5 font-mono text-[10px] text-muted">
+            <label className="absolute bottom-2.5 right-4 flex items-center gap-1.5 text-[12px] text-muted">
               <input
                 type="checkbox"
                 checked={reducedMotion}
@@ -627,8 +627,8 @@ function CommitNodeView({
         x={node.x}
         y={node.y + 22}
         textAnchor="middle"
-        className="fill-[var(--muted)] font-mono"
-        fontSize={9}
+        className="fill-[var(--muted)] tabular-nums"
+        fontSize={11}
         stroke="var(--panel)"
         strokeWidth={3}
         paintOrder="stroke"
@@ -641,7 +641,7 @@ function CommitNodeView({
           y={node.y - 14}
           textAnchor="middle"
           className="fill-[var(--muted)]"
-          fontSize={9}
+          fontSize={11}
         >
           racine
         </text>
@@ -703,18 +703,18 @@ function BranchLabelView({
         x={0}
         y={0}
         width={width}
-        height={18}
-        rx={9}
+        height={20}
+        rx={0}
         fill={label.current ? label.color : 'var(--panel)'}
         stroke={label.color}
         strokeOpacity={label.current ? 1 : 0.85}
       />
       <text
         x={9}
-        y={12.5}
+        y={14}
         fill={label.current ? 'var(--bg)' : label.color}
-        fontSize={10}
-        className="font-mono font-semibold"
+        fontSize={12}
+        fontWeight={600}
       >
         {text}
       </text>

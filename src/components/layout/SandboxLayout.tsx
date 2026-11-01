@@ -66,7 +66,7 @@ function MobileTabs({ tabs, active }: MobileTabsProps) {
     <nav
       role="tablist"
       aria-label="Panneaux du bac à sable"
-      className="flex shrink-0 border-b border-border bg-panel"
+      className="flex shrink-0  bg-panel"
     >
       {tabs.map((item, index) => (
         <button
@@ -85,7 +85,7 @@ function MobileTabs({ tabs, active }: MobileTabsProps) {
           <Icon name={item.icon} size={14} />
           {item.label}
           {item.id === 'graph' && unseen > 0 && active !== 'graph' && (
-            <span className="ml-0.5 rounded-full bg-accent px-1.5 py-0.5 text-[9px] font-medium leading-none text-on-accent">
+            <span className="ml-0.5 rounded-full bg-accent px-1.5 py-0.5 text-[12px] font-medium leading-none text-on-accent">
               {unseen > 9 ? '9+' : unseen}
             </span>
           )}
@@ -107,7 +107,7 @@ function MobileSecondaryPanel({ missionPanel }: { readonly missionPanel: ReactNo
   const [panel, setPanel] = useState<'mission' | 'files'>('mission');
 
   return (
-    <section className="shrink-0 border-b border-border bg-panel" aria-label="Panneau secondaire">
+    <section className="shrink-0  bg-panel" aria-label="Panneau secondaire">
       <div
         role="group"
         aria-label="Contenu du panneau secondaire"
@@ -125,7 +125,7 @@ function MobileSecondaryPanel({ missionPanel }: { readonly missionPanel: ReactNo
             aria-pressed={panel === item.id}
             onClick={() => setPanel(item.id)}
             className={cn(
-              'flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors',
+              'flex items-center gap-1  px-2 py-0.5 text-[13px] font-medium transition-colors',
               panel === item.id
                 ? 'bg-panel-2 text-text'
                 : 'text-muted hover:text-text',

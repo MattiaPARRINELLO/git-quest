@@ -163,7 +163,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   if (!unlocked) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 px-4 text-center">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-panel-2 text-muted">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-panel-2 text-muted">
           <Icon name="lock" size={18} />
         </span>
         <p className="text-sm font-medium text-text">Mission verrouillée</p>
@@ -367,12 +367,12 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
         missionPanel={
           <>
             {isolatedMode && (
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-warning/30 bg-warning/10 px-3 py-2 text-[11px] text-warning">
+              <div className="flex flex-wrap items-center justify-between gap-2 bg-warning/10 px-5 py-2.5 text-[13px] text-warning">
                 <span>Entraînement : ton arbre Nova n’est pas modifié.</span>
                 {storyBetaEnabled() && (
                   <button
                     type="button"
-                    className="btn px-2 py-1 text-[11px]"
+                    className="btn px-2 py-1 text-[13px]"
                     onClick={() => {
                       const confirmed = window.confirm(
                         `Reprendre l’histoire depuis la mission ${mission.number} ?\n\n` +

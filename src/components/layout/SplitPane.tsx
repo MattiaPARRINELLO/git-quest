@@ -71,10 +71,10 @@ export function SplitPane({ left, right, initialLeftPercent = 40 }: SplitPanePro
         }}
         className="group relative z-10 w-2 shrink-0 cursor-col-resize bg-transparent"
       >
-        <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border transition-colors group-hover:bg-accent group-focus-visible:bg-accent" />
+        <div className="absolute inset-y-0 left-1/2 w-[2px] -translate-x-1/2 bg-border transition-colors group-hover:bg-accent group-focus-visible:bg-accent" />
       </div>
 
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col" aria-label="Visualisation">
+      <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-panel" aria-label="Visualisation">
         {right}
       </section>
     </div>

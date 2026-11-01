@@ -30,7 +30,7 @@ function Stars({ count }: { readonly count: number }) {
         <span
           key={index}
           className={cn(
-            'h-[5px] w-[5px] rounded-full',
+            'h-[7px] w-[7px]',
             index < count ? 'bg-warning' : 'bg-border-strong/60',
           )}
         />
@@ -57,11 +57,16 @@ export function NovaScreen() {
 
   if (nova === null) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 px-4 text-center">
-        <p className="max-w-sm text-[13px] leading-relaxed text-muted">
-          Ton arbre Nova apparaîtra ici une fois ta première mission terminée.
+      <div className="mx-auto flex h-full max-w-[640px] flex-col justify-center px-5 py-12">
+        <h1 className="display text-[28px] leading-[1.1] text-text sm:text-[32px]">Ton arbre Nova</h1>
+        <p className="mt-4 text-[17px] leading-relaxed text-text">
+          Ton arbre apparaîtra ici une fois ta première mission terminée.
         </p>
-        <a href={routePaths.home} className="btn">
+        <p className="mt-2 text-[15px] leading-relaxed text-muted">
+          Chaque mission laisse un commit : tu pourras relire l’histoire, ouvrir un commit et
+          retrouver la commande qui l’a créé.
+        </p>
+        <a href={routePaths.home} className="btn btn-accent mt-6 h-11 w-fit px-5 text-[14px]">
           Retour aux chapitres
         </a>
       </div>
@@ -118,69 +123,62 @@ export function NovaScreen() {
 
   return (
     <div className="scrollbar-thin h-full overflow-y-auto">
-      <div className="mx-auto max-w-[1160px] px-5 py-8 sm:px-8 sm:py-10">
+      <div className="mx-auto max-w-[1180px] px-5 py-10 sm:px-8 sm:py-14">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="flex items-center gap-2 text-[11.5px] text-muted">
-              <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
-              Ton histoire
+            <h1 className="display text-[28px] leading-[1.1] sm:text-[32px]">Ton arbre Nova</h1>
+            <p className="mt-2 text-[15px] text-muted">
+              Le dépôt que tu as construit, mission après mission.
             </p>
-            <h1 className="display mt-1.5 text-[34px] leading-[1.1] text-text">Ton arbre Nova</h1>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button type="button" className="btn h-8 px-2.5 text-[12px]" onClick={exportPng}>
+            <button type="button" className="btn btn-quiet px-3" onClick={exportPng}>
               Exporter en PNG
             </button>
             <button
               type="button"
-              className="btn h-8 px-2.5 text-[12px]"
+              className="btn btn-quiet px-3"
               onClick={() => void copyLog()}
             >
               {copied ? 'Copié' : 'Copier git log'}
             </button>
-            <a href={routePaths.home} className="btn h-8 px-2.5 text-[12px]">
+            <a href={routePaths.home} className="btn btn-quiet px-3">
               Carte
             </a>
           </div>
         </header>
 
-        <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-4">
+        <p className="mt-8 flex flex-wrap gap-x-10 gap-y-3 text-[14px] text-muted">
           {summary.map(([label, value]) => (
-            <div key={label} className="bg-panel px-3.5 py-3">
-              <dt className="mono-meta">{label}</dt>
-              <dd className="mt-1 font-mono text-[19px] leading-none tabular-nums text-text">
-                {value}
-              </dd>
-            </div>
+            <span key={label} className="inline-flex items-baseline gap-2">
+              <span className="text-[24px] leading-none tabular-nums text-text">{value}</span>
+              <span>{label}</span>
+            </span>
           ))}
-        </dl>
+        </p>
 
         {timeline.length > 0 && (
-          <section className="mt-7" aria-label="Fil de l’histoire">
-            <h2 className="text-[14px] font-medium text-text">Le fil de l’histoire</h2>
-            <ol className="mt-2 divide-y divide-border border-y border-border">
+          <section className="mt-12" aria-label="Fil de l’histoire">
+            <h2 className="display text-[30px] leading-none text-text">Le fil de l’histoire</h2>
+            <ol className="mt-5 space-y-4">
               {timeline.map(({ mission, stars: missionStars, messages }) => (
-                <li
-                  key={mission.id}
-                  className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2"
-                >
-                  <span className="font-mono text-[10.5px] text-muted">{mission.number}</span>
-                  <span className="text-[12.5px] font-medium text-text">{mission.title}</span>
-                  <Stars count={missionStars} />
-                  <span className="w-full truncate font-mono text-[10.5px] text-muted">
+                <li key={mission.id}>
+                  <div className="flex flex-wrap items-baseline gap-x-3">
+                    <span className="text-[13px] tabular-nums text-muted">{mission.number}</span>
+                    <span className="text-[16px] font-medium text-text">{mission.title}</span>
+                    <Stars count={missionStars} />
+                  </div>
+                  <p className="mt-1 text-[14px] leading-relaxed text-muted">
                     {messages.length > 0 ? messages.join(' · ') : 'Aucun message personnel'}
-                  </span>
+                  </p>
                 </li>
               ))}
             </ol>
           </section>
         )}
 
-        <div className="mt-6 grid gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <div
-            ref={graphRef}
-            className="min-h-[24rem] overflow-hidden rounded-xl border border-border bg-panel"
-          >
+        <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <div ref={graphRef} className="min-h-[24rem] overflow-hidden bg-panel">
             <CommitGraph
               state={nova}
               batch={{ id: 0, events: [] }}
@@ -188,17 +186,14 @@ export function NovaScreen() {
             />
           </div>
 
-          <aside className="rounded-xl border border-border bg-panel">
-            <div className="flex items-center gap-2 border-b border-border px-3.5 py-2.5">
-              <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
-              <h2 className="text-[12px] font-medium text-text">
+          <aside className="bg-panel">
+            <div className="px-4 py-4">
+              <h2 className="text-[15px] font-medium text-text">
                 {commit ? 'Commit sélectionné' : 'Détail'}
               </h2>
-            </div>
-            <div className="px-3.5 py-3">
               {commit ? (
-                <div className="space-y-1.5 text-[12px]">
-                  <p className="font-mono text-[11px] text-accent-2">{commit.hash.slice(0, 7)}</p>
+                <div className="mt-3 space-y-2 text-[14px] leading-snug">
+                  <p className="text-[13px] text-accent-2">{commit.hash.slice(0, 7)}</p>
                   <p className="font-medium leading-snug text-text">{commit.message}</p>
                   <p className="text-muted">
                     {author === undefined
@@ -212,11 +207,11 @@ export function NovaScreen() {
                   <p className="text-muted">
                     {Object.keys(commit.snapshot).length} fichier(s) dans la photo
                   </p>
-                  <p className="text-[11px] text-muted">
+                  <p className="text-[13px] text-muted">
                     Orphelin : {unreferencedHashes(nova).includes(commit.hash) ? 'oui' : 'non'}
                   </p>
                   {origin !== undefined && (
-                    <p className="text-[11px] text-muted">
+                    <p className="text-[13px] text-muted">
                       Mission d’origine :{' '}
                       {originMission === undefined
                         ? origin.missionId
@@ -225,7 +220,7 @@ export function NovaScreen() {
                   )}
                 </div>
               ) : (
-                <p className="text-[12px] leading-relaxed text-muted">
+                <p className="mt-3 text-[14px] leading-relaxed text-muted">
                   Clique sur un commit du graphe pour voir son message, son auteur et son
                   contenu. Les commits abandonnés restent visibles, plus pâles.
                 </p>
@@ -234,11 +229,11 @@ export function NovaScreen() {
           </aside>
         </div>
 
-        <details className="mt-4 rounded-xl border border-border bg-panel">
-          <summary className="cursor-pointer px-3.5 py-2.5 text-[12px] font-medium text-text">
+        <details className="mt-4 bg-panel">
+          <summary className="cursor-pointer px-4 py-3 text-[14px] font-medium text-text">
             git log --oneline --graph
           </summary>
-          <pre className="scrollbar-thin max-h-72 overflow-auto whitespace-pre-wrap break-words border-t border-border px-3.5 py-3 font-mono text-[11px] leading-5 text-muted">
+          <pre className="scrollbar-thin max-h-72 overflow-auto whitespace-pre-wrap break-words bg-panel-2 px-4 py-3 text-[13px] leading-6 text-muted">
             {log}
           </pre>
         </details>
