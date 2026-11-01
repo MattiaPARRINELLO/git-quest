@@ -100,7 +100,8 @@ function MobileTabs({ tabs, active }: MobileTabsProps) {
 
 /**
  * Panneau du haut sur mobile : version mini de la mission ou de l'arbre de
- * fichiers. Il disparaît dès que le terminal prend le focus (clavier ouvert).
+ * fichiers. Il est masqué quand le clavier virtuel est ouvert, sans être
+ * démonté, pour conserver la bascule et le dépliage choisis.
  */
 function MobileSecondaryPanel({ missionPanel }: { readonly missionPanel: ReactNode }) {
   const [panel, setPanel] = useState<'mission' | 'files'>('mission');
@@ -199,8 +200,10 @@ export function SandboxLayout({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {missionPanel !== undefined && !keyboardOpen && (
-        <MobileSecondaryPanel missionPanel={missionPanel} />
+      {missionPanel !== undefined && (
+        <div className={cn(keyboardOpen && 'hidden')}>
+          <MobileSecondaryPanel missionPanel={missionPanel} />
+        </div>
       )}
       <MobileTabs tabs={visibleTabs} active={activeTab} />
       {activeTab === 'terminal' && (
