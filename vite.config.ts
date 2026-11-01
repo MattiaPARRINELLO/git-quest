@@ -8,12 +8,18 @@ import { VitePWA } from 'vite-plugin-pwa';
 // VITE_BASE_PATH=/git-quest/ — every generated URL then carries the prefix.
 const base = process.env['VITE_BASE_PATH'] ?? '/';
 
+// Build natif (Capacitor) : le service worker n'a pas de sens dans une WebView
+// embarquée, où il resservirait un build périmé et rendrait les mises à jour
+// fantômes. Voir docs/NATIVE-ANDROID.md.
+const isNativeBuild = process.env['CAPACITOR'] === '1';
+
 export default defineConfig({
   base,
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
+      disable: isNativeBuild,
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {

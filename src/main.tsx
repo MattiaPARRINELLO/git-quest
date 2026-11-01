@@ -5,11 +5,13 @@ import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/newsreader';
 import './styles/index.css';
 import App from './App';
+import { hideSplash, initNative } from './native';
 import { useProgressStore } from './store/useProgressStore';
 import { useRepoStore } from './store/useRepoStore';
 import { useMissionDraftStore } from './store/useMissionDraftStore';
 
 async function bootstrap(): Promise<void> {
+  await initNative();
   await Promise.all([
     useRepoStore.getState().hydrate(),
     useProgressStore.getState().hydrate(),
@@ -22,6 +24,11 @@ async function bootstrap(): Promise<void> {
       <App />
     </StrictMode>,
   );
+  // Le splash natif reste affiché tant que la progression n'est pas hydratée :
+  // on le masque après la première frame pour éviter un écran vide.
+  requestAnimationFrame(() => {
+    void hideSplash();
+  });
 }
 
 void bootstrap();

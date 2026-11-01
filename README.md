@@ -6,11 +6,12 @@
 
 <p align="center">
   <strong>Apprends Git sans souffrir.</strong><br>
-  Un jeu gratuit, dans ton navigateur, où chaque commande devient une image.
+  Un jeu gratuit, dans ton navigateur ou sur Android, où chaque commande devient une image.
 </p>
 
 <p align="center">
   <a href="https://mattiaparrinello.github.io/git-quest/"><img alt="Jouer maintenant" src="https://img.shields.io/badge/▶_Jouer_maintenant-en_ligne-ff7a45?style=for-the-badge"></a>
+  <a href="https://github.com/MattiaPARRINELLO/git-quest/releases/latest"><img alt="Télécharger l'APK Android" src="https://img.shields.io/badge/Android-APK_4_Mo-3DDC84?style=for-the-badge&amp;logo=android&amp;logoColor=white"></a>
 </p>
 
 <p align="center">
@@ -115,7 +116,7 @@ graphe.
 <p align="center">
   <img src="docs/screenshots/home-mobile.png" alt="GitQuest sur mobile" width="280">
   <br>
-  <sub>Ça marche aussi sur téléphone, et hors ligne.</sub>
+  <sub>Ça marche aussi sur téléphone : dans le navigateur, ou en APK Android.</sub>
 </p>
 
 ---
@@ -179,6 +180,18 @@ Tu peux aussi l'installer comme une application : dans ton navigateur, cherche l
 « Installer » dans la barre d'adresse. Une fois installée, GitQuest fonctionne **hors
 ligne**, y compris dans le train.
 
+### Sur Android, en APK
+
+Télécharge l'APK signé depuis les
+[releases GitHub](https://github.com/MattiaPARRINELLO/git-quest/releases/latest) (4 Mo).
+Android demande d'autoriser l'installation depuis cette source, puis tout le jeu vit sur
+l'appareil : démarrage sans réseau, sans compte, sans navigateur.
+
+C'est la même application que la version web, empaquetée : le terminal y gagne une barre
+de touches (`-`, `"`, `/`, `.`, `_`, `~`, espace, `Tab`, historique, `Entrée`) pour taper
+du Git au pouce sans refermer le clavier, les suggestions de complétion se touchent au
+doigt, et le graphe se zoome à deux doigts.
+
 > **Astuce** : commence par le prologue, puis le chapitre 1. Tu peux aussi ouvrir
 > directement le bac à sable si tu veux juste essayer des commandes.
 
@@ -203,7 +216,14 @@ Environ 2 à 3 heures pour tout le parcours, en plusieurs sessions. La progressi
 conservée.
 
 **Ça marche sur téléphone ?**
-Oui. L'interface s'adapte en onglets Terminal / Graphe / Fichiers.
+Oui. L'interface s'adapte en onglets Terminal / Graphe / Fichiers, avec une barre de
+touches pour les caractères Git et un graphe qui se zoome au doigt. Il existe aussi un
+**APK Android** à installer depuis les releases, pour jouer sans navigateur.
+
+**Est-ce que mes étoiles sont conservées si je change d'appareil ?**
+Pas automatiquement : la progression reste sur l'appareil. L'écran d'accueil propose
+« Sauvegarder » / « Restaurer » : un texte JSON à copier, qui contient tes étoiles, tes
+cours lus et ton arbre Nova.
 
 **C'est gratuit ?**
 Oui, et sans publicité ni compte.
@@ -220,14 +240,23 @@ composant.
 
 ```bash
 npm ci
-npm run dev        # développement local
-npm test           # 414 tests
-npm run build      # build PWA
+npm run dev          # développement local
+npm test             # 433 tests
+npm run build        # build PWA
+npm run android:apk  # APK Android de développement
+npm run android:aab  # AAB + APK signés, pour le Play Store
 ```
+
+Deux livrables, une seule base de code : le `dist/` produit par Vite alimente la PWA et
+est embarqué tel quel dans la coquille Capacitor. Les seules différences sont déclaratives
+— détection de plateforme dans `src/native/`, affordances tactiles montées selon la taille
+d'écran — jamais un second rendu à maintenir.
 
 Documentation technique : [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 [`docs/VERIFY.md`](docs/VERIFY.md) · [`docs/CI.md`](docs/CI.md) ·
-[`docs/STORY-REPO.md`](docs/STORY-REPO.md).
+[`docs/STORY-REPO.md`](docs/STORY-REPO.md) · [`docs/NATIVE-ANDROID.md`](docs/NATIVE-ANDROID.md)
+— et, côté Android : [`docs/ANDROID-VERIFY.md`](docs/ANDROID-VERIFY.md) (recette sur
+appareil) et [`docs/RELEASE.md`](docs/RELEASE.md) (signature et Play Store).
 
 Envie de contribuer ? Les conventions et les guides « ajouter une commande / une
 mission » sont dans [`AGENTS.md`](AGENTS.md) et dans l'architecture.

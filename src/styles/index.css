@@ -210,6 +210,18 @@ html.light {
   .animate-fade-up {
     animation: fade-up 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
+
+  /*
+   * Cadre de sécurité pour les écrans bord à bord (Android 15+ force l'edge-to-edge,
+   * la coquille Capacitor affiche le contenu sous la barre de statut et la barre
+   * de gestes). Sur le web et sur desktop les encarts valent 0 : aucun effet.
+   */
+  .safe-frame {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+  }
 }
 
 @keyframes fade-up {

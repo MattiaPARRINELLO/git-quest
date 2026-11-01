@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fr" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0e100e" />
+    <title>GitQuest — Confidentialité</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0e100e;
+        --panel: #141714;
+        --border: #272d27;
+        --text: #e9ece6;
+        --muted: #99a299;
+        --accent: #ec6a40;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 2.5rem 1.25rem 4rem;
+        background: var(--bg);
+        color: var(--text);
+        font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+      main {
+        max-width: 42rem;
+        margin: 0 auto;
+      }
+      a {
+        color: var(--accent);
+      }
+      h1 {
+        font-size: 1.6rem;
+        line-height: 1.2;
+        margin: 0 0 0.35rem;
+        letter-spacing: -0.01em;
+      }
+      h2 {
+        font-size: 0.95rem;
+        margin: 2rem 0 0.5rem;
+      }
+      .lede {
+        color: var(--muted);
+        margin: 0 0 2rem;
+        font-size: 0.9rem;
+      }
+      ul {
+        padding-left: 1.1rem;
+      }
+      li {
+        margin: 0.35rem 0;
+      }
+      .card {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        border-radius: 0.75rem;
+        padding: 1rem 1.15rem;
+      }
+      code {
+        font-size: 0.85em;
+      }
+      footer {
+        margin-top: 2.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Politique de confidentialité — GitQuest</h1>
+      <p class="lede">Dernière mise à jour : 1<sup>er</sup> novembre 2026.</p>
+
+      <div class="card">
+        <strong>Aucune donnée personnelle n'est collectée, transmise ni revendue.</strong>
+        GitQuest fonctionne entièrement hors ligne : l'application n'effectue
+        aucune requête réseau, n'a ni compte utilisateur, ni publicité, ni outil
+        de mesure d'audience.
+      </div>
+
+      <h2>1. Données enregistrées sur l'appareil</h2>
+      <p>
+        La progression (missions terminées, étoiles, slides de cours lus, état de
+        l'arbre du mode histoire, brouillons en cours), le thème clair ou sombre et
+        le réglage des explications sont stockés <strong>uniquement en local</strong>,
+        dans le stockage de l'application (<code>IndexedDB</code> et
+        <code>localStorage</code>).
+      </p>
+      <ul>
+        <li>Ces données ne quittent jamais l'appareil.</li>
+        <li>Elles ne sont lisibles que par GitQuest.</li>
+        <li>
+          Elles sont supprimées quand tu désinstalles l'application ou que tu
+          effaces ses données depuis les réglages Android.
+        </li>
+      </ul>
+
+      <h2>2. Sauvegarde manuelle</h2>
+      <p>
+        L'écran d'accueil propose d'exporter la progression sous forme de texte
+        JSON. Cet export est déclenché par toi, copié dans le presse-papiers ou
+        téléchargé sur ton appareil : personne d'autre n'y a accès.
+      </p>
+
+      <h2>3. Services tiers</h2>
+      <p>
+        Aucun service tiers n'est intégré : pas de régie publicitaire, pas de SDK
+        d'analyse, pas de service d'authentification, pas de rapport de plantage
+        distant. Aucune permission Android sensible n'est demandée (ni contacts, ni
+        localisation, ni caméra, ni micro, ni accès aux fichiers).
+      </p>
+
+      <h2>4. Enfants</h2>
+      <p>
+        L'application ne collecte aucune donnée et ne diffuse aucun contenu
+        publicitaire : elle convient à tous les publics, y compris aux mineurs.
+      </p>
+
+      <h2>5. Tes droits</h2>
+      <p>
+        Aucune donnée n'étant collectée, il n'y a rien à consulter, corriger ou
+        supprimer à distance. Pour effacer les données locales, désinstalle
+        l'application ou utilise « Effacer les données » dans les réglages Android.
+      </p>
+
+      <h2>6. Modifications</h2>
+      <p>
+        Si cette politique change, la date ci-dessus est mise à jour et la nouvelle
+        version est publiée à cette adresse.
+      </p>
+
+      <h2>7. Contact</h2>
+      <p>
+        Pour toute question :
+        <a href="https://github.com/MattiaPARRINELLO/git-quest/issues">ouvrir une issue sur le dépôt GitQuest</a>.
+      </p>
+
+      <footer>
+        gitquest — application pédagogique pour apprendre Git par la visualisation
+        du graphe.
+      </footer>
+    </main>
+  </body>
+</html>

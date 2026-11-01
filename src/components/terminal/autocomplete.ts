@@ -43,6 +43,11 @@ function replaceLastToken(input: string, value: string): string {
   return `${input.slice(0, match.index)}${value}`;
 }
 
+/** Remplace le dernier mot saisi par une suggestion choisie au doigt. */
+export function applySuggestion(input: string, suggestion: string): string {
+  return replaceLastToken(input, suggestion);
+}
+
 function files(state: RepoState): string[] {
   const worktree = state.worktrees[state.activeWorktree];
   return worktree ? Object.keys(worktree.workingDir).sort() : [];

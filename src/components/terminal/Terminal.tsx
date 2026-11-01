@@ -5,7 +5,9 @@ import { useUiStore } from '../../store/useUiStore';
 import type { TerminalEntry } from '../../store/useRepoStore';
 import { promptFor } from '../../lib/prompt';
 import { cn } from '../../lib/cn';
-import { completeInput } from './autocomplete';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { applySuggestion, completeInput } from './autocomplete';
+import { KeyBar } from './KeyBar';
 import type { OutputTone } from '../../engine/types';
 
 const TONE_CLASSES: Record<OutputTone, string> = {
@@ -57,6 +59,7 @@ export function Terminal({ onCommand }: TerminalProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   useEffect(() => {
     const element = logRef.current;
@@ -87,6 +90,64 @@ export function Terminal({ onCommand }: TerminalProps) {
     inputRef.current?.focus();
   };
 
+  const complete = () => {
+    const completion = completeInput(input, state);
+    setInput(completion.value);
+    setSuggestions(completion.suggestions);
+  };
+
+  const navigateHistory = (direction: 'up' | 'down') => {
+    if (direction === 'up') {
+      if (commandHistory.length === 0) return;
+      const index =
+        historyIndex === null ? commandHistory.length - 1 : Math.max(0, historyIndex - 1);
+      setHistoryIndex(index);
+      setInput(commandHistory[index] ?? '');
+      setSuggestions([]);
+      return;
+    }
+    if (historyIndex === null) return;
+    if (historyIndex >= commandHistory.length - 1) {
+      setHistoryIndex(null);
+      setInput('');
+      return;
+    }
+    const index = historyIndex + 1;
+    setHistoryIndex(index);
+    setInput(commandHistory[index] ?? '');
+  };
+
+  /**
+   * Insère un texte à la position du curseur, sans perdre le clavier tactile :
+   * la valeur est contrôlée par React, donc le curseur est replacé après le
+   * rendu.
+   */
+  const insertAtCaret = (text: string) => {
+    const element = inputRef.current;
+    const start = element?.selectionStart ?? input.length;
+    const end = element?.selectionEnd ?? input.length;
+    setInput(`${input.slice(0, start)}${text}${input.slice(end)}`);
+    setHistoryIndex(null);
+    setSuggestions([]);
+    const caret = start + text.length;
+    requestAnimationFrame(() => {
+      element?.focus();
+      element?.setSelectionRange(caret, caret);
+    });
+  };
+
+  const chooseSuggestion = (suggestion: string) => {
+    const next = applySuggestion(input, suggestion);
+    setInput(next);
+    setSuggestions([]);
+    setHistoryIndex(null);
+    const caret = next.length;
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange(caret, caret);
+    });
+  };
+
   const onKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -96,9 +157,7 @@ export function Terminal({ onCommand }: TerminalProps) {
 
     if (event.key === 'Tab') {
       event.preventDefault();
-      const completion = completeInput(input, state);
-      setInput(completion.value);
-      setSuggestions(completion.suggestions);
+      complete();
       return;
     }
 
@@ -118,26 +177,13 @@ export function Terminal({ onCommand }: TerminalProps) {
 
     if (event.key === 'ArrowUp') {
       event.preventDefault();
-      if (commandHistory.length === 0) return;
-      const index =
-        historyIndex === null ? commandHistory.length - 1 : Math.max(0, historyIndex - 1);
-      setHistoryIndex(index);
-      setInput(commandHistory[index] ?? '');
-      setSuggestions([]);
+      navigateHistory('up');
       return;
     }
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      if (historyIndex === null) return;
-      if (historyIndex >= commandHistory.length - 1) {
-        setHistoryIndex(null);
-        setInput('');
-        return;
-      }
-      const index = historyIndex + 1;
-      setHistoryIndex(index);
-      setInput(commandHistory[index] ?? '');
+      navigateHistory('down');
       return;
     }
   };
@@ -184,17 +230,41 @@ export function Terminal({ onCommand }: TerminalProps) {
             spellCheck={false}
             autoComplete="off"
             autoCapitalize="off"
+            autoCorrect="off"
             aria-label="Commande Git"
-            className="min-w-0 flex-1 border-none bg-transparent p-0 font-mono text-[12.5px] leading-6 text-text caret-accent outline-none placeholder:text-muted/50"
+            className="min-w-0 flex-1 border-none bg-transparent p-0 font-mono text-[16px] leading-6 text-text caret-accent outline-none placeholder:text-muted/50 sm:text-[12.5px]"
             placeholder="git status"
           />
         </div>
         {suggestions.length > 1 && (
-          <div className="mt-1 pl-1 font-mono text-[11px] text-muted">
-            {suggestions.slice(0, 8).join('  ·  ')}
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {suggestions.slice(0, 8).map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                // Le clavier tactile reste ouvert : pas de prise de focus.
+                onPointerDown={(event) => event.preventDefault()}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  chooseSuggestion(suggestion);
+                }}
+                className="rounded border border-border bg-panel-2 px-2.5 py-1.5 font-mono text-[11px] text-text transition-colors active:bg-panel-3"
+              >
+                {suggestion}
+              </button>
+            ))}
           </div>
         )}
       </div>
+
+      {isMobile && (
+        <KeyBar
+          onInsert={insertAtCaret}
+          onComplete={complete}
+          onHistory={navigateHistory}
+          onSubmit={submit}
+        />
+      )}
     </div>
   );
 }

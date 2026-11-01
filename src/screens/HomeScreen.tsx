@@ -17,6 +17,7 @@ import { routePaths } from '../router/useHashRoute';
 import { branchColor } from '../lib/colors';
 import { Icon } from '../components/ui/Icon';
 import { CommitGraph } from '../components/graph/CommitGraph';
+import { ProgressBackup } from '../components/layout/ProgressBackup';
 import { cn } from '../lib/cn';
 
 /** Trois repères pleins ou vides : la note se lit d'un coup d'œil. */
@@ -357,7 +358,10 @@ export function HomeScreen() {
         </section>
 
         <footer className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[11.5px] text-muted">
-          <span>GitQuest — progression enregistrée sur cet appareil.</span>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>GitQuest — progression enregistrée sur cet appareil.</span>
+            <ProgressBackup />
+          </span>
           <a href={routePaths.sandbox} className="inline-flex items-center gap-1 hover:text-text">
             Terminal libre <Icon name="arrow-right" size={12} />
           </a>

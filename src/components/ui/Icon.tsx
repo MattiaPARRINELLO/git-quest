@@ -16,7 +16,8 @@ export type IconName =
   | 'arrow-right'
   | 'book'
   | 'award'
-  | 'menu';
+  | 'menu'
+  | 'close';
 
 const PATHS: Record<IconName, string> = {
   terminal: 'M4 5h16v14H4zM7 9l3 3-3 3M12 15h5',
@@ -35,6 +36,7 @@ const PATHS: Record<IconName, string> = {
   book: 'M4 4h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H4zM20 4h-3a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h3z',
   award: 'M12 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM8.5 12.5 7 21l5-2.5L17 21l-1.5-8.5',
   menu: 'M4 7h16M4 12h16M4 17h16',
+  close: 'M6 6l12 12M18 6 6 18',
 };
 
 interface IconProps extends SVGProps<SVGSVGElement> {

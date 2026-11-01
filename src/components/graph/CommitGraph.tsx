@@ -91,6 +91,16 @@ export function CommitGraph({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ pointerId: number; x: number; y: number } | null>(null);
+  /** Pointeurs actifs : deux doigts déclenchent un pincement (zoom tactile). */
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{
+    distance: number;
+    scale: number;
+    originX: number;
+    originY: number;
+    centerX: number;
+    centerY: number;
+  } | null>(null);
   const lastBatchId = useRef(batch.id);
   const initialized = useRef(false);
 
@@ -181,13 +191,56 @@ export function CommitGraph({
     if (target instanceof Element && target.closest(INTERACTIVE_SELECTOR) !== null) {
       return;
     }
-    dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (typeof event.currentTarget.setPointerCapture === 'function') {
       event.currentTarget.setPointerCapture(event.pointerId);
     }
+
+    const pointers = [...pointersRef.current.values()];
+    const first = pointers[0];
+    const second = pointers[1];
+    if (pointers.length >= 2 && first && second) {
+      // Deux doigts : le déplacement cède la place au pincement.
+      dragRef.current = null;
+      const bounds = containerRef.current?.getBoundingClientRect();
+      const current = viewRef.current;
+      pinchRef.current = {
+        distance: Math.hypot(second.x - first.x, second.y - first.y),
+        scale: current.scale,
+        originX: current.x,
+        originY: current.y,
+        centerX: (first.x + second.x) / 2 - (bounds?.left ?? 0),
+        centerY: (first.y + second.y) / 2 - (bounds?.top ?? 0),
+      };
+      return;
+    }
+
+    dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (pointersRef.current.has(event.pointerId)) {
+      pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    }
+
+    const pinch = pinchRef.current;
+    if (pinch !== null && pointersRef.current.size >= 2) {
+      const pointers = [...pointersRef.current.values()];
+      const first = pointers[0];
+      const second = pointers[1];
+      if (!first || !second || pinch.distance === 0) return;
+      const distance = Math.hypot(second.x - first.x, second.y - first.y);
+      const nextScale = clampScale(pinch.scale * (distance / pinch.distance));
+      // Le point sous les doigts reste immobile pendant le zoom.
+      setView({
+        scale: nextScale,
+        x: pinch.centerX - ((pinch.centerX - pinch.originX) / pinch.scale) * nextScale,
+        y: pinch.centerY - ((pinch.centerY - pinch.originY) / pinch.scale) * nextScale,
+      });
+      return;
+    }
+
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     const deltaX = event.clientX - drag.x;
@@ -196,7 +249,10 @@ export function CommitGraph({
     setView((current) => ({ ...current, x: current.x + deltaX, y: current.y + deltaY }));
   };
 
-  const endDrag = () => {
+  const endDrag = (event?: ReactPointerEvent<HTMLDivElement>) => {
+    if (event === undefined) pointersRef.current.clear();
+    else pointersRef.current.delete(event.pointerId);
+    if (pointersRef.current.size < 2) pinchRef.current = null;
     dragRef.current = null;
   };
 
@@ -306,7 +362,7 @@ export function CommitGraph({
               tabIndex: 0,
               role: 'group',
               'aria-label':
-                'Graphe des commits — flèches pour déplacer, + et − pour zoomer, 0 pour recentrer',
+                'Graphe des commits — flèches ou glisser pour déplacer, pincer, + et − pour zoomer, 0 pour recentrer',
             })}
         className={cn(
           'relative h-full w-full touch-none',
@@ -463,7 +519,8 @@ export function CommitGraph({
         {!preview && (
           <>
             <div className="pointer-events-none absolute bottom-2.5 left-4 font-mono text-[10px] text-muted/70">
-              molette = zoom · glisser = déplacer
+              <span className="sm:hidden">pincer = zoom · glisser = déplacer</span>
+              <span className="hidden sm:inline">molette = zoom · glisser = déplacer</span>
             </div>
             <label className="absolute bottom-2.5 right-4 flex items-center gap-1.5 font-mono text-[10px] text-muted">
               <input
