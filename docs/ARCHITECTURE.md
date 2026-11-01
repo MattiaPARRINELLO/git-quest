@@ -421,6 +421,19 @@ toujours accessible.
 - `MissionComplete` : étoiles, commandes/par, note de réussite, solution de
   référence, mission suivante.
 
+### Layout mobile en mission
+
+- Panneau secondaire au-dessus des onglets, avec bascule **Mission / Fichiers**
+  (`SandboxLayout`) : la mission reste accessible sans consommer un onglet.
+- `MissionPanel` démarre replié en version mini (< 768 px) : titre, commandes/par,
+  étoiles, indice ; le détail (objectif, étapes, histoire, indices) s'ouvre à la
+  demande dans une zone scrollable bornée.
+- Les onglets mobiles se réduisent à Terminal / Graphe ; le bac à sable garde ses
+  trois onglets.
+- `useKeyboardOpen` (viewport visuel) masque le panneau secondaire et compacte
+  l'en-tête du terminal quand le clavier virtuel est ouvert : l'historique
+  conserve la hauteur disponible.
+
 ### Prédictions
 
 - `Prediction.trigger(parsed: ParsedCommand, state: RepoState) => boolean` est

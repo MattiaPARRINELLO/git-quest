@@ -4,6 +4,8 @@ import { useRepoStore } from '../../store/useRepoStore';
 import { useUiStore } from '../../store/useUiStore';
 import type { TerminalEntry } from '../../store/useRepoStore';
 import { promptFor } from '../../lib/prompt';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { useKeyboardOpen } from '../../hooks/useKeyboardOpen';
 import { cn } from '../../lib/cn';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { applySuggestion, completeInput } from './autocomplete';
@@ -52,6 +54,8 @@ export function Terminal({ onCommand }: TerminalProps) {
   const clearTerminal = useRepoStore((store) => store.clearTerminal);
   const commandPrefill = useUiStore((store) => store.commandPrefill);
   const clearPrefill = useUiStore((store) => store.clearPrefill);
+  const isMobile = useMediaQuery('(max-width: 767px)');
+  const keyboardOpen = useKeyboardOpen();
 
   const [input, setInput] = useState('');
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
@@ -69,6 +73,13 @@ export function Terminal({ onCommand }: TerminalProps) {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Clavier ouvert : on recolle l'historique sur la dernière ligne.
+  useEffect(() => {
+    if (!keyboardOpen) return;
+    const element = logRef.current;
+    if (element) element.scrollTop = element.scrollHeight;
+  }, [keyboardOpen]);
 
   useEffect(() => {
     if (commandPrefill === null) return;
@@ -193,15 +204,17 @@ export function Terminal({ onCommand }: TerminalProps) {
       className="flex h-full min-h-0 flex-col bg-bg text-text"
       onClick={() => inputRef.current?.focus()}
     >
-      <div className="flex h-9 shrink-0 items-center justify-between border-b border-border px-3">
-        <div className="flex items-center gap-2 text-[12px] text-muted">
-          <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
-          Terminal
+      {!(isMobile && keyboardOpen) && (
+        <div className="flex h-9 shrink-0 items-center justify-between border-b border-border px-3">
+          <div className="flex items-center gap-2 text-[12px] text-muted">
+            <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
+            Terminal
+          </div>
+          <span className="hidden font-mono text-[10px] text-muted/70 sm:inline">
+            ↑↓ historique · Tab complétion · Ctrl+L effacer
+          </span>
         </div>
-        <span className="hidden font-mono text-[10px] text-muted/70 sm:inline">
-          ↑↓ historique · Tab complétion · Ctrl+L effacer
-        </span>
-      </div>
+      )}
 
       <div
         ref={logRef}
@@ -215,7 +228,12 @@ export function Terminal({ onCommand }: TerminalProps) {
         ))}
       </div>
 
-      <div className="shrink-0 border-t border-border/70 px-3 py-2.5">
+      <div
+        className={cn(
+          'shrink-0 border-t border-border/70 px-3',
+          isMobile && keyboardOpen ? 'py-1.5' : 'py-2.5',
+        )}
+      >
         <div className="flex items-start gap-2 font-mono text-[12.5px] leading-6">
           <span className="shrink-0 select-none text-accent-2">{promptFor(state)}</span>
           <input

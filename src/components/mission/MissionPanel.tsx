@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { Mission } from '../../content/types';
 import type { RepoState } from '../../engine/types';
 import { missionText, starsFor } from '../../app/mission';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { cn } from '../../lib/cn';
 import { Icon } from '../ui/Icon';
 
@@ -39,7 +40,9 @@ export function MissionPanel({
   onHint,
   onSuggest,
 }: MissionPanelProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  // Sur mobile la mission démarre en version mini : le terminal garde la place.
+  const compact = useMediaQuery('(max-width: 767px)');
+  const [collapsed, setCollapsed] = useState(compact);
   const stars = starsFor(commandsUsed, mission.par);
   const texts = missionText(mission, state);
   const remainingHints = mission.hints.length - hintsUsed;
@@ -53,7 +56,7 @@ export function MissionPanel({
       className="shrink-0 border-b border-border bg-panel"
       aria-label={`Mission ${mission.number} : ${mission.title}`}
     >
-      <div className="flex items-start justify-between gap-3 px-3 py-2.5">
+      <div className="flex items-start justify-between gap-3 px-3 py-2 md:py-2.5">
         <div className="flex min-w-0 items-start gap-2.5">
           <span aria-hidden="true" className="mt-1.5 h-3.5 w-[2px] shrink-0 rounded-full bg-accent" />
           <div className="min-w-0">
@@ -67,7 +70,7 @@ export function MissionPanel({
               </span>
               <StarDots count={stars} />
             </div>
-            <p className="mt-1 text-[11.5px] leading-snug text-muted">
+            <p className="mt-1 hidden text-[11.5px] leading-snug text-muted md:block">
               <span className="text-muted/70">Situation de départ · </span>
               {mission.situation}
             </p>
@@ -116,7 +119,7 @@ export function MissionPanel({
             transition={{ duration: 0.18, ease: [0.2, 0.7, 0.2, 1] }}
             className="overflow-hidden"
           >
-            <div className="scrollbar-thin max-h-56 overflow-y-auto px-3 pb-3">
+            <div className="scrollbar-thin max-h-[45dvh] overflow-y-auto px-3 pb-3 md:max-h-56">
               <div className="border-l-2 border-accent/70 pl-2.5">
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="mono-meta">Objectif</p>
