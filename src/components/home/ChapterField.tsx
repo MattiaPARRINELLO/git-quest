@@ -51,7 +51,7 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
         aria-labelledby={headingId}
         className={cn('field', `field-${lane}`)}
       >
-        <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-20">
+        <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-20">
           <div>
             <Reveal>
               <h2 id={headingId} className="display display-xl max-w-[18ch] text-balance">
@@ -97,7 +97,7 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
             <ol className="relative mt-4">
               <span
                 aria-hidden="true"
-                className="absolute bottom-4 left-[5px] top-4 w-[2px] bg-current opacity-25"
+                className="absolute bottom-4 left-[6px] top-4 w-[2px] bg-current opacity-40"
               />
               {chapter.missions.map((mission) => {
                 const unlocked = isMissionUnlocked(mission.id, completed);
@@ -114,7 +114,7 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
                         <span
                           aria-hidden="true"
                           className={cn(
-                            'relative z-10 mt-[7px] h-3 w-3 shrink-0',
+                            'relative z-10 mt-[6px] h-3.5 w-3.5 shrink-0',
                             completion ? 'bg-current' : 'bg-current/30',
                           )}
                         />
@@ -123,7 +123,7 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
                             <span className="text-[13px] tabular-nums opacity-60">
                               {mission.number}
                             </span>
-                            <span className="text-[15px] font-medium leading-snug">
+                            <span className="text-[16px] font-medium leading-snug">
                               {mission.title}
                             </span>
                             {isHead && (
@@ -160,7 +160,7 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
                             <span className="text-[13px] tabular-nums opacity-60">
                               {mission.number}
                             </span>
-                            <span className="text-[15px] leading-snug">{mission.title}</span>
+                            <span className="text-[16px] leading-snug">{mission.title}</span>
                           </span>
                           <span className="mt-1 flex items-center gap-1.5 text-[13px]">
                             <Icon name="lock" size={11} />

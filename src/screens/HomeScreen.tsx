@@ -53,7 +53,7 @@ export function HomeScreen() {
     <div>
       <article>
         {/* OUVERTURE — ce que c'est, où tu en es, l'objet qui le prouve. */}
-        <section className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:min-h-[78svh] lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16">
+        <section className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] lg:gap-16">
           <Reveal y={22}>
             <h1 className="display display-xl max-w-[17ch] text-balance">
               Apprends Git en voyant le graphe.
@@ -92,6 +92,10 @@ export function HomeScreen() {
 
           <Reveal delay={0.12} className="min-w-0">
             <GraphFragment />
+            <p className="mt-3 text-[13px] text-muted">
+              Le dépôt de Nova : quatre commits, une branche fusionnée. Chaque mission en ajoute
+              un.
+            </p>
           </Reveal>
         </section>
 
@@ -163,17 +167,17 @@ export function HomeScreen() {
             Quatre panneaux, un seul dépôt. Le terminal écrit, le graphe répond, le pipeline
             montre le fichier qui traverse l’index, la prédiction te fait parier avant de voir.
           </p>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <Reveal>
+          <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-12">
+            <Reveal className="lg:col-span-7">
               <TerminalFragment />
             </Reveal>
-            <Reveal delay={0.08}>
+            <Reveal delay={0.08} className="lg:col-span-5">
               <MissionFragment />
             </Reveal>
-            <Reveal delay={0.16}>
+            <Reveal delay={0.16} className="lg:col-span-5">
               <PipelineFragment />
             </Reveal>
-            <Reveal delay={0.24}>
+            <Reveal delay={0.24} className="lg:col-span-7">
               <PredictionFragment />
             </Reveal>
           </div>
@@ -204,18 +208,18 @@ export function HomeScreen() {
               <ProgressPanel summary={summary} />
             </Reveal>
 
-            <Reveal className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+            <Reveal className="mt-4 space-y-4">
               {lastCompleted !== undefined && lastBriefing?.outcome !== undefined && (
-                <section className="bg-panel-2 p-6" aria-label="Dernier épisode">
+                <section className="bg-panel-2 p-6 lg:p-7" aria-label="Dernier épisode">
                   <p className="text-[13px] text-muted">
                     Dernier épisode · {lastCompleted.number}
                   </p>
-                  <p className="mt-1.5 text-[17px] font-medium text-text">{lastCompleted.title}</p>
-                  <p className="mt-2 text-[16px] leading-relaxed text-muted">
+                  <p className="mt-1.5 text-[18px] font-medium text-text">{lastCompleted.title}</p>
+                  <p className="mt-2 max-w-[72ch] text-[16px] leading-relaxed text-muted">
                     {lastBriefing.outcome}
                   </p>
                   {lastBriefing.teaser !== undefined && (
-                    <p className="mt-3 text-[13px] leading-relaxed text-muted">
+                    <p className="mt-3 max-w-[72ch] text-[14px] leading-relaxed text-muted">
                       <span className="text-text">À suivre · </span>
                       {lastBriefing.teaser}
                     </p>
@@ -223,16 +227,21 @@ export function HomeScreen() {
                 </section>
               )}
 
-              <section className="bg-panel-2 p-6" aria-label="Ton arbre Nova">
-                <p className="text-[13px] text-muted">Le dépôt que tu construis</p>
-                <p className="mt-1.5 text-[17px] font-medium text-text">L’arbre de Nova</p>
-                <p className="mt-2 text-[16px] leading-relaxed text-muted">
-                  Chaque mission laisse un commit. À la fin, tu ouvres l’arbre complet et tu le
-                  lis comme une histoire.
-                </p>
+              <section
+                className="bg-panel-2 p-6 lg:flex lg:items-center lg:justify-between lg:gap-12 lg:p-7"
+                aria-label="Ton arbre Nova"
+              >
+                <div>
+                  <p className="text-[13px] text-muted">Le dépôt que tu construis</p>
+                  <p className="mt-1.5 text-[18px] font-medium text-text">L’arbre de Nova</p>
+                  <p className="mt-2 max-w-[60ch] text-[16px] leading-relaxed text-muted">
+                    Chaque mission laisse un commit. À la fin, tu ouvres l’arbre complet et tu le
+                    lis comme une histoire.
+                  </p>
+                </div>
                 <a
                   href={routePaths.nova}
-                  className="mt-4 inline-flex items-center gap-2 text-[15px] text-text hover:text-accent-ink"
+                  className="btn btn-quiet mt-4 h-11 w-fit shrink-0 gap-2 px-4 text-[15px] lg:mt-0"
                 >
                   Ton arbre Nova
                   <Icon name="arrow-right" size={14} />

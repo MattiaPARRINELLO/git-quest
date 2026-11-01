@@ -54,7 +54,7 @@ export function GraphFragment() {
         <span className="text-text">nova · main</span>
         <span className="text-muted">4 commits · 2 branches</span>
       </div>
-      <div className="mt-2 h-[248px]">
+      <div className="mt-3 h-[320px]">
         <CommitGraph state={previewState} batch={emptyBatch} preview bare />
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-4 text-[13px] text-muted">
