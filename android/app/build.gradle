@@ -19,8 +19,8 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         // À incrémenter à chaque envoi sur le Play Store : un même applicationId
         // ne peut jamais recevoir deux fois le même versionCode.
-        versionCode 2
-        versionName "1.0.1"
+        versionCode 3
+        versionName "1.0.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

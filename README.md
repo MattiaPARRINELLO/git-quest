@@ -86,6 +86,10 @@ Deux ou trois heures suffisent pour faire tout le parcours. Et si tu veux juste 
 sans leçon, le **bac à sable** est toujours ouvert : un terminal Git libre, avec le même
 graphe.
 
+Chaque chapitre a **sa couleur**, la même que sa voie dans le graphe : la carte de
+progression se lit comme un dépôt, et HEAD marque la mission où tu en es. Un seul accent
+vif, réservé à l'action.
+
 ---
 
 ## Aperçu
@@ -93,17 +97,17 @@ graphe.
 <table>
   <tr>
     <td width="50%">
-      <img src="docs/screenshots/home.png" alt="Carte de progression, XP, niveaux et badges">
-      <p align="center"><sub><b>La carte</b> — tu vois où tu en es, chapitre par chapitre.</sub></p>
+      <img src="docs/screenshots/home.png" alt="Accueil : le dépôt de Nova, son graphe et le bouton de reprise">
+      <p align="center"><sub><b>L'accueil</b> — où tu en es, et le dépôt que tu construis.</sub></p>
     </td>
     <td width="50%">
-      <img src="docs/screenshots/lesson.png" alt="Cours avec diagramme fast-forward et merge commit">
+      <img src="docs/screenshots/lesson.png" alt="Cours : une notion, un schéma et une démonstration rejouée">
       <p align="center"><sub><b>Les cours</b> — un concept, un schéma, une démo jouée.</sub></p>
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <img src="docs/screenshots/mission.png" alt="Mission avec objectif, checklist, terminal, graphe et pipeline">
+      <img src="docs/screenshots/mission.png" alt="Mission : objectif, étapes, terminal, graphe et pipeline">
       <p align="center"><sub><b>Les missions</b> — une vraie situation, des indices, des étoiles.</sub></p>
     </td>
     <td width="50%">
@@ -112,6 +116,12 @@ graphe.
     </td>
   </tr>
 </table>
+
+<p align="center">
+  <img src="docs/screenshots/chapters.png" alt="Le parcours : chaque chapitre est une voie, avec sa couleur et ses missions">
+  <br>
+  <sub><b>Le parcours</b> — six voies, une couleur par chapitre, tes missions posées dessus.</sub>
+</p>
 
 <p align="center">
   <img src="docs/screenshots/home-mobile.png" alt="GitQuest sur mobile" width="280">
@@ -241,7 +251,7 @@ composant.
 ```bash
 npm ci
 npm run dev          # développement local
-npm test             # 433 tests
+npm test             # 436 tests
 npm run build        # build PWA
 npm run android:apk  # APK Android de développement
 npm run android:aab  # AAB + APK signés, pour le Play Store

@@ -1,57 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="GitQuest — apprends Git en voyant le graphe">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#12151a"/>
-      <stop offset="1" stop-color="#0b0d10"/>
-    </linearGradient>
-    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#ff7a45" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="#ff7a45" stop-opacity="0"/>
-    </linearGradient>
     <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-opacity="0.035" stroke-width="1"/>
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-opacity="0.03" stroke-width="1"/>
     </pattern>
   </defs>
 
-  <rect width="1280" height="400" fill="url(#bg)"/>
+  <rect width="1280" height="400" fill="#0b0d0b"/>
   <rect width="1280" height="400" fill="url(#grid)"/>
-  <rect x="0" y="0" width="1280" height="2" fill="url(#glow)"/>
+  <rect x="0" y="0" width="1280" height="4" fill="#d6f24b"/>
 
-  <!-- Glyphe GitQuest -->
-  <g transform="translate(72 66)" fill="none" stroke="#ff7a45" stroke-width="4" stroke-linecap="round">
-    <path d="M6 34 L34 6"/>
-    <circle cx="8" cy="36" r="7" fill="#12151a"/>
-    <circle cx="36" cy="36" r="7" fill="#12151a"/>
-    <circle cx="36" cy="8" r="7" fill="#12151a"/>
-    <path d="M15 36 H29" stroke-width="4"/>
-    <path d="M36 15 V29" stroke-width="4"/>
+  <!-- Glyphe GitQuest : une route qui bifurque, terminée par HEAD. -->
+  <g transform="translate(72 62)">
+    <path d="M8 46 V20 a10 10 0 0 1 10-10 h16" fill="none" stroke="#eef1e9" stroke-width="4"/>
+    <path d="M34 10 h14 M34 10 l7 7 M34 10 l7-7" fill="none" stroke="#eef1e9" stroke-width="4"/>
+    <rect x="2" y="40" width="12" height="12" fill="#eef1e9"/>
+    <rect x="2" y="4" width="12" height="12" fill="#eef1e9"/>
+    <rect x="42" y="4" width="12" height="12" fill="#d6f24b"/>
   </g>
 
-  <text x="72" y="176" font-family="Georgia, 'Times New Roman', serif" font-size="86" fill="#f4f1ea" letter-spacing="-1">GitQuest</text>
-  <text x="75" y="221" font-family="Menlo, Consolas, monospace" font-size="15" fill="#ff9d73" letter-spacing="3">APPRENDRE GIT PAR LA PRATIQUE</text>
-  <text x="75" y="262" font-family="Georgia, serif" font-size="21" fill="#a7b0ba">Terminal simulé, graphe animé : chaque commande devient visible.</text>
-  <text x="75" y="322" font-family="Menlo, Consolas, monospace" font-size="13" fill="#6f7a86">6 chapitres  ·  19 missions  ·  PWA hors ligne  ·  zéro backend</text>
+  <text x="142" y="98" font-family="Georgia, 'Times New Roman', serif" font-size="34" fill="#eef1e9">GitQuest</text>
 
-  <!-- Graphe décoratif -->
-  <g transform="translate(760 70)">
-    <line x1="0" y1="130" x2="440" y2="130" stroke="#5b6470" stroke-width="3"/>
-    <path d="M0 130 C 90 34, 210 34, 300 130" fill="none" stroke="#e85c8a" stroke-width="3"/>
-    <path d="M300 130 C 350 130, 380 130, 440 130" fill="none" stroke="#57c7a1" stroke-width="3"/>
-    <path d="M300 130 C 360 190, 400 190, 440 190" fill="none" stroke="#5b6470" stroke-width="3" stroke-dasharray="4 6"/>
+  <text x="72" y="196" font-family="Georgia, 'Times New Roman', serif" font-size="52" fill="#eef1e9" letter-spacing="-1.2">Apprends Git</text>
+  <text x="72" y="252" font-family="Georgia, 'Times New Roman', serif" font-size="52" fill="#eef1e9" letter-spacing="-1.2">en voyant le graphe.</text>
+  <text x="74" y="300" font-family="Helvetica, Arial, sans-serif" font-size="19" fill="#a3ada0">Une vraie commande, et le dépôt se redessine.</text>
+  <text x="74" y="340" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#eef1e9">6 chapitres  ·  19 missions  ·  hors ligne  ·  sans compte</text>
 
-    <circle cx="0" cy="130" r="9" fill="#12151a" stroke="#5b6470" stroke-width="3"/>
-    <circle cx="300" cy="130" r="10" fill="#12151a" stroke="#ff7a45" stroke-width="4"/>
-    <circle cx="150" cy="66" r="9" fill="#12151a" stroke="#e85c8a" stroke-width="3"/>
-    <circle cx="440" cy="130" r="9" fill="#12151a" stroke="#57c7a1" stroke-width="3"/>
-    <circle cx="440" cy="190" r="7" fill="#12151a" stroke="#5b6470" stroke-width="3"/>
+  <!-- Six voies : la couleur d'un chapitre est celle de sa branche. -->
+  <g transform="translate(820 96)">
+    <g font-family="Helvetica, Arial, sans-serif" font-size="13">
+      <line x1="0" y1="40" x2="380" y2="40" stroke="#1f4a44" stroke-width="3"/>
+      <line x1="0" y1="96" x2="380" y2="96" stroke="#2c2440" stroke-width="3"/>
+      <line x1="0" y1="152" x2="380" y2="152" stroke="#3d2430" stroke-width="3"/>
+      <line x1="0" y1="208" x2="380" y2="208" stroke="#3a3520" stroke-width="3"/>
 
-    <g font-family="Menlo, Consolas, monospace" font-size="13">
-      <rect x="316" y="112" width="54" height="24" rx="12" fill="#24313d" stroke="#57c7a1" stroke-opacity="0.5"/>
-      <text x="327" y="129" fill="#9ae6cb">main</text>
-      <rect x="128" y="44" width="132" height="24" rx="12" fill="#33222c" stroke="#e85c8a" stroke-opacity="0.5"/>
-      <text x="140" y="61" fill="#ffa9c4">feature/login</text>
-      <text x="0" y="164" fill="#6f7a86">racine</text>
-      <text x="404" y="214" fill="#6f7a86">merge</text>
+      <circle cx="42" cy="40" r="9" fill="#0b0d0b" stroke="#5fd1c4" stroke-width="3"/>
+      <circle cx="128" cy="96" r="9" fill="#0b0d0b" stroke="#b8a6e0" stroke-width="3"/>
+      <circle cx="214" cy="152" r="9" fill="#0b0d0b" stroke="#e8a0b6" stroke-width="3"/>
+      <circle cx="300" cy="208" r="9" fill="#0b0d0b" stroke="#d9c37a" stroke-width="3"/>
+
+      <circle cx="128" cy="40" r="5" fill="#5fd1c4"/>
+      <circle cx="214" cy="96" r="5" fill="#b8a6e0"/>
+      <circle cx="300" cy="152" r="5" fill="#e8a0b6"/>
+      <circle cx="360" cy="208" r="5" fill="#d9c37a"/>
+
+      <rect x="118" y="50" width="4" height="4" fill="#d6f24b"/>
+      <text x="130" y="57" fill="#d6f24b" font-size="12">HEAD</text>
     </g>
   </g>
 </svg>
