@@ -127,7 +127,7 @@ export const en: Record<MessageKey, string> = {
   'mission.hintPrefix': 'Hint {index} · ',
   'mission.starsAria': '{count} star(s) out of 3',
   'mission.complete': 'Mission complete',
-  'mission.commandsCount': '{count} command(s) · par {par}',
+  'mission.commandsCount': '{count} command(s) · target {par}',
   'mission.takeawayLabel': 'What to notice',
   'mission.nextUp': 'Next up · ',
   'mission.solution': 'Reference solution',
