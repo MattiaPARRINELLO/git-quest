@@ -73,6 +73,13 @@ jobs:
       - name: Unit tests (vitest)
         run: npm test
 
+      # The differential suite replays the same scenarios in a real git
+      # repository. It is part of `npm test`; the explicit step makes a git
+      # regression visible on its own, and skips itself cleanly when git is
+      # missing (the Ubuntu runners ship it).
+      - name: Differential tests against real git
+        run: npx vitest run src/engine/__tests__/differential.test.ts
+
       - name: Production build (typecheck + PWA)
         run: npm run build
 
