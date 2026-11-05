@@ -7,19 +7,21 @@ import { progressSummary } from '../app/xp';
 import { ProgressPanel } from '../components/progress/ProgressPanel';
 import { routePaths } from '../router/useHashRoute';
 import { useProgressStore } from '../store/useProgressStore';
+import { useTranslation } from '../i18n/useTranslation';
 
 /**
  * Écran final : une dernière vue de l'arbre de Nova, les statistiques du
  * parcours et les sorties vers la carte des chapitres ou le bac à sable.
  */
 export function FinalScreen() {
+  const { locale, t } = useTranslation();
   const completed = useProgressStore((store) => store.completed);
   const lessonSlides = useProgressStore((store) => store.lessonSlides);
   const state = useMemo(() => createDemoState(), []);
   const batch = useMemo(() => ({ id: 0, events: [] }), []);
   const summary = useMemo(
     () => progressSummary({ completed, lessonSlides }),
-    [completed, lessonSlides],
+    [completed, lessonSlides, locale],
   );
 
   const totalMissions = chapters.reduce((sum, chapter) => sum + chapter.missions.length, 0);
@@ -29,22 +31,21 @@ export function FinalScreen() {
   return (
     <div className="scrollbar-thin h-full overflow-y-auto">
       <div className="mx-auto max-w-[1060px] px-5 py-12 sm:px-8 sm:py-16">
-        <h1 className="display text-balance text-[28px] leading-[1.1] sm:text-[32px]">Ton arbre Nova</h1>
+        <h1 className="display text-balance text-[28px] leading-[1.1] sm:text-[32px]">
+          {t('final.title')}
+        </h1>
         <p className="mt-5 max-w-[60ch] text-[17px] leading-[1.6] text-text">
-          Dix-neuf missions plus tard, tu lis un dépôt Git comme une histoire : des commits, des
-          branches qui pointent, un HEAD qui avance et des worktrees qui travaillent en parallèle.
+          {t('final.intro')}
         </p>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted">
-          Parcours terminé.
-        </p>
+        <p className="mt-3 text-[15px] leading-relaxed text-muted">{t('final.done')}</p>
         <p className="mt-4 flex flex-wrap items-baseline gap-x-10 gap-y-3 text-[15px] text-muted">
           <span className="inline-flex items-baseline gap-2">
             <span className="text-[28px] leading-none tabular-nums text-text">{done}</span>
-            missions sur {totalMissions}
+            {t('final.missionsLabel')} {totalMissions}
           </span>
           <span className="inline-flex items-baseline gap-2">
             <span className="text-[28px] leading-none tabular-nums text-text">{totalStars}</span>
-            étoiles sur {totalMissions * 3}
+            {t('final.starsLabel')} {totalMissions * 3}
           </span>
         </p>
 
@@ -58,11 +59,11 @@ export function FinalScreen() {
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <a href={routePaths.home} className="btn btn-quiet h-11 px-4">
-            Revoir la carte des chapitres
+            {t('final.reviewMap')}
           </a>
           <a href={routePaths.sandbox} className="btn btn-accent h-11 gap-2 px-5 text-[14px]">
             <Icon name="terminal" size={15} />
-            Continuer dans le bac à sable
+            {t('final.continueSandbox')}
           </a>
         </div>
       </div>

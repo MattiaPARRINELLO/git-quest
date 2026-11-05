@@ -31,10 +31,10 @@ describe('StagingPipeline', () => {
 
     expect(screen.getByText('≠ index')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /Working dir — README\.md/i }));
+    await user.click(screen.getByRole('button', { name: /Working dir · README\.md/i }));
     expect(await screen.findByText('version 2')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /Dernier commit — README\.md/i }));
+    await user.click(screen.getByRole('button', { name: /Dernier commit · README\.md/i }));
     expect(await screen.findByText('version 1')).toBeInTheDocument();
 
     await user.keyboard('{Escape}');

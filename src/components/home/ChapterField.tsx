@@ -2,6 +2,7 @@ import type { Chapter } from '../../content/types';
 import { estimatedLessonMinutes, isMissionUnlocked } from '../../content';
 import { routePaths } from '../../router/useHashRoute';
 import { cn } from '../../lib/cn';
+import { useTranslation } from '../../i18n/useTranslation';
 import { Icon } from '../ui/Icon';
 import { Reveal } from './Reveal';
 
@@ -15,8 +16,12 @@ export interface ChapterFieldProps {
 }
 
 function Stars({ count }: { readonly count: number }) {
+  const { t } = useTranslation();
   return (
-    <span className="inline-flex items-center gap-[3px]" aria-label={`${count} étoile(s) sur 3`}>
+    <span
+      className="inline-flex items-center gap-[3px]"
+      aria-label={t('chapter.starsAria', { count })}
+    >
       {[0, 1, 2].map((index) => (
         <span
           key={index}
@@ -41,6 +46,7 @@ function courseCommand(chapter: Chapter): string | null {
  * graphe ; les missions sont les nœuds posés dessus.
  */
 export function ChapterField({ chapter, lane, completed, headMissionId }: ChapterFieldProps) {
+  const { t } = useTranslation();
   const done = chapter.missions.filter((mission) => completed[mission.id] !== undefined).length;
   const command = courseCommand(chapter);
   const headingId = `chapitre-${chapter.id}`;
@@ -80,11 +86,15 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
                   className="ink-btn inline-flex h-10 items-center gap-2 px-4 text-[13.5px] font-medium"
                 >
                   <Icon name="book" size={14} />
-                  Lire le cours
+                  {t('chapter.readCourse')}
                 </a>
                 <span className="max-w-full text-[13px] tabular-nums opacity-80">
-                  Chapitre {chapter.number} · {done}/{chapter.missions.length} missions ·{' '}
-                  {estimatedLessonMinutes(chapter.lesson)} min de cours
+                  {t('chapter.meta', {
+                    number: chapter.number,
+                    done,
+                    total: chapter.missions.length,
+                    minutes: estimatedLessonMinutes(chapter.lesson),
+                  })}
                 </span>
               </div>
             </Reveal>
@@ -92,7 +102,7 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
 
           <Reveal delay={0.1} className="lg:pt-2">
             <p className="text-[13px] opacity-70">
-              {chapter.missions.length} missions sur cette voie
+              {t('chapter.missionsOnLane', { count: chapter.missions.length })}
             </p>
             <ol className="relative mt-4">
               <span
@@ -136,10 +146,10 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
                             {completion ? (
                               <>
                                 <Stars count={completion.stars} />
-                                <span>terminée</span>
+                                <span>{t('chapter.done')}</span>
                               </>
                             ) : (
-                              <span>à faire</span>
+                              <span>{t('chapter.todo')}</span>
                             )}
                           </span>
                         </span>
@@ -164,7 +174,7 @@ export function ChapterField({ chapter, lane, completed, headMissionId }: Chapte
                           </span>
                           <span className="mt-1 flex items-center gap-1.5 text-[13px]">
                             <Icon name="lock" size={11} />
-                            verrouillée
+                            {t('chapter.locked')}
                           </span>
                         </span>
                       </div>

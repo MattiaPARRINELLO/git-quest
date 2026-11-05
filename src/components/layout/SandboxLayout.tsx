@@ -13,6 +13,8 @@ import { cn } from '../../lib/cn';
 import { useRepoStore } from '../../store/useRepoStore';
 import { useUiStore } from '../../store/useUiStore';
 import type { MobileTab } from '../../store/useUiStore';
+import { useTranslation } from '../../i18n/useTranslation';
+import type { MessageKey } from '../../i18n';
 
 interface SandboxLayoutProps {
   readonly onCommand?: (input: string) => void;
@@ -24,14 +26,14 @@ interface SandboxLayoutProps {
 
 interface TabItem {
   readonly id: MobileTab;
-  readonly label: string;
+  readonly label: MessageKey;
   readonly icon: IconName;
 }
 
 const TABS: ReadonlyArray<TabItem> = [
-  { id: 'terminal', label: 'Terminal', icon: 'terminal' },
-  { id: 'graph', label: 'Graphe', icon: 'graph' },
-  { id: 'files', label: 'Fichiers', icon: 'files' },
+  { id: 'terminal', label: 'tabs.terminal', icon: 'terminal' },
+  { id: 'graph', label: 'tabs.graph', icon: 'graph' },
+  { id: 'files', label: 'tabs.files', icon: 'files' },
 ];
 
 /** En mission, « Fichiers » vit dans le panneau secondaire, pas dans les onglets. */
@@ -43,6 +45,7 @@ interface MobileTabsProps {
 }
 
 function MobileTabs({ tabs, active }: MobileTabsProps) {
+  const { t } = useTranslation();
   const unseen = useUiStore((store) => store.graphUnseen);
   const setTab = useUiStore((store) => store.setMobileTab);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
@@ -65,7 +68,7 @@ function MobileTabs({ tabs, active }: MobileTabsProps) {
   return (
     <nav
       role="tablist"
-      aria-label="Panneaux du bac à sable"
+      aria-label={t('sandbox.panelsAria')}
       className="flex shrink-0  bg-panel"
     >
       {tabs.map((item, index) => (
@@ -83,7 +86,7 @@ function MobileTabs({ tabs, active }: MobileTabsProps) {
           onClick={() => setTab(item.id)}
         >
           <Icon name={item.icon} size={14} />
-          {item.label}
+          {t(item.label)}
           {item.id === 'graph' && unseen > 0 && active !== 'graph' && (
             <span className="ml-0.5 rounded-full bg-accent px-1.5 py-0.5 text-[12px] font-medium leading-none text-on-accent">
               {unseen > 9 ? '9+' : unseen}
@@ -104,19 +107,20 @@ function MobileTabs({ tabs, active }: MobileTabsProps) {
  * démonté, pour conserver la bascule et le dépliage choisis.
  */
 function MobileSecondaryPanel({ missionPanel }: { readonly missionPanel: ReactNode }) {
+  const { t } = useTranslation();
   const [panel, setPanel] = useState<'mission' | 'files'>('mission');
 
   return (
-    <section className="shrink-0  bg-panel" aria-label="Panneau secondaire">
+    <section className="shrink-0  bg-panel" aria-label={t('sandbox.secondaryAria')}>
       <div
         role="group"
-        aria-label="Contenu du panneau secondaire"
+        aria-label={t('sandbox.secondaryContentAria')}
         className="flex items-center gap-1 px-2 py-1.5"
       >
         {(
           [
-            { id: 'mission', label: 'Mission', icon: 'target' },
-            { id: 'files', label: 'Fichiers', icon: 'files' },
+            { id: 'mission', label: 'sandbox.missionTab', icon: 'target' },
+            { id: 'files', label: 'tabs.files', icon: 'files' },
           ] as const
         ).map((item) => (
           <button
@@ -132,7 +136,7 @@ function MobileSecondaryPanel({ missionPanel }: { readonly missionPanel: ReactNo
             )}
           >
             <Icon name={item.icon} size={12} />
-            {item.label}
+            {t(item.label)}
           </button>
         ))}
       </div>

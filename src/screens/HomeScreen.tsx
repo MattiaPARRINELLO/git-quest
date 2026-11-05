@@ -12,6 +12,7 @@ import { ProgressPanel } from '../components/progress/ProgressPanel';
 import { useProgressStore } from '../store/useProgressStore';
 import { useMissionDraftStore } from '../store/useMissionDraftStore';
 import { routePaths } from '../router/useHashRoute';
+import { useTranslation } from '../i18n/useTranslation';
 import { Icon } from '../components/ui/Icon';
 import { ProgressBackup } from '../components/layout/ProgressBackup';
 import { ChapterField } from '../components/home/ChapterField';
@@ -27,6 +28,7 @@ import {
 const MISSION_ROUTE = '#/mission/';
 
 export function HomeScreen() {
+  const { locale, t } = useTranslation();
   const completed = useProgressStore((store) => store.completed);
   const lessonSlides = useProgressStore((store) => store.lessonSlides);
   const progressHydrated = useProgressStore((store) => store.hydrated);
@@ -36,7 +38,7 @@ export function HomeScreen() {
   const progress = useMemo(() => ({ completed, lessonSlides }), [completed, lessonSlides]);
   const target = useMemo(() => resumeTarget(progress, activeMission), [progress, activeMission]);
   const context = useMemo(() => resumeContext(progress, activeMission), [progress, activeMission]);
-  const summary = useMemo(() => progressSummary(progress), [progress]);
+  const summary = useMemo(() => progressSummary(progress), [progress, locale]);
   const totalMissions = chapters.reduce((sum, chapter) => sum + chapter.missions.length, 0);
   const totalStars = Object.values(completed).reduce((sum, item) => sum + item.stars, 0);
   const lastCompleted = [...missionSequence].reverse().find((mission) => completed[mission.id]);
@@ -56,11 +58,10 @@ export function HomeScreen() {
         <section className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] lg:gap-16">
           <Reveal y={22}>
             <h1 className="display display-xl max-w-[17ch] text-balance">
-              Apprends Git en voyant le graphe.
+              {t('home.title')}
             </h1>
             <p className="mt-6 max-w-[44ch] text-[17px] leading-[1.55] text-text">
-              Six chapitres, dix-neuf missions. Tu tapes une vraie commande, le dépôt se
-              redessine : branches, HEAD, index et worktrees deviennent lisibles.
+              {t('home.intro', { chapters: chapters.length, missions: totalMissions })}
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -77,12 +78,12 @@ export function HomeScreen() {
                   className="btn btn-accent invisible h-12 gap-4 px-5 text-[15px]"
                   aria-hidden="true"
                 >
-                  Chargement
+                  {t('home.loading')}
                 </span>
               )}
               <a href={routePaths.sandbox} className="btn btn-quiet h-12 px-4 text-[15px]">
                 <Icon name="terminal" size={15} />
-                Ouvrir le bac à sable
+                {t('home.openSandbox')}
               </a>
             </div>
             <p className="mt-4 min-h-4 text-[13px] text-muted" aria-live="polite">
@@ -92,10 +93,7 @@ export function HomeScreen() {
 
           <Reveal delay={0.12} className="min-w-0">
             <GraphFragment />
-            <p className="mt-3 text-[13px] text-muted">
-              Le dépôt de Nova : quatre commits, une branche fusionnée. Chaque mission en ajoute
-              un.
-            </p>
+            <p className="mt-3 text-[13px] text-muted">{t('home.graphCaption')}</p>
           </Reveal>
         </section>
 
@@ -103,7 +101,7 @@ export function HomeScreen() {
         <section className="mx-auto max-w-[1180px] px-5 pb-16 sm:px-8" aria-labelledby="prologue">
           <Reveal className="bg-panel px-5 py-6 sm:px-7 sm:py-7">
             <h2 id="prologue" className="display text-[30px] leading-tight">
-              Avant de taper
+              {t('home.beforeTyping')}
             </h2>
             <a
               href={routePaths.prologue}
@@ -111,15 +109,16 @@ export function HomeScreen() {
             >
               <span className="min-w-0 max-w-[58ch]">
                 <span className="block text-[17px] font-medium text-text">
-                  Prologue · Lire une commande Git
+                  {t('home.prologueTitle')}
                 </span>
                 <span className="mt-1.5 block text-[16px] leading-relaxed text-muted">
-                  Options, guillemets, placeholders : décoder n’importe quelle commande avant de
-                  commencer. {estimatedLessonMinutes(commandLineLesson)} min.
+                  {t('home.prologueText', {
+                    minutes: estimatedLessonMinutes(commandLineLesson),
+                  })}
                 </span>
               </span>
               <span className="inline-flex items-center gap-2 text-[15px] text-text">
-                {prologueRead ? 'Relire' : 'Lire'}
+                {prologueRead ? t('home.reread') : t('home.read')}
                 <Icon
                   name="arrow-right"
                   size={15}
@@ -134,11 +133,10 @@ export function HomeScreen() {
         <section aria-labelledby="parcours">
           <div className="mx-auto max-w-[1180px] px-5 pb-10 sm:px-8">
             <h2 id="parcours" className="display text-[30px] leading-none">
-              Le parcours
+              {t('home.path')}
             </h2>
             <p className="mt-3 max-w-[52ch] text-[16px] leading-relaxed text-muted">
-              Six voies, du premier commit aux conflits de pull. Une mission ne s’ouvre qu’une
-              fois la précédente terminée.
+              {t('home.pathText')}
             </p>
           </div>
 
@@ -161,11 +159,10 @@ export function HomeScreen() {
           aria-labelledby="dedans"
         >
           <h2 id="dedans" className="display text-[clamp(2rem,3.4vw,2.8rem)] leading-none">
-            Ce que tu regardes
+            {t('home.whatYouSee')}
           </h2>
           <p className="mt-3 max-w-[52ch] text-[16px] leading-relaxed text-muted">
-            Quatre panneaux, un seul dépôt. Le terminal écrit, le graphe répond, le pipeline
-            montre le fichier qui traverse l’index, la prédiction te fait parier avant de voir.
+            {t('home.whatYouSeeText')}
           </p>
           <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-12">
             <Reveal className="lg:col-span-7">
@@ -187,18 +184,18 @@ export function HomeScreen() {
         <section className="bg-panel" aria-labelledby="etat">
           <div className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 sm:py-20">
             <h2 id="etat" className="display text-[30px] leading-none">
-              Où tu en es
+              {t('home.whereYouAre')}
             </h2>
 
             <p className="mt-8 text-[15px] leading-none text-muted">
               <span className="mr-2 text-[32px] tabular-nums text-text">{done}</span>
-              missions sur {totalMissions}
+              {t('home.missionsLabel')} {totalMissions}
               <span className="mx-6 inline-block" aria-hidden="true" />
               <span className="mr-2 text-[32px] tabular-nums text-text">{totalStars}</span>
-              étoiles sur {totalMissions * 3}
+              {t('home.starsLabel')} {totalMissions * 3}
               <span className="mx-6 inline-block" aria-hidden="true" />
               <span className="mr-2 text-[32px] tabular-nums text-text">{percent}%</span>
-              du parcours
+              {t('home.percentLabel')}
             </p>
             <div className="mt-4 h-1 w-full max-w-[520px] bg-panel-3">
               <span className="block h-full bg-accent" style={{ width: `${percent}%` }} />
@@ -210,9 +207,9 @@ export function HomeScreen() {
 
             <Reveal className="mt-4 space-y-4">
               {lastCompleted !== undefined && lastBriefing?.outcome !== undefined && (
-                <section className="bg-panel-2 p-6 lg:p-7" aria-label="Dernier épisode">
+                <section className="bg-panel-2 p-6 lg:p-7" aria-label={t('home.lastEpisode')}>
                   <p className="text-[13px] text-muted">
-                    Dernier épisode · {lastCompleted.number}
+                    {t('home.lastEpisode')} · {lastCompleted.number}
                   </p>
                   <p className="mt-1.5 text-[18px] font-medium text-text">{lastCompleted.title}</p>
                   <p className="mt-2 max-w-[72ch] text-[16px] leading-relaxed text-muted">
@@ -220,7 +217,7 @@ export function HomeScreen() {
                   </p>
                   {lastBriefing.teaser !== undefined && (
                     <p className="mt-3 max-w-[72ch] text-[14px] leading-relaxed text-muted">
-                      <span className="text-text">À suivre · </span>
+                      <span className="text-text">{t('home.nextUp')}</span>
                       {lastBriefing.teaser}
                     </p>
                   )}
@@ -229,21 +226,22 @@ export function HomeScreen() {
 
               <section
                 className="bg-panel-2 p-6 lg:flex lg:items-center lg:justify-between lg:gap-12 lg:p-7"
-                aria-label="Ton arbre Nova"
+                aria-label={t('home.yourNovaTree')}
               >
                 <div>
-                  <p className="text-[13px] text-muted">Le dépôt que tu construis</p>
-                  <p className="mt-1.5 text-[18px] font-medium text-text">L’arbre de Nova</p>
+                  <p className="text-[13px] text-muted">{t('home.novaDepot')}</p>
+                  <p className="mt-1.5 text-[18px] font-medium text-text">
+                    {t('home.novaTreeTitle')}
+                  </p>
                   <p className="mt-2 max-w-[60ch] text-[16px] leading-relaxed text-muted">
-                    Chaque mission laisse un commit. À la fin, tu ouvres l’arbre complet et tu le
-                    lis comme une histoire.
+                    {t('home.novaTreeText')}
                   </p>
                 </div>
                 <a
                   href={routePaths.nova}
                   className="btn btn-quiet mt-4 h-11 w-fit shrink-0 gap-2 px-4 text-[15px] lg:mt-0"
                 >
-                  Ton arbre Nova
+                  {t('home.yourNovaTree')}
                   <Icon name="arrow-right" size={14} />
                 </a>
               </section>
@@ -256,20 +254,20 @@ export function HomeScreen() {
           <div className="mt-8 flex flex-wrap items-start justify-between gap-8">
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[15px]">
               <a href={routePaths.home} className="text-text hover:text-accent-ink">
-                Chapitres
+                {t('nav.chapters')}
               </a>
               <a href={routePaths.prologue} className="text-text hover:text-accent-ink">
-                Prologue
+                {t('nav.prologue')}
               </a>
               <a href={routePaths.sandbox} className="text-text hover:text-accent-ink">
-                Bac à sable
+                {t('nav.sandbox')}
               </a>
               <a href={routePaths.nova} className="text-text hover:text-accent-ink">
-                Mon arbre
+                {t('nav.myTree')}
               </a>
             </div>
             <div className="flex flex-col gap-2 text-[13px] text-muted">
-              <span>Progression enregistrée sur cet appareil. Hors ligne, sans compte.</span>
+              <span>{t('home.savedLocally')}</span>
               <ProgressBackup />
             </div>
           </div>

@@ -1,6 +1,7 @@
 import type { ProgressSummary } from '../../app/xp';
 import { Icon } from '../ui/Icon';
 import { cn } from '../../lib/cn';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface ProgressPanelProps {
   readonly summary: ProgressSummary;
@@ -10,21 +11,30 @@ interface ProgressPanelProps {
 
 /** Niveau, XP et badges : tout est dérivé de la progression enregistrée. */
 export function ProgressPanel({ summary, compact = false }: ProgressPanelProps) {
+  const { t } = useTranslation();
   const { level, xp, badges, unlockedBadges } = summary;
   const remaining = level.span === 0 ? 0 : Math.max(0, level.nextAt - xp);
 
   return (
-    <section className={cn('bg-panel-2 p-6', compact ? '' : 'mt-4')} aria-label="Niveau et badges">
+    <section
+      className={cn('bg-panel-2 p-6', compact ? '' : 'mt-4')}
+      aria-label={t('progress.panelAria')}
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
         <p className="text-[17px] text-text">
-          Niveau {level.level} · {level.title}
+          {t('progress.level', { level: level.level, title: level.title })}
         </p>
         <p className="text-[14px] tabular-nums text-muted">
           {xp} XP
           {level.span === 0 ? (
-            <span className="text-text"> · niveau maximum</span>
+            <span className="text-text">{t('progress.maxLevel')}</span>
           ) : (
-            <span> · encore {remaining} XP pour le niveau {level.level + 1}</span>
+            <span>
+              {t('progress.toNext', {
+                xp: remaining,
+                next: level.level + 1,
+              })}
+            </span>
           )}
         </p>
       </div>
@@ -37,7 +47,7 @@ export function ProgressPanel({ summary, compact = false }: ProgressPanelProps) 
       </div>
 
       <p className="mt-6 text-[13.5px] text-muted">
-        Badges · {unlockedBadges} sur {badges.length}
+        {t('progress.badges', { unlocked: unlockedBadges, total: badges.length })}
       </p>
 
       <ul className="mt-3 grid gap-x-10 gap-y-3 sm:grid-cols-2">

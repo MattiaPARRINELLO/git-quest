@@ -5,7 +5,9 @@ import { Diagram } from './diagrams';
 import { Icon } from '../ui/Icon';
 import type { Lesson, LessonSlide } from '../../content/types';
 import { estimatedLessonMinutes } from '../../content';
+import type { MessageKey } from '../../i18n';
 import { useProgressStore } from '../../store/useProgressStore';
+import { useTranslation } from '../../i18n/useTranslation';
 import { cn } from '../../lib/cn';
 
 function clampIndex(index: number, total: number): number {
@@ -13,14 +15,21 @@ function clampIndex(index: number, total: number): number {
   return Math.min(Math.max(0, Math.trunc(index)), Math.max(0, total - 1));
 }
 
-const KIND_LABEL: Record<LessonSlide['kind'], string> = {
-  text: 'Texte',
-  diagram: 'Schéma',
-  demo: 'Démo',
-  recap: 'Récapitulatif',
-};
+function kindLabel(kind: LessonSlide['kind']): MessageKey {
+  switch (kind) {
+    case 'text':
+      return 'lesson.kindText';
+    case 'diagram':
+      return 'lesson.kindDiagram';
+    case 'demo':
+      return 'lesson.kindDemo';
+    case 'recap':
+      return 'lesson.kindRecap';
+  }
+}
 
 function SlideView({ slide }: { readonly slide: LessonSlide }) {
+  const { t } = useTranslation();
   switch (slide.kind) {
     case 'text':
       return (
@@ -45,7 +54,7 @@ function SlideView({ slide }: { readonly slide: LessonSlide }) {
           )}
           {slide.note && (
             <p className="mt-5 max-w-[62ch] bg-warning/10 px-4 py-3 text-[15px] leading-6 text-text">
-              <span className="text-warning">À noter · </span>
+              <span className="text-warning">{t('lesson.noteLabel')}</span>
               {slide.note}
             </p>
           )}
@@ -113,6 +122,7 @@ export function LessonDeck({
   backLabel,
   lastAction,
 }: LessonDeckProps) {
+  const { t } = useTranslation();
   const setLessonSlide = useProgressStore((store) => store.setLessonSlide);
   const [index, setIndex] = useState(0);
 
@@ -186,7 +196,7 @@ export function LessonDeck({
             <span className="text-text">{badge}</span>
             <span className="inline-flex items-center gap-1.5">
               <Icon name="book" size={13} />
-              {estimatedLessonMinutes(lesson)} min de lecture
+              {t('lesson.readMinutes', { minutes: estimatedLessonMinutes(lesson) })}
             </span>
           </div>
         </div>
@@ -195,7 +205,7 @@ export function LessonDeck({
 
         <div className="mt-6 grid grid-cols-1 gap-12 lg:grid-cols-[15rem_minmax(0,1fr)]">
           <aside className="hidden lg:block">
-            <p className="text-[13px] text-muted">Sommaire</p>
+            <p className="text-[13px] text-muted">{t('lesson.contents')}</p>
 
             <ol className="mt-3 space-y-1">
               {lesson.slides.map((item, position) => (
@@ -204,7 +214,7 @@ export function LessonDeck({
                     type="button"
                     onClick={() => setIndex(position)}
                     aria-current={position === index ? 'step' : undefined}
-                    aria-label={`Diapositive ${position + 1} sur ${total}`}
+                    aria-label={t('lesson.slideAria', { index: position + 1, total })}
                     className={cn(
                       'flex w-full items-center gap-2.5 px-2.5 py-2 text-left text-[13.5px] transition-colors',
                       position === index
@@ -213,7 +223,7 @@ export function LessonDeck({
                     )}
                   >
                     <span className="tabular-nums opacity-70">{position + 1}</span>
-                    {KIND_LABEL[item.kind]}
+                    {t(kindLabel(item.kind))}
                   </button>
                 </li>
               ))}
@@ -229,7 +239,7 @@ export function LessonDeck({
                 />
               </div>
               <span className="shrink-0 text-[13px] tabular-nums text-muted">
-                {index + 1} sur {total}
+                {t('lesson.position', { index: index + 1, total })}
               </span>
             </div>
 
@@ -246,7 +256,7 @@ export function LessonDeck({
                 onClick={() => setIndex((current) => Math.max(0, current - 1))}
                 disabled={index === 0}
               >
-                Précédent
+                {t('lesson.previous')}
               </button>
 
               {isLast ? (
@@ -257,7 +267,7 @@ export function LessonDeck({
                   className="btn btn-accent h-11 px-5 text-[14px]"
                   onClick={() => setIndex((current) => Math.min(total - 1, current + 1))}
                 >
-                  Suivant
+                  {t('lesson.next')}
                   <Icon name="arrow-right" size={15} />
                 </button>
               )}

@@ -3,6 +3,8 @@ import { useRepoStore } from '../../store/useRepoStore';
 import { useUiStore } from '../../store/useUiStore';
 import { cn } from '../../lib/cn';
 import { Icon } from '../ui/Icon';
+import { setLocale } from '../../i18n';
+import { useTranslation } from '../../i18n/useTranslation';
 
 /**
  * Signature de la marque : une route qui bifurque, terminée par HEAD.
@@ -57,6 +59,7 @@ function NavLink({
 }
 
 export function TopBar() {
+  const { locale, t } = useTranslation();
   const route = useHashRoute();
   const loadDemo = useRepoStore((store) => store.loadDemo);
   const resetSandbox = useRepoStore((store) => store.resetSandbox);
@@ -75,7 +78,7 @@ export function TopBar() {
         <a
           href={routePaths.home}
           className="flex items-center gap-2.5 text-text"
-          aria-label="Accueil GitQuest"
+          aria-label={t('nav.homeAria')}
         >
           <BrandMark />
           <span className="display text-[21px] leading-none">GitQuest</span>
@@ -83,15 +86,15 @@ export function TopBar() {
         <details className="relative sm:hidden">
           <summary
             className="btn btn-quiet list-none px-2 [&::-webkit-details-marker]:hidden"
-            aria-label="Ouvrir le menu"
+            aria-label={t('nav.openMenu')}
           >
             <Icon name="menu" size={16} />
           </summary>
           <div className="absolute left-0 top-11 z-40 w-48 bg-panel-2 p-1">
             {[
-              { href: routePaths.home, label: 'Chapitres', active: route.name === 'home' },
-              { href: routePaths.sandbox, label: 'Bac à sable', active: isSandbox },
-              { href: routePaths.nova, label: 'Mon arbre', active: route.name === 'nova' },
+              { href: routePaths.home, label: t('nav.chapters'), active: route.name === 'home' },
+              { href: routePaths.sandbox, label: t('nav.sandbox'), active: isSandbox },
+              { href: routePaths.nova, label: t('nav.myTree'), active: route.name === 'nova' },
             ].map((item) => (
               <a
                 key={item.href}
@@ -106,15 +109,15 @@ export function TopBar() {
             ))}
           </div>
         </details>
-        <nav className="hidden items-center sm:flex" aria-label="Navigation principale">
+        <nav className="hidden items-center sm:flex" aria-label={t('nav.main')}>
           <NavLink href={routePaths.home} active={route.name === 'home'}>
-            Chapitres
+            {t('nav.chapters')}
           </NavLink>
           <NavLink href={routePaths.sandbox} active={isSandbox}>
-            Bac à sable
+            {t('nav.sandbox')}
           </NavLink>
           <NavLink href={routePaths.nova} active={route.name === 'nova'}>
-            Mon arbre
+            {t('nav.myTree')}
           </NavLink>
         </nav>
       </div>
@@ -126,7 +129,7 @@ export function TopBar() {
             className="btn btn-quiet hidden gap-2 sm:inline-flex"
             aria-pressed={showExplanations}
             onClick={() => setShowExplanations(!showExplanations)}
-            title="Afficher les explications après chaque commande"
+            title={t('controls.explanationsTitle')}
           >
             <span
               className={cn(
@@ -134,7 +137,7 @@ export function TopBar() {
                 showExplanations ? 'bg-success' : 'bg-border-strong',
               )}
             />
-            Explications
+            {t('controls.explanations')}
           </button>
         )}
 
@@ -144,30 +147,46 @@ export function TopBar() {
               type="button"
               className="btn btn-quiet"
               onClick={loadDemo}
-              title="Charger un dépôt de démonstration"
+              title={t('controls.demoTitle')}
             >
               <Icon name="play" size={13} />
-              <span className="hidden sm:inline">Démo</span>
+              <span className="hidden sm:inline">{t('controls.demo')}</span>
             </button>
 
             <button
               type="button"
               className="btn btn-quiet"
               onClick={resetSandbox}
-              title="Réinitialiser le bac à sable"
+              title={t('controls.resetTitle')}
             >
               <Icon name="reset" size={13} />
-              <span className="hidden sm:inline">Réinitialiser</span>
+              <span className="hidden sm:inline">{t('controls.reset')}</span>
             </button>
           </>
         )}
 
         <button
           type="button"
+          className="btn btn-quiet px-2 text-[12px] font-medium uppercase"
+          onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
+          aria-label={
+            locale === 'fr' ? t('controls.switchToEnglish') : t('controls.switchToFrench')
+          }
+          title={locale === 'fr' ? 'Français' : 'English'}
+        >
+          {locale === 'fr' ? 'EN' : 'FR'}
+        </button>
+
+        <button
+          type="button"
           className="btn btn-quiet w-9 px-0"
           onClick={toggleTheme}
-          aria-label={theme === 'dark' ? 'Passer en thème clair' : 'Passer en thème sombre'}
-          title={theme === 'dark' ? 'Thème clair' : 'Thème sombre'}
+          aria-label={
+            theme === 'dark' ? t('controls.lightTheme') : t('controls.darkTheme')
+          }
+          title={
+            theme === 'dark' ? t('controls.lightThemeShort') : t('controls.darkThemeShort')
+          }
         >
           <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={15} />
         </button>

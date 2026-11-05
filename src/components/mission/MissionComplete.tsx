@@ -6,6 +6,7 @@ import type { Mission } from '../../content/types';
 import { routePaths } from '../../router/useHashRoute';
 import { Icon } from '../ui/Icon';
 import { cn } from '../../lib/cn';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface MissionCompleteProps {
   readonly mission: Mission;
@@ -44,14 +45,16 @@ export function MissionCompleteBar({
   readonly after: AfterMission;
   readonly onResume: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center p-3">
       <div className="pointer-events-auto flex w-full max-w-lg flex-wrap items-center justify-between gap-2 rounded-2xl border border-success/40 bg-panel px-3 py-2 ">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="text-[13px] text-success">
-            Mission accomplie
-          </span>
-          <span className="flex items-center gap-1" aria-label={`${stars} étoile(s) sur 3`}>
+          <span className="text-[13px] text-success">{t('mission.complete')}</span>
+          <span
+            className="flex items-center gap-1"
+            aria-label={t('mission.starsAria', { count: stars })}
+          >
             {[0, 1, 2].map((index) => (
               <span
                 key={index}
@@ -65,10 +68,10 @@ export function MissionCompleteBar({
         </div>
         <div className="flex items-center gap-2">
           <button type="button" className="btn px-2 py-1 text-[13px]" onClick={onResume}>
-            Revoir
+            {t('mission.review')}
           </button>
           <a href={afterHref(after)} className="btn btn-accent px-2 py-1 text-[13px]">
-            Continuer
+            {t('mission.continue')}
             <Icon name="arrow-right" size={13} />
           </a>
         </div>
@@ -87,6 +90,7 @@ export function MissionComplete({
   outcome,
   teaser,
 }: MissionCompleteProps) {
+  const { t } = useTranslation();
   const dialog = useRef<HTMLDivElement>(null);
   useDialogKeyboard(dialog, { onCancel: onInspect });
 
@@ -101,24 +105,29 @@ export function MissionComplete({
         className="scrollbar-thin max-h-[90vh] w-full max-w-xl overflow-y-auto bg-panel  outline-none"
         role="dialog"
         aria-modal="true"
-        aria-label={`Mission ${mission.number} réussie`}
+        aria-label={t('mission.doneAria', { number: mission.number })}
       >
         <header className="flex items-center justify-between gap-2  px-5 py-3">
           <span className="flex items-center gap-2 text-[12px] text-success">
             <span aria-hidden="true" className="h-1.5 w-1.5  bg-success" />
-            Mission accomplie
+            {t('mission.complete')}
           </span>
           <button type="button" className="btn btn-quiet h-9 px-3 text-[13px]" onClick={onInspect}>
-            Inspecter
+            {t('mission.inspect')}
           </button>
         </header>
 
         <div className="px-5 py-4">
-          <span className="text-[13px] text-muted">Mission {mission.number}</span>
+          <span className="text-[13px] text-muted">
+            {t('briefing.header', { number: mission.number })}
+          </span>
           <h2 className="display mt-1 text-[32px] leading-[1.12] text-text">{mission.title}</h2>
 
           <div className="mt-3 flex items-center gap-4  py-2.5">
-            <div className="flex items-center gap-1" aria-label={`${stars} étoile(s) sur 3`}>
+            <div
+              className="flex items-center gap-1"
+              aria-label={t('mission.starsAria', { count: stars })}
+            >
               {[1, 2, 3].map((value) => (
                 <motion.span
                   key={value}
@@ -133,13 +142,13 @@ export function MissionComplete({
               ))}
             </div>
             <p className="text-[13px] tabular-nums text-muted">
-              {commandsUsed} commande{commandsUsed > 1 ? 's' : ''} · par {mission.par}
+              {t('mission.commandsCount', { count: commandsUsed, par: mission.par })}
             </p>
           </div>
 
           {mission.takeaway && (
             <div className="mt-3 border-l-2 border-accent pl-3">
-              <p className="mono-meta">Ce que tu dois remarquer</p>
+              <p className="mono-meta">{t('mission.takeawayLabel')}</p>
               <p className="mt-1 text-[13px] leading-relaxed text-text">{mission.takeaway}</p>
             </div>
           )}
@@ -156,7 +165,7 @@ export function MissionComplete({
 
           {teaser !== undefined && (
             <p className="mt-2 text-[13.5px] leading-relaxed text-muted">
-              <span className="text-text">À suivre · </span>
+              <span className="text-text">{t('mission.nextUp')}</span>
               {teaser}
             </p>
           )}
@@ -164,7 +173,7 @@ export function MissionComplete({
           <div className="mt-4">
             <h3 className="flex items-center gap-1.5 text-[13.5px] text-muted">
               <Icon name="book" size={12} />
-              Solution de référence
+              {t('mission.solution')}
             </h3>
             <ol className="mt-1.5  ">
               {solution.map((command, index) => (
@@ -184,20 +193,20 @@ export function MissionComplete({
 
         <div className="flex flex-col-reverse gap-2  px-5 py-3 sm:flex-row sm:justify-end">
           <a href={routePaths.home} className="btn btn-quiet h-11 justify-center px-4 text-[14px]">
-            Carte des chapitres
+            {t('mission.map')}
           </a>
           <a
             href={afterHref(after)}
             data-autofocus
             className="btn btn-accent h-9 justify-center px-3.5 text-[13px]"
           >
-            Continuer
+            {t('mission.continue')}
             <Icon name="arrow-right" size={15} />
           </a>
         </div>
 
         <p className="mt-3 text-center text-[12px] text-muted/80" aria-hidden="true">
-          Entrée pour continuer · Échap pour rester dans le dépôt
+          {t('mission.keysContinue')}
         </p>
       </motion.div>
     </div>

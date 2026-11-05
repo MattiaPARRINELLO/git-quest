@@ -4,6 +4,7 @@ import { scenario } from '../../engine/scenario';
 import { execute } from '../../engine';
 import { CommitGraph } from '../graph/CommitGraph';
 import { missionText } from '../../app/mission';
+import { useTranslation } from '../../i18n/useTranslation';
 import { Icon } from '../ui/Icon';
 
 /**
@@ -48,11 +49,12 @@ function Frame({
 
 /** Le graphe, à sa taille d'usage. */
 export function GraphFragment() {
+  const { t } = useTranslation();
   return (
     <div data-ui className="bg-panel p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3 text-[13px]">
         <span className="text-text">nova · main</span>
-        <span className="text-muted">4 commits · 2 branches</span>
+        <span className="text-muted">{t('fragments.mainCommits')}</span>
       </div>
       <div className="mt-3 h-[320px]">
         <CommitGraph state={previewState} batch={emptyBatch} preview bare />
@@ -68,7 +70,7 @@ export function GraphFragment() {
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-2 w-2" style={{ background: 'var(--warning)' }} />
-          commit de fusion
+          {t('fragments.mergeCommit')}
         </span>
       </div>
     </div>
@@ -77,6 +79,7 @@ export function GraphFragment() {
 
 /** Le terminal : sortie réelle du moteur, pas une capture. */
 export function TerminalFragment() {
+  const { t } = useTranslation();
   return (
     <Frame label="git log --oneline">
       <pre className="mt-3 overflow-x-auto bg-panel-2 px-3.5 py-3 text-[13px] leading-7">
@@ -87,8 +90,7 @@ export function TerminalFragment() {
         </code>
       </pre>
       <p className="mt-3 text-[14px] leading-relaxed text-muted">
-        Une ligne par commit, du plus récent au plus ancien. Chaque empreinte pointe vers un
-        snapshot complet.
+        {t('fragments.terminalCaption')}
       </p>
     </Frame>
   );
@@ -96,6 +98,7 @@ export function TerminalFragment() {
 
 /** Le panneau de mission : objectif, étapes, coût en commandes. */
 export function MissionFragment() {
+  const { t } = useTranslation();
   if (firstMission === undefined) return null;
   const texts = missionText(firstMission, firstMission.initialState);
 
@@ -112,7 +115,7 @@ export function MissionFragment() {
       </ol>
       <p className="mt-4 flex items-center gap-2 text-[13px] text-muted">
         <Icon name="target" size={13} />
-        {firstMission.par} commandes pour 3 étoiles
+        {t('fragments.missionPar', { par: firstMission.par })}
       </p>
     </Frame>
   );
@@ -120,11 +123,12 @@ export function MissionFragment() {
 
 /** La prédiction : HEAD suspendu, on parie avant de voir. */
 export function PredictionFragment() {
+  const { t } = useTranslation();
   const prediction = chapters[1]?.missions[1]?.predictions?.[0];
   if (prediction === undefined) return null;
 
   return (
-    <Frame label="Avant d’exécuter">
+    <Frame label={t('fragments.beforeRun')}>
       <p className="mt-3 text-[15px] font-medium leading-snug">{prediction.question}</p>
       <ul className="mt-3 space-y-2">
         {prediction.options.map((option) => (
@@ -138,7 +142,7 @@ export function PredictionFragment() {
         ))}
       </ul>
       <p className="mt-3 text-[14px] leading-relaxed text-muted">
-        L’exécution attend ta réponse. Tu peux passer : rien ne bloque.
+        {t('fragments.predictionCaption')}
       </p>
     </Frame>
   );
@@ -146,14 +150,15 @@ export function PredictionFragment() {
 
 /** Les trois zones : le geste que le chapitre 1 enseigne. */
 export function PipelineFragment() {
+  const { t } = useTranslation();
   const zones = [
-    { title: 'Working dir', note: 'a.txt modifié' },
-    { title: 'Staging', note: 'a.txt indexé' },
-    { title: 'Graphe', note: 'commit 4f2a1c' },
+    { title: t('fragments.workingDir'), note: t('fragments.zoneModified') },
+    { title: t('fragments.staging'), note: t('fragments.zoneStaged') },
+    { title: t('fragments.graph'), note: t('fragments.zoneCommit', { hash: '4f2a1c' }) },
   ];
 
   return (
-    <Frame label="Pipeline">
+    <Frame label={t('fragments.pipeline')}>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         {zones.map((zone, index) => (
           <div key={zone.title} className="flex flex-1 items-center gap-2">
@@ -168,7 +173,7 @@ export function PipelineFragment() {
         ))}
       </div>
       <p className="mt-3 text-[14px] leading-relaxed text-muted">
-        Un fichier ne rejoint le graphe qu’en traversant les deux premières zones.
+        {t('fragments.pipelineNote')}
       </p>
     </Frame>
   );

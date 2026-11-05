@@ -1,4 +1,6 @@
 import { chapters, commandLineLesson, missionSequence } from '../content';
+import { t } from '../i18n';
+import type { MessageKey } from '../i18n';
 
 export interface ProgressSnapshot {
   readonly completed: Readonly<Record<string, { readonly stars: 1 | 2 | 3 }>>;
@@ -24,7 +26,6 @@ export function totalXp(progress: ProgressSnapshot): number {
 
 export interface LevelDefinition {
   readonly level: number;
-  readonly title: string;
   /** XP cumulé nécessaire pour atteindre ce niveau. */
   readonly at: number;
 }
@@ -34,16 +35,31 @@ export interface LevelDefinition {
  * atteint le dernier niveau, une exploration minimale termine au quatrième.
  */
 export const LEVELS: readonly LevelDefinition[] = [
-  { level: 1, title: 'Novice', at: 0 },
-  { level: 2, title: 'Apprenti', at: 150 },
-  { level: 3, title: 'Committeur', at: 400 },
-  { level: 4, title: 'Brancheur', at: 750 },
-  { level: 5, title: 'Fusionneur', at: 1_200 },
-  { level: 6, title: 'Architecte', at: 1_750 },
-  { level: 7, title: 'Maître du dépôt', at: 2_250 },
+  { level: 1, at: 0 },
+  { level: 2, at: 150 },
+  { level: 3, at: 400 },
+  { level: 4, at: 750 },
+  { level: 5, at: 1_200 },
+  { level: 6, at: 1_750 },
+  { level: 7, at: 2_250 },
 ];
 
+const LEVEL_TITLE_KEYS: readonly MessageKey[] = [
+  'level.1',
+  'level.2',
+  'level.3',
+  'level.4',
+  'level.5',
+  'level.6',
+  'level.7',
+];
+
+export function levelTitle(level: number): string {
+  return t(LEVEL_TITLE_KEYS[level - 1] ?? 'level.1');
+}
+
 export interface LevelInfo extends LevelDefinition {
+  readonly title: string;
   /** XP total courant. */
   readonly xp: number;
   /** XP accumulé dans le niveau courant. */
@@ -62,7 +78,7 @@ export function levelFor(xp: number): LevelInfo {
     if (level !== undefined && xp >= level.at) index = candidate;
   }
 
-  const current = LEVELS[index] ?? { level: 1, title: 'Novice', at: 0 };
+  const current = LEVELS[index] ?? { level: 1, at: 0 };
   const next = LEVELS[index + 1];
   const intoLevel = xp - current.at;
   const span = next === undefined ? 0 : next.at - current.at;
@@ -70,6 +86,7 @@ export function levelFor(xp: number): LevelInfo {
 
   return {
     ...current,
+    title: levelTitle(current.level),
     xp,
     intoLevel,
     nextAt: next?.at ?? 0,
@@ -80,8 +97,6 @@ export function levelFor(xp: number): LevelInfo {
 
 export interface BadgeDefinition {
   readonly id: string;
-  readonly title: string;
-  readonly description: string;
   readonly earned: (progress: ProgressSnapshot) => boolean;
   /** Compteur affiché quand le badge se gagne par accumulation. */
   readonly progress?: (progress: ProgressSnapshot) => { done: number; total: number };
@@ -116,31 +131,23 @@ function allLessonsRead(progress: ProgressSnapshot): boolean {
 
 const CHAPTER_BADGES: readonly BadgeDefinition[] = chapters.map((chapter) => ({
   id: `chapitre-${chapter.id}`,
-  title: chapter.title,
-  description: `Terminer les ${chapter.missions.length} missions du chapitre ${chapter.number}.`,
   earned: (progress) => chapterComplete(progress, chapter.id),
 }));
 
 export const BADGES: readonly BadgeDefinition[] = [
   {
     id: 'premier-pas',
-    title: 'Premier pas',
-    description: 'Terminer une mission.',
     earned: (progress) => completedCount(progress) >= 1,
     progress: (progress) => ({ done: Math.min(1, completedCount(progress)), total: 1 }),
   },
   {
     id: 'sans-faute',
-    title: 'Sans faute',
-    description: 'Réussir cinq missions avec trois étoiles.',
     earned: (progress) => perfectCount(progress) >= 5,
     progress: (progress) => ({ done: Math.min(5, perfectCount(progress)), total: 5 }),
   },
   ...CHAPTER_BADGES,
   {
     id: 'erudit',
-    title: 'Érudit',
-    description: 'Lire tous les cours, prologue compris.',
     earned: allLessonsRead,
     progress: (progress) => {
       const total = chapters.length + 1;
@@ -155,8 +162,6 @@ export const BADGES: readonly BadgeDefinition[] = [
   },
   {
     id: 'parcours-complet',
-    title: 'Parcours complet',
-    description: `Terminer les ${missionSequence.length} missions.`,
     earned: (progress) => completedCount(progress) >= missionSequence.length,
     progress: (progress) => ({
       done: completedCount(progress),
@@ -165,8 +170,6 @@ export const BADGES: readonly BadgeDefinition[] = [
   },
   {
     id: 'maitre',
-    title: 'Maître du dépôt',
-    description: 'Terminer toutes les missions avec trois étoiles.',
     earned: (progress) => perfectCount(progress) >= missionSequence.length,
     progress: (progress) => ({
       done: perfectCount(progress),
@@ -176,13 +179,50 @@ export const BADGES: readonly BadgeDefinition[] = [
 ];
 
 export interface BadgeState extends BadgeDefinition {
+  readonly title: string;
+  readonly description: string;
   readonly unlocked: boolean;
   readonly counter: { readonly done: number; readonly total: number } | null;
+}
+
+const FIXED_BADGE_KEYS = {
+  'premier-pas': ['badge.premier-pas.title', 'badge.premier-pas.description'],
+  'sans-faute': ['badge.sans-faute.title', 'badge.sans-faute.description'],
+  erudit: ['badge.erudit.title', 'badge.erudit.description'],
+  'parcours-complet': ['badge.parcours-complet.title', 'badge.parcours-complet.description'],
+  maitre: ['badge.maitre.title', 'badge.maitre.description'],
+} as const satisfies Record<string, readonly [MessageKey, MessageKey]>;
+
+function badgeTitle(id: string): string {
+  const chapter = chapters.find((candidate) => id === `chapitre-${candidate.id}`);
+  if (chapter !== undefined) return chapter.title;
+  const keys = FIXED_BADGE_KEYS[id as keyof typeof FIXED_BADGE_KEYS];
+  return keys === undefined ? id : t(keys[0]);
+}
+
+function badgeDescription(id: string): string {
+  const chapter = chapters.find((candidate) => id === `chapitre-${candidate.id}`);
+  if (chapter !== undefined) {
+    return t('progress.badgeChapterDesc', {
+      count: chapter.missions.length,
+      number: chapter.number,
+    });
+  }
+  switch (id) {
+    case 'parcours-complet':
+      return t('badge.parcours-complet.description', { count: missionSequence.length });
+    default: {
+      const keys = FIXED_BADGE_KEYS[id as keyof typeof FIXED_BADGE_KEYS];
+      return keys === undefined ? '' : t(keys[1]);
+    }
+  }
 }
 
 export function badgesFor(progress: ProgressSnapshot): BadgeState[] {
   return BADGES.map((badge) => ({
     ...badge,
+    title: badgeTitle(badge.id),
+    description: badgeDescription(badge.id),
     unlocked: badge.earned(progress),
     counter: badge.progress?.(progress) ?? null,
   }));

@@ -1,9 +1,11 @@
 import type { RepoState } from '../engine/types';
 import { headSnapshot } from '../engine/validate';
 
+export type PreparedFileStatus = 'new' | 'modified' | 'staged';
+
 export interface PreparedFile {
   readonly path: string;
-  readonly status: 'nouveau' | 'modifié' | 'indexé';
+  readonly status: PreparedFileStatus;
   readonly preview: string;
 }
 
@@ -25,11 +27,11 @@ export function preparedFiles(state: RepoState): readonly PreparedFile[] {
     const staged = worktree.index[path];
     if (local === undefined) continue;
 
-    let status: PreparedFile['status'] | null = null;
-    if (committed === undefined && staged === undefined) status = 'nouveau';
+    let status: PreparedFileStatus | null = null;
+    if (committed === undefined && staged === undefined) status = 'new';
     else if (committed !== local) {
-      status = staged === local && staged !== committed ? 'indexé' : 'modifié';
-    } else if (staged !== committed && staged !== undefined) status = 'indexé';
+      status = staged === local && staged !== committed ? 'staged' : 'modified';
+    } else if (staged !== committed && staged !== undefined) status = 'staged';
     if (status === null) continue;
 
     const line = local.replace(/\s+/g, ' ').trim();
