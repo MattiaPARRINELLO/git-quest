@@ -1,5 +1,6 @@
 import { chapters, commandLineLesson, missionSequence } from '../content';
-import { t } from '../i18n';
+import { contentFor } from '../content/localized';
+import { getLocale, t } from '../i18n';
 import type { MessageKey } from '../i18n';
 
 export interface ProgressSnapshot {
@@ -194,14 +195,18 @@ const FIXED_BADGE_KEYS = {
 } as const satisfies Record<string, readonly [MessageKey, MessageKey]>;
 
 function badgeTitle(id: string): string {
-  const chapter = chapters.find((candidate) => id === `chapitre-${candidate.id}`);
+  const chapter = contentFor(getLocale()).chapters.find(
+    (candidate) => id === `chapitre-${candidate.id}`,
+  );
   if (chapter !== undefined) return chapter.title;
   const keys = FIXED_BADGE_KEYS[id as keyof typeof FIXED_BADGE_KEYS];
   return keys === undefined ? id : t(keys[0]);
 }
 
 function badgeDescription(id: string): string {
-  const chapter = chapters.find((candidate) => id === `chapitre-${candidate.id}`);
+  const chapter = contentFor(getLocale()).chapters.find(
+    (candidate) => id === `chapitre-${candidate.id}`,
+  );
   if (chapter !== undefined) {
     return t('progress.badgeChapterDesc', {
       count: chapter.missions.length,

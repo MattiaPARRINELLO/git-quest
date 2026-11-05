@@ -5,6 +5,9 @@ import type { MessageKey } from './fr';
  * compile error and a typo in a key is too. See `docs/I18N.md`.
  */
 export const en: Record<MessageKey, string> = {
+  'app.title': 'GitQuest · Git sandbox',
+  'app.description':
+    'GitQuest: learn Git by seeing every command. Commits, branches, merges and worktrees, step by step.',
   'app.skipToContent': 'Skip to content',
   'app.notFound': 'Page not found.',
   'app.backToChapters': 'Back to chapters',

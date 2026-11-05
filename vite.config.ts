@@ -23,11 +23,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'GitQuest — Apprendre Git visuellement',
+        name: 'GitQuest: learn Git visually',
         short_name: 'GitQuest',
         description:
-          'Bac à sable Git interactif : commits, branches, merge et worktrees visualisés en direct.',
-        lang: 'fr',
+          'Interactive Git sandbox: commits, branches, merges and worktrees visualized live.',
+        lang: 'en',
         theme_color: '#0a0b0f',
         background_color: '#0a0b0f',
         display: 'standalone',

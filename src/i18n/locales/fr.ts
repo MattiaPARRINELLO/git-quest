@@ -9,6 +9,9 @@
  */
 export const fr = {
   // Application
+  'app.title': 'GitQuest · Bac à sable Git',
+  'app.description':
+    'GitQuest : apprends Git en visualisant chaque commande. Commits, branches, merges et worktrees, pas à pas.',
   'app.skipToContent': 'Aller au contenu',
   'app.notFound': 'Page introuvable.',
   'app.backToChapters': 'Retour aux chapitres',

@@ -10,6 +10,7 @@ import type { Commit, RepoState } from '../../../../engine/types';
 import { entryState, referenceCommands } from '../../../../story/checkpoints';
 import { oldestHash } from '../../../../story/display';
 import { branchUnchanged, commitDelta } from '../../../../story/preconditions';
+import { localizedText } from '../../../text';
 import type { Mission } from '../../../types';
 
 const initial = entryState('commit-perdu');
@@ -119,16 +120,33 @@ export const mission23: Mission = {
         'checkout d’un hash détache HEAD sur le commit. Aucune étiquette ne bouge, et le prochain commit sera orphelin si tu repars sans branche.',
       resolve: (state) => {
         const oldest = oldestHash(state) ?? '';
+        const short = oldest.slice(0, 7);
         return {
-          question: `Où sera HEAD après « git checkout ${oldest.slice(0, 7)} » ?`,
+          question: localizedText(
+            `Où sera HEAD après « git checkout ${short} » ?`,
+            'Where will HEAD be after "git checkout {hash}"?',
+            { hash: short },
+          ),
           options: [
-            { id: 'main', label: 'Sur la branche main', target: { kind: 'branch', value: 'main' } },
+            {
+              id: 'main',
+              label: localizedText('Sur la branche main', 'On branch main'),
+              target: { kind: 'branch', value: 'main' },
+            },
             {
               id: 'detached',
-              label: `Détaché sur le commit ${oldest.slice(0, 7)}`,
+              label: localizedText(
+                `Détaché sur le commit ${short}`,
+                'Detached at commit {hash}',
+                { hash: short },
+              ),
               target: { kind: 'commit', value: oldest },
             },
-            { id: 'feature', label: 'Sur la branche feature', target: { kind: 'branch', value: 'feature' } },
+            {
+              id: 'feature',
+              label: localizedText('Sur la branche feature', 'On branch feature'),
+              target: { kind: 'branch', value: 'feature' },
+            },
           ],
         };
       },

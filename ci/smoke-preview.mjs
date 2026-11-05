@@ -69,7 +69,6 @@ else fail('GET / content-type', `expected text/html, got "${home.contentType}"`)
 
 const shellMarkers = [
   ['<div id="root"></div>', 'React mount point'],
-  ['lang="fr"', 'French locale'],
   ['manifest.webmanifest', 'manifest link'],
   ['registerSW.js', 'service worker registration'],
 ];
@@ -77,6 +76,8 @@ for (const [needle, label] of shellMarkers) {
   if (home.body.includes(needle)) ok(`shell: ${label}`);
   else fail(`shell: ${label}`, `"${needle}" not found in /`);
 }
+if (/lang="(fr|en)"/.test(home.body)) ok('shell: supported locale');
+else fail('shell: supported locale', 'lang="fr" or lang="en" not found in /');
 
 const entry = [...home.body.matchAll(/src="(\/assets\/[^"]+\.js)"/g)].map((match) => match[1]);
 if (entry.length > 0) {

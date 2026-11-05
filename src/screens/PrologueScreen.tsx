@@ -1,12 +1,13 @@
 import { Icon } from '../components/ui/Icon';
 import { LessonDeck } from '../components/lesson/LessonDeck';
-import { chapters, commandLineLesson } from '../content';
+import { useContent } from '../content/useContent';
 import { routePaths } from '../router/useHashRoute';
 import { useTranslation } from '../i18n/useTranslation';
 
 /** Lecture préalable : décoder la syntaxe d'une commande avant le chapitre 1. */
 export function PrologueScreen() {
   const { t } = useTranslation();
+  const { chapters, prologue } = useContent();
   const first = chapters[0];
 
   const lastAction = (
@@ -21,8 +22,8 @@ export function PrologueScreen() {
 
   return (
     <LessonDeck
-      lesson={commandLineLesson}
-      storageId={commandLineLesson.id}
+      lesson={prologue}
+      storageId={prologue.id}
       badge={t('lesson.prologueBadge')}
       backHref={routePaths.home}
       backLabel={t('nav.chapters')}

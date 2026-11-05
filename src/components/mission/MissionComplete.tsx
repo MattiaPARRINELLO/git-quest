@@ -63,7 +63,7 @@ export function MissionCompleteBar({
             ))}
           </span>
           <span className="truncate text-[13px] text-muted">
-            {mission.number} — {mission.title}
+            {mission.number} · {mission.title}
           </span>
         </div>
         <div className="flex items-center gap-2">

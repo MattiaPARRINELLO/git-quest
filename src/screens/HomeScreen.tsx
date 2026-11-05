@@ -1,11 +1,6 @@
 import { useMemo } from 'react';
-import {
-  chapters,
-  commandLineLesson,
-  estimatedLessonMinutes,
-  missionSequence,
-} from '../content';
-import { briefingFor } from '../content/briefings';
+import { estimatedLessonMinutes } from '../content';
+import { useContent } from '../content/useContent';
 import { resumeContext, resumeTarget } from '../app/resume';
 import { progressSummary } from '../app/xp';
 import { ProgressPanel } from '../components/progress/ProgressPanel';
@@ -29,6 +24,11 @@ const MISSION_ROUTE = '#/mission/';
 
 export function HomeScreen() {
   const { locale, t } = useTranslation();
+  const { chapters, prologue, briefings } = useContent();
+  const missionSequence = useMemo(
+    () => chapters.flatMap((chapter) => chapter.missions),
+    [chapters],
+  );
   const completed = useProgressStore((store) => store.completed);
   const lessonSlides = useProgressStore((store) => store.lessonSlides);
   const progressHydrated = useProgressStore((store) => store.hydrated);
@@ -48,11 +48,12 @@ export function HomeScreen() {
   const totalMissions = chapters.reduce((sum, chapter) => sum + chapter.missions.length, 0);
   const totalStars = Object.values(completed).reduce((sum, item) => sum + item.stars, 0);
   const lastCompleted = [...missionSequence].reverse().find((mission) => completed[mission.id]);
-  const lastBriefing = lastCompleted === undefined ? undefined : briefingFor(lastCompleted.id);
+  const lastBriefing =
+    lastCompleted === undefined ? undefined : briefings[lastCompleted.id];
   const done = Object.keys(completed).length;
   const percent = totalMissions === 0 ? 0 : Math.round((done / totalMissions) * 100);
   const prologueRead =
-    (lessonSlides[commandLineLesson.id] ?? 0) >= commandLineLesson.slides.length - 1;
+    (lessonSlides[prologue.id] ?? 0) >= prologue.slides.length - 1;
   const headMissionId = target.route.startsWith(MISSION_ROUTE)
     ? target.route.slice(MISSION_ROUTE.length)
     : null;
@@ -119,7 +120,7 @@ export function HomeScreen() {
                 </span>
                 <span className="mt-1.5 block text-[16px] leading-relaxed text-muted">
                   {t('home.prologueText', {
-                    minutes: estimatedLessonMinutes(commandLineLesson),
+                    minutes: estimatedLessonMinutes(prologue),
                   })}
                 </span>
               </span>

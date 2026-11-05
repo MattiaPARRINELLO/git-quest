@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { chapters } from '../../content';
+import { useContent } from '../../content/useContent';
 import { scenario } from '../../engine/scenario';
 import { execute } from '../../engine';
 import { CommitGraph } from '../graph/CommitGraph';
@@ -26,8 +26,6 @@ export const emptyBatch = { id: 0, events: [] } as const;
 
 /** Sortie réelle de `git log --oneline` sur ce dépôt. */
 const logLines = execute(previewState, 'git log --oneline').output;
-
-const firstMission = chapters[0]?.missions[0];
 
 function Frame({
   label,
@@ -99,6 +97,8 @@ export function TerminalFragment() {
 /** Le panneau de mission : objectif, étapes, coût en commandes. */
 export function MissionFragment() {
   const { t } = useTranslation();
+  const { chapters } = useContent();
+  const firstMission = chapters[0]?.missions[0];
   if (firstMission === undefined) return null;
   const texts = missionText(firstMission, firstMission.initialState);
 
@@ -124,6 +124,7 @@ export function MissionFragment() {
 /** La prédiction : HEAD suspendu, on parie avant de voir. */
 export function PredictionFragment() {
   const { t } = useTranslation();
+  const { chapters } = useContent();
   const prediction = chapters[1]?.missions[1]?.predictions?.[0];
   if (prediction === undefined) return null;
 

@@ -1,13 +1,16 @@
 import { Icon } from '../components/ui/Icon';
 import { LessonDeck } from '../components/lesson/LessonDeck';
-import { firstMissionOfChapter, findChapter, isMissionUnlocked } from '../content';
+import { useContent } from '../content/useContent';
+import { findChapterIn } from '../content/localized';
+import { isMissionUnlocked } from '../content';
 import { routePaths } from '../router/useHashRoute';
 import { useProgressStore } from '../store/useProgressStore';
 import { useTranslation } from '../i18n/useTranslation';
 
 export function LessonScreen({ chapterId }: { readonly chapterId: string }) {
   const { t } = useTranslation();
-  const chapter = findChapter(chapterId);
+  const pack = useContent();
+  const chapter = findChapterIn(pack, chapterId);
   const completed = useProgressStore((store) => store.completed);
 
   if (!chapter) {
@@ -21,7 +24,7 @@ export function LessonScreen({ chapterId }: { readonly chapterId: string }) {
     );
   }
 
-  const firstMission = firstMissionOfChapter(chapter.id);
+  const firstMission = chapter.missions[0];
   const missionUnlocked = firstMission
     ? isMissionUnlocked(firstMission.id, completed)
     : false;

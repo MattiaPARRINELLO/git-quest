@@ -53,7 +53,10 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.lang = locale;
-  }, [locale]);
+    document.title = t('app.title');
+    const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (description !== null) description.content = t('app.description');
+  }, [locale, t]);
 
   useEffect(() => {
     if (window.location.hash === '' || window.location.hash === '#') {

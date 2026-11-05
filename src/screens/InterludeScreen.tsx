@@ -1,5 +1,5 @@
-import { chapters, chapterMissions, findChapter } from '../content';
-import { briefingFor } from '../content/briefings';
+import { useContent } from '../content/useContent';
+import { findChapterIn, missionSequenceIn } from '../content/localized';
 import { routePaths } from '../router/useHashRoute';
 import { useProgressStore } from '../store/useProgressStore';
 import { Icon } from '../components/ui/Icon';
@@ -13,9 +13,11 @@ import { useTranslation } from '../i18n/useTranslation';
  */
 export function InterludeScreen({ chapterId }: { readonly chapterId: string }) {
   const { t } = useTranslation();
+  const pack = useContent();
+  const { chapters, briefings } = pack;
   const completed = useProgressStore((store) => store.completed);
   const slots = useProgressStore((store) => store.story.slots);
-  const chapter = findChapter(chapterId);
+  const chapter = findChapterIn(pack, chapterId);
   const index = chapters.findIndex((candidate) => candidate.id === chapterId);
   const previous = index > 0 ? chapters[index - 1] : undefined;
 
@@ -30,9 +32,12 @@ export function InterludeScreen({ chapterId }: { readonly chapterId: string }) {
     );
   }
 
-  const missions = chapterMissions(previous.id);
+  const missions = missionSequenceIn(pack).filter(
+    (mission) => mission.chapterId === previous.id,
+  );
   const lastMission = missions[missions.length - 1];
-  const teaser = lastMission === undefined ? undefined : briefingFor(lastMission.id)?.teaser;
+  const teaser =
+    lastMission === undefined ? undefined : briefings[lastMission.id]?.teaser;
   const stars = missions.reduce((sum, mission) => sum + (completed[mission.id]?.stars ?? 0), 0);
 
   return (
