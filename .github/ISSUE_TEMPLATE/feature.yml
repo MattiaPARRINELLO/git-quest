@@ -1,0 +1,31 @@
+name: Idée ou amélioration
+description: Proposer une fonctionnalité, une amélioration d'interface ou d'outillage
+title: "[Idée] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème ou besoin
+      description: Décrire la situation actuelle et ce qui bloque.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+    validations:
+      required: false
+  - type: checkboxes
+    id: ai
+    attributes:
+      label: Divulgation IA
+      options:
+        - label: Cette issue a été rédigée avec l'aide d'un assistant IA (le préciser dans le corps).
+          required: false

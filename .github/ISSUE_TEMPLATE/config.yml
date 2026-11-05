@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Guide de contribution
+    url: https://github.com/MattiaPARRINELLO/git-quest/blob/main/CONTRIBUTING.md
+    about: Installation, conventions, ajout de mission et de traduction.
+  - name: Documentation
+    url: https://github.com/MattiaPARRINELLO/git-quest/tree/main/docs
+    about: Architecture, contenu, i18n, CI et Android.

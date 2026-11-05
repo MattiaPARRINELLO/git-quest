@@ -12,6 +12,9 @@ strict, Zustand, Tailwind v4, Framer Motion, SVG maison, Vitest, IndexedDB via
 - `npm run coverage` — couverture du moteur.
 - `npm run build` — typecheck + build PWA (génère `dist/sw.js`).
 - `npm run preview` — sert le build (vérifier le mode hors ligne).
+- `npm run check` — typecheck + invariants du contenu + parité i18n.
+- `npm run new:mission -- --chapter <id> --id <mission-id> --title "<titre>"` —
+  génère une mission, son import et son stub de chaîne story.
 
 ## Règles d'architecture
 
@@ -60,8 +63,10 @@ strict, Zustand, Tailwind v4, Framer Motion, SVG maison, Vitest, IndexedDB via
   `Commit.branch`).
 - Le graphe joue les `GitEvent` de `lastEvents`, il ne diffe jamais deux états.
 - Tout service web local doit passer par Portless (`https://<nom>.localhost`).
-- UI en français, commandes Git en anglais. Thème sombre par défaut, tokens CSS
-  dans `src/styles/index.css`, pas de couleurs codées en dur dans les composants.
+- UI en français par défaut et traduisible en anglais, commandes Git en anglais. Aucun
+  texte d'interface codé en dur : passer par `t()` (`src/i18n/`), avec la clé ajoutée
+  dans `fr.ts` et `en.ts`. Thème sombre par défaut, tokens CSS dans
+  `src/styles/index.css`, pas de couleurs codées en dur dans les composants.
 - Le terminal reste utilisable clavier : focus auto, `aria-live`, Tab/↑/↓/Ctrl+L/C.
 
 ## Conventions
@@ -70,6 +75,8 @@ strict, Zustand, Tailwind v4, Framer Motion, SVG maison, Vitest, IndexedDB via
 - Fichiers en kebab-case pour les modules, composants en PascalCase.
 - Un commit par unité de travail vérifiée (typecheck + tests + build si UI).
 - Ne jamais logger de secret ; aucun secret n'est nécessaire au projet.
+- Contribution : `CONTRIBUTING.md`, `docs/CONTENT.md`, `docs/I18N.md` et les modèles
+  GitHub doivent rester à jour avec le code.
 
 ## Méthode
 

@@ -1,0 +1,50 @@
+name: Contenu pédagogique
+description: Proposer une mission, un cours, un indice ou une correction
+title: "[Contenu] "
+labels: ["content"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type de contribution
+      options:
+        - Nouvelle mission
+        - Nouveau cours
+        - Correction d'un texte existant
+        - Nouvel indice
+        - Prédiction
+        - Autre
+    validations:
+      required: true
+  - type: input
+    id: chapter
+    attributes:
+      label: Chapitre concerné
+      placeholder: ex. 05-shortcuts, ou « nouveau chapitre »
+    validations:
+      required: true
+  - type: textarea
+    id: intent
+    attributes:
+      label: Intention pédagogique
+      description: Quel concept, quel malentendu, quel geste concret ?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposition
+      description: Situation, objectif, étapes observables, solution de référence.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Avant d'ouvrir
+      options:
+        - label: J'ai lu docs/CONTENT.md.
+          required: true
+        - label: La solution utilise uniquement des commandes supportées.
+          required: false
+        - label: Cette issue a été rédigée avec l'aide d'un assistant IA (le préciser dans le corps).
+          required: false
