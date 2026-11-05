@@ -36,8 +36,14 @@ export function HomeScreen() {
   const draftHydrated = useMissionDraftStore((store) => store.hydrated);
   const hydrated = progressHydrated && draftHydrated;
   const progress = useMemo(() => ({ completed, lessonSlides }), [completed, lessonSlides]);
-  const target = useMemo(() => resumeTarget(progress, activeMission), [progress, activeMission]);
-  const context = useMemo(() => resumeContext(progress, activeMission), [progress, activeMission]);
+  const target = useMemo(
+    () => resumeTarget(progress, activeMission),
+    [progress, activeMission, locale],
+  );
+  const context = useMemo(
+    () => resumeContext(progress, activeMission),
+    [progress, activeMission, locale],
+  );
   const summary = useMemo(() => progressSummary(progress), [progress, locale]);
   const totalMissions = chapters.reduce((sum, chapter) => sum + chapter.missions.length, 0);
   const totalStars = Object.values(completed).reduce((sum, item) => sum + item.stars, 0);

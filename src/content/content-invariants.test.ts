@@ -18,6 +18,17 @@ function sentences(text: string): number {
 }
 
 function checkMission(mission: Mission): void {
+  const texts = [
+    mission.title,
+    mission.story,
+    mission.situation,
+    mission.objective,
+    mission.takeaway,
+    ...mission.steps.map((step) => step.label),
+    ...mission.hints,
+  ].join(' ');
+  expect(texts, `${mission.id} : texte encore marqué TODO`).not.toMatch(/\bTODO\b/);
+
   expect(mission.title.trim(), `${mission.id} : titre vide`).not.toBe('');
   expect(mission.situation.trim(), `${mission.id} : situation vide`).not.toBe('');
   expect(mission.objective.trim(), `${mission.id} : objectif vide`).not.toBe('');

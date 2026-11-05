@@ -160,9 +160,9 @@ const storyStub = `  // TODO : décrire le préambule, les slots et la solution 
   },`;
 const lastArrayClose = storySource.lastIndexOf('\n];');
 if (lastArrayClose === -1) usage(`tableau story introuvable dans ${storyFile}`);
-const updatedStory = `${storySource.slice(0, lastArrayClose)}\n${storyStub}${storySource.slice(
-  lastArrayClose,
-)}`;
+const storyBefore = storySource.slice(0, lastArrayClose);
+const comma = storyBefore.trimEnd().endsWith(',') ? '' : ',';
+const updatedStory = `${storyBefore}${comma}\n${storyStub}${storySource.slice(lastArrayClose)}`;
 
 if (args.dryRun === true) {
   console.log(`--- ${path.relative(root, missionFile)} ---\n${missionSource}`);
