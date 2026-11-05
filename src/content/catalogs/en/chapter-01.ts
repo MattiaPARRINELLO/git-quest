@@ -95,15 +95,15 @@ export const chapter01Text: ChapterText = {
       situation: 'a.txt and b.txt are modified; nothing is staged yet.',
       objective: 'Commit only a.txt and leave b.txt modified in the working dir.',
       takeaway:
-        'The commit only takes the index: b.txt stays out of the snapshot until it is staged.',
+        'The commit only photographs the index: only staged changes enter the new snapshot, and the b.txt changes stay uncommitted.',
       stepLabels: [
         'Stage a.txt with git add',
         'Commit the updated design note',
-        'Leave b.txt modified outside the commit',
+        'Keep the b.txt change uncommitted',
       ],
       hints: [
         'A commit photographs the index, not the whole working dir. You have to choose what to stage.',
-        'Add only a.txt to the index, then commit: b.txt will stay modified on disk.',
+        'Add only a.txt to the index, then commit: the b.txt change will stay uncommitted on disk.',
         'git add a.txt, then git commit -m "fix: a.txt".',
       ],
       predictions: [
@@ -115,7 +115,7 @@ export const chapter01Text: ChapterText = {
             { id: 'none', label: 'None' },
           ],
           explanation:
-            'The commit only reads the index. b.txt stays modified in the working dir without entering the snapshot.',
+            'The commit only reads the index: the new version of b.txt does not enter the snapshot, the change stays uncommitted.',
         },
       ],
     },

@@ -22,8 +22,8 @@ export const messageTranslations: Readonly<Record<string, string>> = {
   'Aucun commit supplémentaire ne doit être créé.': 'No extra commit must be created.',
   'Le commit doit contenir la version mise à jour de a.txt.':
     'The commit must contain the updated version of a.txt.',
-  'Le commit ne doit pas contenir b.txt modifié.':
-    'The commit must not contain the modified b.txt.',
+  'Le commit doit conserver l’ancienne version de b.txt.':
+    'The commit must keep the old version of b.txt.',
   'a.txt doit être à jour dans le working dir.':
     'a.txt must be up to date in the working dir.',
   'b.txt doit rester modifié dans le working dir.':
