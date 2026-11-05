@@ -15,7 +15,7 @@ import { syncStatusBar } from './native';
 import { useTranslation } from './i18n/useTranslation';
 
 export default function App() {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const theme = useUiStore((store) => store.theme);
   const route = useHashRoute();
   const mainRef = useRef<HTMLElement>(null);
@@ -50,6 +50,10 @@ export default function App() {
     root.classList.toggle('dark', theme === 'dark');
     void syncStatusBar(theme);
   }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   useEffect(() => {
     if (window.location.hash === '' || window.location.hash === '#') {
