@@ -175,7 +175,7 @@ function parseWorktree(args: readonly string[]): ParseResult {
       if (arg === '--detach') {
         return fail(
           'invalid-option',
-          'error: --detach n’est pas supporté dans GitQuest',
+          'error: --detach is not supported in GitQuest',
         );
       }
       if (arg.startsWith('-')) {

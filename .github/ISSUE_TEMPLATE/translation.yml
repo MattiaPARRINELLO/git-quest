@@ -1,0 +1,41 @@
+name: Traduction
+description: Proposer une traduction d'interface ou de contenu
+title: "[Traduction] "
+labels: ["i18n"]
+body:
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Portée
+      options:
+        - Interface (catalogues i18n)
+        - Un chapitre de contenu
+        - Tout le contenu
+        - Correction d'une traduction existante
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Langue
+      placeholder: ex. anglais, espagnol
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Détails
+      description: Clés, chapitre, écrans ou textes concernés.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Avant d'ouvrir
+      options:
+        - label: J'ai lu docs/I18N.md.
+          required: true
+        - label: Je ne traduis pas les commandes Git ni les identifiants.
+          required: true
+        - label: Cette issue a été rédigée avec l'aide d'un assistant IA (le préciser dans le corps).
+          required: false

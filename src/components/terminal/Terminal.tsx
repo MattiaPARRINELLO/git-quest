@@ -10,6 +10,7 @@ import { cn } from '../../lib/cn';
 import { applySuggestion, completeInput } from './autocomplete';
 import { KeyBar } from './KeyBar';
 import type { OutputTone } from '../../engine/types';
+import { useTranslation } from '../../i18n/useTranslation';
 
 const TERM_INPUT_STYLE = { fontFamily: 'var(--font-mono)' } as const; // taste-skill-ignore : saisie du terminal, du code Git
 
@@ -48,6 +49,7 @@ interface TerminalProps {
 }
 
 export function Terminal({ onCommand }: TerminalProps) {
+  const { t } = useTranslation();
   const entries = useRepoStore((store) => store.entries);
   const state = useRepoStore((store) => store.state);
   const commandHistory = useRepoStore((store) => store.commandHistory);
@@ -208,9 +210,9 @@ export function Terminal({ onCommand }: TerminalProps) {
           manger de la hauteur utile à l'historique. */}
       {!isMobile && (
         <div className="flex h-9 shrink-0 items-center justify-between px-5">
-          <span className="text-[13px] text-muted">Terminal</span>
+          <span className="text-[13px] text-muted">{t('terminal.title')}</span>
           <span className="hidden text-[12px] text-muted sm:inline">
-            ↑↓ historique · Tab complétion · Ctrl+L effacer
+            {t('terminal.shortcuts')}
           </span>
         </div>
       )}
@@ -219,7 +221,7 @@ export function Terminal({ onCommand }: TerminalProps) {
         ref={logRef}
         role="log"
         aria-live="polite"
-        aria-label="Sortie du terminal"
+        aria-label={t('terminal.outputAria')}
         className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-5 py-3"
       >
         {entries.map((entry) => (
@@ -248,7 +250,7 @@ export function Terminal({ onCommand }: TerminalProps) {
             autoComplete="off"
             autoCapitalize="off"
             autoCorrect="off"
-            aria-label="Commande Git"
+            aria-label={t('terminal.inputAria')}
             style={TERM_INPUT_STYLE}
             className="min-w-0 flex-1 border-none bg-transparent p-0 text-[16px] leading-6 text-text caret-accent outline-none placeholder:text-muted/50 sm:text-[13px]"
             placeholder="git status"

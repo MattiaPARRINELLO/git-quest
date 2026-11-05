@@ -5,7 +5,8 @@ import type { DemoSlide } from '../../content/types';
 import { execute } from '../../engine/execute';
 import type { GitEvent, RepoState } from '../../engine/types';
 import { CommitGraph } from '../graph/CommitGraph';
-import { explainEvent } from '../../explanations/fr';
+import { explainEvent } from '../../explanations';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface DemoState {
   readonly state: RepoState;
@@ -15,6 +16,7 @@ interface DemoState {
 }
 
 export function MiniDemo({ slide }: { readonly slide: DemoSlide }) {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
 
   const states = useMemo<DemoState[]>(() => {
@@ -52,7 +54,7 @@ export function MiniDemo({ slide }: { readonly slide: DemoSlide }) {
       <div className="flex flex-col gap-2  px-3.5 py-2.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           {step === 0 ? (
-            <p className="text-[12px] text-muted">État initial du dépôt. Lance la démo pour voir chaque étape.</p>
+            <p className="text-[12px] text-muted">{t('demo.initial')}</p>
           ) : (
             <p className="text-[13px] text-text">
               <span className="text-muted">$ </span>
@@ -72,7 +74,7 @@ export function MiniDemo({ slide }: { readonly slide: DemoSlide }) {
           </span>
           {done ? (
             <button type="button" className="btn h-8 px-2.5 text-[12px]" onClick={() => setStep(0)}>
-              Recommencer
+              {t('demo.restart')}
             </button>
           ) : (
             <button
@@ -80,7 +82,7 @@ export function MiniDemo({ slide }: { readonly slide: DemoSlide }) {
               className="btn btn-accent h-8 px-2.5 text-[12px]"
               onClick={() => setStep(step + 1)}
             >
-              Étape suivante
+              {t('demo.nextStep')}
             </button>
           )}
         </div>

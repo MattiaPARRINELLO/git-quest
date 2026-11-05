@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { routeCommand } from '../app/commands';
 import type { RoutedResult } from '../app/commands';
-import { explainEvent } from '../explanations/fr';
+import { explainEvent } from '../explanations';
 import { createDemoState, createSandboxState } from '../content/sandbox';
 import { promptFor } from '../lib/prompt';
 import { storage } from '../storage/storage';

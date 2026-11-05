@@ -1,0 +1,68 @@
+name: Bug
+description: Signaler un comportement incorrect ou un crash
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci pour le signalement. Décrivez un cas reproductible, pas seulement le symptôme.
+  - type: input
+    id: version
+    attributes:
+      label: Version ou commit
+      description: Numéro de version, hash de commit ou URL déployée.
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Écran concerné
+      options:
+        - Accueil
+        - Cours
+        - Mission
+        - Bac à sable
+        - Arbre Nova
+        - Sauvegarde de progression
+        - Android
+        - Autre
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Ouvrir ...
+        2. Taper ...
+        3. Observer ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Résultat attendu
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Résultat observé
+      description: Inclure le message du terminal ou une capture si possible.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environnement
+      description: Navigateur, OS, mobile ou desktop.
+    validations:
+      required: false
+  - type: checkboxes
+    id: ai
+    attributes:
+      label: Divulgation IA
+      options:
+        - label: Cette issue a été rédigée avec l'aide d'un assistant IA (le préciser dans le corps).
+          required: false

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Prediction } from '../../content/types';
 import { useDialogKeyboard, useModalFocus } from '../../hooks/useDialogKeyboard';
+import { useTranslation } from '../../i18n/useTranslation';
 import { Icon } from '../ui/Icon';
 
 interface PredictionOverlayProps {
@@ -15,6 +16,7 @@ interface PredictionOverlayProps {
  * la réponse par clic sur un commit.
  */
 export function PredictionOverlay({ prediction, onAnswer, onSkip }: PredictionOverlayProps) {
+  const { t } = useTranslation();
   const card = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState(0);
   useModalFocus(card);
@@ -79,7 +81,7 @@ export function PredictionOverlay({ prediction, onAnswer, onSkip }: PredictionOv
         tabIndex={-1}
         role="alertdialog"
         aria-modal="true"
-        aria-label="Prédiction"
+        aria-label={t('prediction.aria')}
         aria-live="assertive"
         aria-activedescendant={optionId(selected)}
         className="pointer-events-auto relative w-full max-w-md bg-panel outline-none"
@@ -87,20 +89,20 @@ export function PredictionOverlay({ prediction, onAnswer, onSkip }: PredictionOv
         <div className="flex items-center justify-between gap-2  px-4 py-2.5">
           <span className="flex items-center gap-2 text-[13px] text-accent">
             <Icon name="play" size={11} />
-            Exécution en pause
+            {t('prediction.paused')}
           </span>
           <button
             type="button"
             className="rounded px-1 text-[13px] text-muted transition-colors hover:text-text"
             onClick={onSkip}
-            title="Exécuter la commande sans répondre"
+            title={t('prediction.skipTitle')}
           >
-            Passer
+            {t('prediction.skip')}
           </button>
         </div>
 
         <div className="px-4 py-4">
-          <p className="mono-meta">Prédiction</p>
+          <p className="mono-meta">{t('prediction.label')}</p>
           <p className="mt-1 text-[15px] font-medium leading-snug text-text">{prediction.question}</p>
 
           <div className="mt-3 flex flex-col gap-1">
@@ -129,7 +131,7 @@ export function PredictionOverlay({ prediction, onAnswer, onSkip }: PredictionOv
                 {option.target && (
                   <span className="flex shrink-0 items-center gap-1 text-[12px] text-muted">
                     <Icon name="graph" size={11} />
-                    graphe
+                    {t('prediction.graph')}
                   </span>
                 )}
               </button>
@@ -137,8 +139,7 @@ export function PredictionOverlay({ prediction, onAnswer, onSkip }: PredictionOv
           </div>
 
           <p className="mt-3 text-[13px] leading-relaxed text-muted/75">
-            ↑↓ puis Entrée pour valider · 1–{prediction.options.length} pour répondre directement ·
-            Échap pour passer. Tu peux aussi cliquer un commit ou une étiquette sur le graphe.
+            {t('prediction.keys', { total: prediction.options.length })}
           </p>
         </div>
       </div>
@@ -153,6 +154,7 @@ interface PredictionFeedbackProps {
 }
 
 export function PredictionFeedback({ correct, explanation, onContinue }: PredictionFeedbackProps) {
+  const { t } = useTranslation();
   const dialog = useRef<HTMLDivElement>(null);
   useDialogKeyboard(dialog, { onConfirm: onContinue, onCancel: onContinue });
 
@@ -176,14 +178,14 @@ export function PredictionFeedback({ correct, explanation, onContinue }: Predict
           </span>
           <div>
             <p className={`text-[15px] font-medium ${correct ? 'text-success' : 'text-warning'}`}>
-              {correct ? 'Bonne prédiction' : 'Pas tout à fait'}
+              {correct ? t('prediction.correct') : t('prediction.incorrect')}
             </p>
             <p className="mt-1 text-[14px] leading-relaxed text-muted">{explanation}</p>
           </div>
         </div>
         <div className="mt-3 flex items-center justify-end gap-3  px-4 py-2.5">
           <span className="text-[12px] text-muted" aria-hidden="true">
-            Entrée pour continuer
+            {t('prediction.continueKey')}
           </span>
           <button
             type="button"
@@ -191,7 +193,7 @@ export function PredictionFeedback({ correct, explanation, onContinue }: Predict
             className="btn btn-accent h-10 px-4 text-[14px]"
             onClick={onContinue}
           >
-            Continuer
+            {t('mission.continue')}
           </button>
         </div>
       </div>

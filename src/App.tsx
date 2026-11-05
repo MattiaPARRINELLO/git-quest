@@ -12,8 +12,10 @@ import { InterludeScreen } from './screens/InterludeScreen';
 import { FinalScreen } from './screens/FinalScreen';
 import { useUiStore } from './store/useUiStore';
 import { syncStatusBar } from './native';
+import { useTranslation } from './i18n/useTranslation';
 
 export default function App() {
+  const { locale, t } = useTranslation();
   const theme = useUiStore((store) => store.theme);
   const route = useHashRoute();
   const mainRef = useRef<HTMLElement>(null);
@@ -50,6 +52,10 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
+  useEffect(() => {
     if (window.location.hash === '' || window.location.hash === '#') {
       window.history.replaceState(null, '', routePaths.home);
     }
@@ -84,9 +90,9 @@ export default function App() {
     default:
       screen = (
         <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center">
-          <p className="text-sm text-muted">Page introuvable.</p>
+          <p className="text-sm text-muted">{t('app.notFound')}</p>
           <a href={routePaths.home} className="btn">
-            Retour aux chapitres
+            {t('app.backToChapters')}
           </a>
         </div>
       );
@@ -103,7 +109,7 @@ export default function App() {
         href="#contenu-principal"
         className="sr-only rounded-lg border border-border bg-panel px-3 py-2 text-sm text-text focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[60]"
       >
-        Aller au contenu
+        {t('app.skipToContent')}
       </a>
       <TopBar />
       <main

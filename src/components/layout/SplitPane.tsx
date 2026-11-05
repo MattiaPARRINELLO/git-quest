@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface SplitPaneProps {
   readonly left: ReactNode;
@@ -8,6 +9,7 @@ interface SplitPaneProps {
 }
 
 export function SplitPane({ left, right, initialLeftPercent = 40 }: SplitPaneProps) {
+  const { t } = useTranslation();
   const [leftPercent, setLeftPercent] = useState(initialLeftPercent);
   const containerRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
@@ -34,7 +36,7 @@ export function SplitPane({ left, right, initialLeftPercent = 40 }: SplitPanePro
       <section
         className="flex min-h-0 min-w-0 flex-col"
         style={{ width: `${leftPercent}%` }}
-        aria-label="Terminal"
+        aria-label={t('split.terminalAria')}
       >
         {left}
       </section>
@@ -42,7 +44,7 @@ export function SplitPane({ left, right, initialLeftPercent = 40 }: SplitPanePro
       <div
         role="separator"
         aria-orientation="vertical"
-        aria-label="Redimensionner les panneaux"
+        aria-label={t('split.resizeAria')}
         aria-valuenow={Math.round(leftPercent)}
         aria-valuemin={28}
         aria-valuemax={62}
@@ -74,7 +76,7 @@ export function SplitPane({ left, right, initialLeftPercent = 40 }: SplitPanePro
         <div className="absolute inset-y-0 left-1/2 w-[2px] -translate-x-1/2 bg-border transition-colors group-hover:bg-accent group-focus-visible:bg-accent" />
       </div>
 
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-panel" aria-label="Visualisation">
+      <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-panel" aria-label={t('split.vizAria')}>
         {right}
       </section>
     </div>

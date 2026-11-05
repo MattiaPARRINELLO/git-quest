@@ -5,7 +5,8 @@ import type {
   RepoState,
   TerminalLine,
 } from '../engine/types';
-import { explainError, explainEvent } from '../explanations/fr';
+import { explainError, explainEvent } from '../explanations';
+import { t } from '../i18n';
 import { helpOutput, suggestCommand } from './help';
 
 export interface MissionContext {
@@ -99,42 +100,42 @@ export function routeCommand(context: RoutedContext, input: string): RoutedResul
     case 'explain': {
       const command = rest.join(' ').trim();
       if (command === '') {
-        return unchanged(context, 'explain', [line('usage: explain <commande>', 'error')]);
+        return unchanged(context, 'explain', [line(t('app.explainUsage'), 'error')]);
       }
 
       const dryRun = execute(context.state, command);
       if (dryRun.error) {
         return unchanged(context, 'explain', [
-          line(`Explication de « ${command} » :`, 'muted'),
+          line(t('app.explainHeader', { command }), 'muted'),
           line(dryRun.error.message, 'error'),
-          line(`Pourquoi : ${explainError(dryRun.error)}`, 'muted'),
+          line(t('app.explainWhy', { reason: explainError(dryRun.error) }), 'muted'),
         ]);
       }
 
       const explanations =
         dryRun.events.length === 0
-          ? [line('Cette commande ne modifie pas le dépôt.', 'muted')]
+          ? [line(t('app.explainNoChange'), 'muted')]
           : dryRun.events.map((event) => line(`• ${explainEvent(event)}`));
 
       return unchanged(context, 'explain', [
-        line(`Explication de « ${command} » :`, 'muted'),
+        line(t('app.explainHeader', { command }), 'muted'),
         ...explanations,
       ]);
     }
 
     case 'undo': {
       if (context.history.length === 0) {
-        return unchanged(context, 'undo', [line('Rien à annuler.', 'muted')]);
+        return unchanged(context, 'undo', [line(t('app.undoEmpty'), 'muted')]);
       }
       const history = context.history.slice(0, -1);
       const previous = context.history[context.history.length - 1];
       if (previous === undefined) {
-        return unchanged(context, 'undo', [line('Rien à annuler.', 'muted')]);
+        return unchanged(context, 'undo', [line(t('app.undoEmpty'), 'muted')]);
       }
       return {
         state: previous,
         history,
-        output: [line('Commande annulée.', 'muted')],
+        output: [line(t('app.undoDone'), 'muted')],
         events: [],
         effect: 'undo',
         hintsUsed: context.hintsUsed,
@@ -144,13 +145,19 @@ export function routeCommand(context: RoutedContext, input: string): RoutedResul
 
     case 'hint': {
       if (context.mission === null) {
-        return unchanged(context, 'hint', [line('Aucune mission active.', 'muted')]);
+        return unchanged(context, 'hint', [line(t('app.hintNone'), 'muted')]);
       }
       const index = Math.min(context.hintsUsed, context.mission.hints.length - 1);
       const hint = context.mission.hints[index];
       return {
         ...unchanged(context, 'hint', [
-          line(`Indice ${index + 1}/${context.mission.hints.length} : ${hint ?? ''}`),
+          line(
+            t('mission.hintLine', {
+              index: index + 1,
+              total: context.mission.hints.length,
+              hint: hint ?? '',
+            }),
+          ),
         ]),
         hintsUsed: Math.min(context.hintsUsed + 1, context.mission.hints.length),
       };
@@ -158,12 +165,12 @@ export function routeCommand(context: RoutedContext, input: string): RoutedResul
 
     case 'reset-mission': {
       if (context.mission === null) {
-        return unchanged(context, 'reset-mission', [line('Aucune mission active.', 'muted')]);
+        return unchanged(context, 'reset-mission', [line(t('app.hintNone'), 'muted')]);
       }
       return {
         state: context.mission.initialState,
         history: [],
-        output: [line('Mission réinitialisée.', 'muted')],
+        output: [line(t('app.resetDone'), 'muted')],
         events: [],
         effect: 'reset-mission',
         hintsUsed: 0,
@@ -182,9 +189,9 @@ export function routeCommand(context: RoutedContext, input: string): RoutedResul
       if (result.error?.code === 'unknown-command') {
         const suggestion = suggestCommand(trimmed);
         if (suggestion) {
-          output.push(line(`Vouliez-vous dire « ${suggestion} » ?`, 'muted'));
+          output.push(line(t('app.suggest', { command: suggestion }), 'muted'));
         }
-        output.push(line('Tape « help » pour voir toutes les commandes.', 'muted'));
+        output.push(line(t('app.helpHint'), 'muted'));
       }
 
       return {

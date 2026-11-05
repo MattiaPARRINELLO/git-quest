@@ -6,6 +6,7 @@ import { missionText, starsFor } from '../../app/mission';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { cn } from '../../lib/cn';
 import { Icon } from '../ui/Icon';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface MissionPanelProps {
   readonly mission: Mission;
@@ -17,8 +18,12 @@ interface MissionPanelProps {
 }
 
 function StarDots({ count }: { readonly count: number }) {
+  const { t } = useTranslation();
   return (
-    <span className="inline-flex items-center gap-1" aria-label={`${count} étoile(s) sur 3`}>
+    <span
+      className="inline-flex items-center gap-1"
+      aria-label={t('mission.starsAria', { count })}
+    >
       {[0, 1, 2].map((index) => (
         <span
           key={index}
@@ -37,6 +42,7 @@ export function MissionPanel({
   onHint,
   onSuggest,
 }: MissionPanelProps) {
+  const { t } = useTranslation();
   // Sur mobile la mission démarre en version mini : le terminal garde la place.
   const compact = useMediaQuery('(max-width: 767px)');
   const [collapsed, setCollapsed] = useState(compact);
@@ -49,17 +55,24 @@ export function MissionPanel({
   ).length;
 
   return (
-    <section className="shrink-0 bg-panel" aria-label={`Mission ${mission.number} : ${mission.title}`}>
+    <section
+      className="shrink-0 bg-panel"
+      aria-label={t('mission.panelAria', { number: mission.number, title: mission.title })}
+    >
       <div className="flex items-start justify-between gap-3 px-4 py-3">
         <div className="min-w-0">
           <p className="text-[13px] text-muted">
-            Mission {mission.number} · {commandsUsed} / {mission.par} commandes
+            {t('mission.panelMeta', {
+              number: mission.number,
+              used: commandsUsed,
+              par: mission.par,
+            })}
           </p>
           <h1 className="mt-0.5 text-[17px] font-medium leading-snug text-text">{mission.title}</h1>
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
             <StarDots count={stars} />
             <span className="text-[13px] text-muted">
-              {stepsDone} / {mission.steps.length} étapes
+              {t('mission.steps', { done: stepsDone, total: mission.steps.length })}
             </span>
           </div>
           <p className="mt-1.5 hidden text-[13.5px] leading-snug text-muted md:block">
@@ -75,13 +88,21 @@ export function MissionPanel({
             disabled={remainingHints === 0}
             title={
               remainingHints === 0
-                ? 'Tous les indices sont révélés'
-                : `Indice ${hintsUsed + 1}/${mission.hints.length}`
+                ? t('mission.allHintsTitle')
+                : t('mission.hintButton', {
+                    index: hintsUsed + 1,
+                    total: mission.hints.length,
+                  })
             }
           >
             <span aria-hidden="true">?</span>
             <span className="hidden sm:inline">
-              {remainingHints > 0 ? `Indice ${hintsUsed + 1}/${mission.hints.length}` : 'Indices'}
+              {remainingHints > 0
+                ? t('mission.hintButton', {
+                    index: hintsUsed + 1,
+                    total: mission.hints.length,
+                  })
+                : t('mission.hints')}
             </span>
           </button>
           <button
@@ -89,7 +110,7 @@ export function MissionPanel({
             className="btn btn-quiet h-9 w-9 px-0"
             onClick={() => setCollapsed((value) => !value)}
             aria-expanded={!collapsed}
-            aria-label={collapsed ? 'Déplier la mission' : 'Replier la mission'}
+            aria-label={collapsed ? t('mission.expand') : t('mission.collapse')}
           >
             <Icon
               name="chevron"
@@ -110,7 +131,7 @@ export function MissionPanel({
             className="overflow-hidden"
           >
             <div className="scrollbar-thin max-h-[45dvh] overflow-y-auto px-4 pb-4 md:max-h-60">
-              <p className="text-[13px] text-muted">Objectif</p>
+              <p className="text-[13px] text-muted">{t('mission.objective')}</p>
               <p className="mt-1.5 bg-panel-2 px-3 py-2.5 text-[14px] leading-relaxed text-text">
                 {texts.objective}
               </p>
@@ -150,7 +171,9 @@ export function MissionPanel({
                       key={hint}
                       className="bg-warning/10 px-3 py-2 text-[13.5px] leading-relaxed text-text"
                     >
-                      <span className="text-warning">Indice {index + 1} · </span>
+                      <span className="text-warning">
+                        {t('mission.hintPrefix', { index: index + 1 })}
+                      </span>
                       {hint}
                     </li>
                   ))}
@@ -160,7 +183,7 @@ export function MissionPanel({
               {mission.suggestedCommands && mission.suggestedCommands.length > 0 && (
                 <details className="mt-3">
                   <summary className="cursor-pointer text-[13.5px] font-medium text-text">
-                    Commandes utiles ici
+                    {t('mission.usefulCommands')}
                   </summary>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {mission.suggestedCommands.map((command) => (
@@ -169,7 +192,7 @@ export function MissionPanel({
                         type="button"
                         onClick={() => onSuggest(command)}
                         className="bg-panel-2 px-2.5 py-1.5 text-[13px] text-muted transition-colors hover:text-text"
-                        title="Pré-remplir la commande sans l’exécuter"
+                        title={t('mission.prefillTitle')}
                       >
                         {command}
                       </button>
@@ -179,8 +202,7 @@ export function MissionPanel({
               )}
 
               <p className="mt-3 text-[13px] leading-relaxed text-muted">
-                La validation se fait après chaque commande. En cas d’échec, utilise « Indice »
-                pour comprendre ce qui manque.
+                {t('mission.validationNote')}
               </p>
             </div>
           </motion.div>

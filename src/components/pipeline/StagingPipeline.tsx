@@ -5,6 +5,8 @@ import { headCommitOf, snapshotOf } from '../../engine/ops/refs';
 import { worktreeStatus } from '../../engine/ops/diff';
 import type { FileChange } from '../../engine/ops/diff';
 import { cn } from '../../lib/cn';
+import type { MessageKey } from '../../i18n';
+import { useTranslation } from '../../i18n/useTranslation';
 
 type ChipStatus = 'new' | 'modified' | 'deleted' | 'staged' | 'committed';
 type ChipZone = 'working' | 'staging' | 'commit';
@@ -17,18 +19,18 @@ const CHIP_STYLES: Record<ChipStatus, string> = {
   committed: 'border-border bg-panel text-muted',
 };
 
-const STATUS_LABEL: Record<ChipStatus, string> = {
-  new: 'nouveau',
-  modified: 'modifié',
-  deleted: 'supprimé',
-  staged: 'stagé',
-  committed: 'commit',
+const STATUS_KEY: Record<ChipStatus, MessageKey> = {
+  new: 'pipeline.statusNew',
+  modified: 'pipeline.statusModified',
+  deleted: 'pipeline.statusDeleted',
+  staged: 'pipeline.statusStaged',
+  committed: 'pipeline.statusCommitted',
 };
 
-const ZONE_LABEL: Record<ChipZone, string> = {
-  working: 'Working dir',
-  staging: 'Index',
-  commit: 'Dernier commit',
+const ZONE_KEY: Record<ChipZone, MessageKey> = {
+  working: 'pipeline.zoneWorking',
+  staging: 'pipeline.zoneStaging',
+  commit: 'pipeline.zoneCommit',
 };
 
 interface Chip {
@@ -70,6 +72,7 @@ function Zone({
   readonly onLeave: () => void;
   readonly onPin: (chip: Chip) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <section className="flex min-h-[92px] min-w-0 flex-1 flex-col bg-panel-2/40 sm:min-h-0">
       <header className="flex items-baseline justify-between gap-2  px-3 py-2">
@@ -98,8 +101,12 @@ function Zone({
                 'inline-flex max-w-full items-center gap-1  border px-1.5 py-0.5 text-left text-[13px] transition-colors hover:border-border-strong',
                 CHIP_STYLES[chip.status],
               )}
-              aria-label={`${ZONE_LABEL[chip.zone]} — ${chip.path}`}
-              title={`${chip.path} — ${STATUS_LABEL[chip.status]} (${ZONE_LABEL[chip.zone]})`}
+              aria-label={`${t(ZONE_KEY[chip.zone])} · ${chip.path}`}
+              title={t('pipeline.chipTitle', {
+                path: chip.path,
+                status: t(STATUS_KEY[chip.status]),
+                zone: t(ZONE_KEY[chip.zone]),
+              })}
               onMouseEnter={() => onHover(chip)}
               onMouseLeave={onLeave}
               onFocus={() => onHover(chip)}
@@ -123,6 +130,7 @@ function Zone({
 }
 
 export function StagingPipeline() {
+  const { t } = useTranslation();
   const state = useRepoStore((store) => store.state);
   const worktree = state.worktrees[state.activeWorktree];
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -131,7 +139,7 @@ export function StagingPipeline() {
   if (!worktree) {
     return (
       <div className=" bg-panel px-3 py-4 text-xs text-muted">
-        Aucun worktree actif.
+        {t('pipeline.noWorktree')}
       </div>
     );
   }
@@ -146,7 +154,7 @@ export function StagingPipeline() {
       status: 'new' as const,
       zone: 'working' as const,
       flow: true,
-      diffLabel: 'non suivi',
+      diffLabel: t('pipeline.untracked'),
     })),
     ...status.unstaged.map((change) => ({
       path: change.path,
@@ -155,7 +163,7 @@ export function StagingPipeline() {
       flow: !headPaths.has(change.path),
       ...(worktree.index[change.path] === worktree.workingDir[change.path]
         ? {}
-        : { diffLabel: '≠ index' }),
+        : { diffLabel: t('pipeline.diffIndex') }),
     })),
   ];
 
@@ -164,7 +172,9 @@ export function StagingPipeline() {
     status: 'staged',
     zone: 'staging',
     flow: !headPaths.has(change.path),
-    ...(headPaths.has(change.path) ? { diffLabel: '≠ dernier commit' } : { diffLabel: 'nouveau' }),
+    ...(headPaths.has(change.path)
+      ? { diffLabel: t('pipeline.diffHead') }
+      : { diffLabel: t('pipeline.statusNew') }),
   }));
 
   const commitChips: Chip[] = Object.keys(headSnapshot)
@@ -205,20 +215,20 @@ export function StagingPipeline() {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
-          <h2 className="text-[13.5px] font-medium text-text">Pipeline</h2>
+          <h2 className="text-[13.5px] font-medium text-text">{t('pipeline.title')}</h2>
           <span className="text-[13px] text-muted">{worktree.path}</span>
         </div>
         <span className="hidden text-[12.5px] text-muted sm:inline">
-          survol ou clic pour voir un fichier
+          {t('pipeline.hint')}
         </span>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-2 sm:flex-row">
         <Zone
-          title="Working dir"
-          subtitle={`${workingChips.length} fichier${workingChips.length > 1 ? 's' : ''}`}
+          title={t('pipeline.zoneWorking')}
+          subtitle={t('pipeline.fileCount', { count: workingChips.length })}
           chips={workingChips}
-          emptyLabel="Aucune modification locale"
+          emptyLabel={t('pipeline.emptyWorking')}
           accent="var(--warning)"
           onHover={hover}
           onLeave={leave}
@@ -228,10 +238,10 @@ export function StagingPipeline() {
           <span className="text-[14px]">→</span>
         </div>
         <Zone
-          title="Staging"
-          subtitle={`${stagingChips.length} indexé${stagingChips.length > 1 ? 's' : ''}`}
+          title={t('fragments.staging')}
+          subtitle={t('pipeline.stagedCount', { count: stagingChips.length })}
           chips={stagingChips}
-          emptyLabel="Index vide"
+          emptyLabel={t('pipeline.emptyStaging')}
           accent="var(--accent)"
           onHover={hover}
           onLeave={leave}
@@ -241,10 +251,10 @@ export function StagingPipeline() {
           <span className="text-[14px]">→</span>
         </div>
         <Zone
-          title="Dernier commit"
-          subtitle={`${commitChips.length} fichier${commitChips.length > 1 ? 's' : ''}`}
+          title={t('pipeline.zoneCommit')}
+          subtitle={t('pipeline.fileCount', { count: commitChips.length })}
           chips={commitChips}
-          emptyLabel="Aucun commit"
+          emptyLabel={t('pipeline.emptyCommit')}
           accent="var(--success)"
           onHover={hover}
           onLeave={leave}
@@ -257,7 +267,7 @@ export function StagingPipeline() {
           <header className="flex items-center justify-between gap-2 px-1 py-1.5">
             <div className="flex min-w-0 items-center gap-2">
               <span className="shrink-0 rounded bg-panel-2 px-1 py-0.5 text-[13px] text-muted">
-                {ZONE_LABEL[preview.zone]}
+                {t(ZONE_KEY[preview.zone])}
               </span>
               <span className="truncate text-[13px] text-text">{preview.path}</span>
             </div>
@@ -268,7 +278,7 @@ export function StagingPipeline() {
                 setPinned(false);
                 setPreview(null);
               }}
-              aria-label="Fermer l’aperçu"
+              aria-label={t('pipeline.closePreview')}
             >
               ×
             </button>
@@ -277,7 +287,9 @@ export function StagingPipeline() {
             aria-live="polite"
             className="scrollbar-thin max-h-24 overflow-auto whitespace-pre-wrap break-words px-3 py-2 text-[12.5px] leading-relaxed text-muted"
           >
-            {previewContent === undefined ? '— absent dans cette zone' : previewContent || '(fichier vide)'}
+            {previewContent === undefined
+              ? t('pipeline.absent')
+              : previewContent || t('pipeline.emptyFile')}
           </pre>
         </div>
       )}

@@ -21,6 +21,8 @@ import { storyBetaEnabled } from '../lib/story-flags';
 import { preparedFiles } from '../lib/prepared-files';
 import type { PreparedFile } from '../lib/prepared-files';
 import { Icon } from '../components/ui/Icon';
+import { t as translate } from '../i18n';
+import { useTranslation } from '../i18n/useTranslation';
 
 interface PendingPrediction {
   readonly prediction: Prediction;
@@ -41,16 +43,21 @@ function introEntries(
     {
       id: 1,
       kind: 'output',
-      text: `Mission ${mission.number} — ${mission.title}`,
+      text: translate('mission.header', { number: mission.number, title: mission.title }),
       tone: 'success',
     },
-    { id: 2, kind: 'output', text: `Objectif : ${mission.objective}`, tone: 'muted' },
+    {
+      id: 2,
+      kind: 'output',
+      text: translate('mission.objectiveLine', { objective: mission.objective }),
+      tone: 'muted',
+    },
   ];
   if (start?.isolated === true) {
     entries.push({
       id: 3,
       kind: 'output',
-      text: 'Entraînement : ton arbre Nova n’est pas modifié.',
+      text: translate('mission.training'),
       tone: 'warning',
     });
   }
@@ -58,7 +65,7 @@ function introEntries(
     entries.push({
       id: 4,
       kind: 'output',
-      text: 'Ton dépôt a été remis au propre pour cette mission. Ton parcours reste visible dans le journal.',
+      text: translate('mission.recalaged'),
       tone: 'warning',
     });
   }
@@ -71,6 +78,7 @@ function introEntries(
  */
 
 export function MissionScreen({ missionId }: { readonly missionId: string }) {
+  const { t } = useTranslation();
   const mission = findMission(missionId);
   const completedMissions = useProgressStore((store) => store.completed);
   const completeMission = useProgressStore((store) => store.completeMission);
@@ -151,9 +159,9 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   if (!mission) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center">
-        <p className="text-sm text-muted">Mission introuvable.</p>
+        <p className="text-sm text-muted">{t('mission.notFound')}</p>
         <a href={routePaths.home} className="btn">
-          Retour aux chapitres
+          {t('app.backToChapters')}
         </a>
       </div>
     );
@@ -166,13 +174,12 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-panel-2 text-muted">
           <Icon name="lock" size={18} />
         </span>
-        <p className="text-sm font-medium text-text">Mission verrouillée</p>
+        <p className="text-sm font-medium text-text">{t('mission.lockedTitle')}</p>
         <p className="max-w-sm text-xs text-muted">
-          Termine d’abord « {mission.number} » et les missions précédentes pour débloquer
-          celle-ci.
+          {t('mission.lockedText', { number: mission.number })}
         </p>
         <a href={routePaths.home} className="btn">
-          Voir la carte des chapitres
+          {t('mission.viewMap')}
         </a>
       </div>
     );
@@ -259,8 +266,12 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
       store.appendCommand(input);
       store.appendOutput(
         next === hintsUsed && next === hints.length
-          ? 'Tous les indices sont déjà révélés.'
-          : `Indice ${next}/${hints.length} : ${hints[next - 1] ?? ''}`,
+          ? t('mission.allHints')
+          : t('mission.hintLine', {
+              index: next,
+              total: hints.length,
+              hint: hints[next - 1] ?? '',
+            }),
         'warning',
       );
       persistDraft(commandsUsed, next);
@@ -368,16 +379,14 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
           <>
             {isolatedMode && (
               <div className="flex flex-wrap items-center justify-between gap-2 bg-warning/10 px-5 py-2.5 text-[13px] text-warning">
-                <span>Entraînement : ton arbre Nova n’est pas modifié.</span>
+                <span>{t('mission.training')}</span>
                 {storyBetaEnabled() && (
                   <button
                     type="button"
                     className="btn px-2 py-1 text-[13px]"
                     onClick={() => {
                       const confirmed = window.confirm(
-                        `Reprendre l’histoire depuis la mission ${mission.number} ?\n\n` +
-                          'Ton arbre Nova actuel et la suite de l’histoire seront remplacés. ' +
-                          'Tes étoiles déjà acquises sont conservées.',
+                        t('mission.confirmResume', { number: mission.number }),
                       );
                       if (!confirmed) return;
                       useProgressStore
@@ -386,7 +395,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
                       setIsolatedMode(false);
                     }}
                   >
-                    Reprendre l’histoire depuis ici
+                    {t('mission.resumeStory')}
                   </button>
                 )}
               </div>

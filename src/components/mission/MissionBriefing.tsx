@@ -6,6 +6,7 @@ import type { BriefingLine, MissionBriefing as Briefing } from '../../content/br
 import type { PreparedFile } from '../../lib/prepared-files';
 import { branchColor } from '../../lib/colors';
 import { TEAMMATES } from '../../story/actor';
+import { useTranslation } from '../../i18n/useTranslation';
 import { Icon } from '../ui/Icon';
 
 interface MissionBriefingProps {
@@ -64,6 +65,7 @@ function DialogueLine({ line }: { readonly line: BriefingLine }) {
  * « Passer l’intro » ou la première commande la referme.
  */
 export function MissionBriefing({ mission, briefing, prepared = [], onClose }: MissionBriefingProps) {
+  const { t } = useTranslation();
   const dialog = useRef<HTMLDivElement>(null);
   useDialogKeyboard(dialog, { onConfirm: onClose, onCancel: onClose });
 
@@ -78,20 +80,20 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
         className="scrollbar-thin max-h-[86vh] w-full max-w-lg overflow-y-auto bg-panel outline-none"
         role="dialog"
         aria-modal="true"
-        aria-label={`Briefing ${mission.number}`}
+        aria-label={t('briefing.aria', { number: mission.number })}
       >
         <header className="flex items-center justify-between gap-3  px-5 py-3">
           <span className="flex items-center gap-2 text-[13px] text-muted">
             <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
-            Mission {mission.number}
+            {t('briefing.header', { number: mission.number })}
           </span>
           <button
             type="button"
             className="btn h-7 px-2 text-[13px]"
             onClick={onClose}
-            title="Fermer l’intro"
+            title={t('briefing.closeTitle')}
           >
-            Fermer
+            {t('briefing.close')}
           </button>
         </header>
 
@@ -106,13 +108,21 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
 
           {prepared.length > 0 && (
             <div className="mt-5  pt-3">
-              <p className="mono-meta">Déjà dans ton working dir</p>
+              <p className="mono-meta">{t('briefing.alreadyPrepared')}</p>
               <ul className="mt-2 space-y-1.5">
                 {prepared.map((file) => (
                   <li key={file.path} className="text-[13px] leading-relaxed">
                     <div className="flex items-baseline gap-2">
                       <span className="text-[13px] text-text">{file.path}</span>
-                      <span className="text-[13px] text-muted">{file.status}</span>
+                      <span className="text-[13px] text-muted">
+                        {t(
+                          file.status === 'new'
+                            ? 'prepared.new'
+                            : file.status === 'modified'
+                              ? 'prepared.modified'
+                              : 'prepared.staged',
+                        )}
+                      </span>
                     </div>
                     <span className="mt-0.5 block truncate text-[13px] text-muted/75">
                       {file.preview}
@@ -126,7 +136,7 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
 
         <div className="flex flex-col-reverse gap-2  px-5 py-3 sm:flex-row sm:justify-end">
           <button type="button" className="btn h-9 justify-center px-3 text-[13px]" onClick={onClose}>
-            Passer l’intro
+            {t('briefing.skip')}
           </button>
           <button
             type="button"
@@ -134,13 +144,13 @@ export function MissionBriefing({ mission, briefing, prepared = [], onClose }: M
             className="btn btn-accent h-9 justify-center px-3.5 text-[13px]"
             onClick={onClose}
           >
-            Entrer dans le dépôt
+            {t('briefing.enter')}
             <Icon name="arrow-right" size={15} />
           </button>
         </div>
 
         <p className="mt-3 text-center text-[12px] text-muted/80" aria-hidden="true">
-          Entrée pour entrer · Échap pour passer l’intro
+          {t('briefing.keys')}
         </p>
       </motion.div>
     </div>

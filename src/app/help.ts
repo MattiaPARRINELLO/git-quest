@@ -1,59 +1,75 @@
 import type { TerminalLine } from '../engine/types';
+import { t } from '../i18n';
 
 function line(text: string, tone?: TerminalLine['tone']): TerminalLine {
   return tone === undefined ? { text } : { text, tone };
 }
 
+const USAGE_WIDTH = 32;
+
+function usage(syntax: string, example?: string): TerminalLine {
+  if (example === undefined) return line(`  ${syntax}`);
+  return line(`  ${syntax.padEnd(USAGE_WIDTH)}${t('help.example')} ${example}`);
+}
+
 /** Aide groupée : chaque commande est accompagnée d'un exemple concret. */
 export function helpOutput(): TerminalLine[] {
+  const file = t('help.argFile');
+  const name = t('help.argName');
+  const branch = t('help.argBranch');
+  const path = t('help.argPath');
+  const command = t('help.argCommand');
+  const text = t('help.argText');
+  const remote = t('help.argRemote');
+
   return [
-    line('Commandes GitQuest', 'success'),
+    line(t('help.title'), 'success'),
     line(''),
-    line('Fichiers', 'muted'),
-    line('  touch <fichier>         ex. touch notes.txt'),
-    line('  edit <fichier> "texte"  ex. edit app.ts "v2"'),
-    line('  cat <fichier>           ex. cat app.ts'),
-    line('  rm <fichier>            ex. rm notes.txt'),
-    line('  git rm <fichier>        ex. git rm notes.txt'),
-    line('  ls                      ex. ls'),
-    line('  cd <worktree>           ex. cd ../gitquest-hotfix'),
+    line(t('help.files'), 'muted'),
+    usage(`touch <${file}>`, 'touch notes.txt'),
+    usage(`edit <${file}> "${text}"`, 'edit app.ts "v2"'),
+    usage(`cat <${file}>`, 'cat app.ts'),
+    usage(`rm <${file}>`, 'rm notes.txt'),
+    usage(`git rm <${file}>`, 'git rm notes.txt'),
+    usage('ls', 'ls'),
+    usage(`cd <${path}>`, 'cd ../gitquest-hotfix'),
     line(''),
-    line('Git', 'muted'),
-    line('  git init                ex. git init'),
-    line('  git status              ex. git status'),
-    line('  git add <fichier>|-A    ex. git add app.ts'),
-    line('  git commit -m "msg"     ex. git commit -m "docs: v2"'),
-    line('  git commit -am "msg"    ex. git commit -am "fix"'),
-    line('  git log --oneline --graph  ex. git log --oneline --graph'),
-    line('  git diff                ex. git diff'),
-    line('  git diff --staged       ex. git diff --staged'),
-    line('  git diff HEAD           ex. git diff HEAD'),
-    line('  git branch [nom]        ex. git branch feature'),
-    line('  git branch -d|-D <nom>  ex. git branch -d feature'),
-    line('  git switch <nom> | -c   ex. git switch -c feature'),
-    line('  git checkout <ref>      ex. git checkout abc1234'),
-    line('  git merge <branche>     ex. git merge feature'),
-    line('  git remote [-v]         ex. git remote -v'),
-    line('  git remote add <nom> <url>'),
-    line('                          ex. git remote add origin git@github.com:nova/nova.git'),
-    line('  git push [-u] [remote] [branche]'),
-    line('                          ex. git push -u origin main'),
-    line('  git fetch [remote]      ex. git fetch origin'),
-    line('  git pull [remote] [branche]'),
-    line('                          ex. git pull origin main'),
-    line('  git worktree add -b <branche> <chemin>'),
-    line('                          ex. git worktree add -b hotfix ../gitquest-hotfix'),
-    line('  git worktree list       ex. git worktree list'),
-    line('  git worktree remove <p> ex. git worktree remove ../gitquest-hotfix'),
+    line(t('help.git'), 'muted'),
+    usage('git init', 'git init'),
+    usage('git status', 'git status'),
+    usage(`git add <${file}>|-A`, 'git add app.ts'),
+    usage(`git commit -m "msg"`, 'git commit -m "docs: v2"'),
+    usage(`git commit -am "msg"`, 'git commit -am "fix"'),
+    usage('git log --oneline --graph', 'git log --oneline --graph'),
+    usage('git diff', 'git diff'),
+    usage('git diff --staged', 'git diff --staged'),
+    usage('git diff HEAD', 'git diff HEAD'),
+    usage(`git branch [${name}]`, 'git branch feature'),
+    usage(`git branch -d|-D <${name}>`, 'git branch -d feature'),
+    usage(`git switch <${name}> | -c`, 'git switch -c feature'),
+    usage(`git checkout <${name}>`, 'git checkout abc1234'),
+    usage(`git merge <${branch}>`, 'git merge feature'),
+    usage('git remote [-v]', 'git remote -v'),
+    usage(`git remote add <${name}> <url>`),
+    usage('', 'git remote add origin git@github.com:nova/nova.git'),
+    usage(`git push [-u] [${remote}] [${branch}]`),
+    usage('', 'git push -u origin main'),
+    usage(`git fetch [${remote}]`, 'git fetch origin'),
+    usage(`git pull [${remote}] [${branch}]`),
+    usage('', 'git pull origin main'),
+    usage(`git worktree add -b <${branch}> <${path}>`),
+    usage('', 'git worktree add -b hotfix ../gitquest-hotfix'),
+    usage('git worktree list', 'git worktree list'),
+    usage(`git worktree remove <${path}>`, 'git worktree remove ../gitquest-hotfix'),
     line(''),
-    line('Outils', 'muted'),
-    line('  help                    ex. help'),
-    line('  explain <commande>      ex. explain git merge feature'),
-    line('  undo                    ex. undo'),
-    line('  hint                    ex. hint'),
-    line('  reset-mission           ex. reset-mission'),
+    line(t('help.tools'), 'muted'),
+    usage('help', 'help'),
+    usage(`explain <${command}>`, 'explain git merge feature'),
+    usage('undo', 'undo'),
+    usage('hint', 'hint'),
+    usage('reset-mission', 'reset-mission'),
     line(''),
-    line('Astuce : « explain <commande> » montre ce qui va se passer.', 'muted'),
+    line(t('help.tip'), 'muted'),
   ];
 }
 

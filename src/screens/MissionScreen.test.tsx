@@ -149,7 +149,7 @@ describe('MissionScreen', () => {
 
     expect(useRepoStore.getState().state).toEqual(savedState);
     expect(useRepoStore.getState().entries.length).toBe(savedEntries);
-    expect(screen.getAllByText(/Mission 1\.1 —/i)).toHaveLength(1);
+    expect(screen.getAllByText(/Mission 1\.1 · Les 3 zones/i)).toHaveLength(1);
   });
 
   it('affiche MissionComplete après la solution et persiste la progression', async () => {

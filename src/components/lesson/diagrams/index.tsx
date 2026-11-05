@@ -2,17 +2,19 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import type { DiagramId } from '../../../content/types';
+import { useTranslation } from '../../../i18n/useTranslation';
 
 const SVG_WIDTH = 680;
 const SVG_HEIGHT = 260;
 
 function Frame({ children }: { readonly children: ReactNode }) {
+  const { t } = useTranslation();
   return (
     <svg
       viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
       className="h-auto w-full"
       role="img"
-      aria-label="Schéma pédagogique"
+      aria-label={t('lesson.diagramAria')}
     >
       {children}
     </svg>
@@ -77,6 +79,7 @@ function Arrow({ x1, x2, y, color = 'var(--border-strong)' }: { x1: number; x2: 
 }
 
 function SnapshotDiagram() {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const steps = [
     {
@@ -113,7 +116,7 @@ function SnapshotDiagram() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2 bg-panel px-3 py-2">
         <span className="text-[13px] tabular-nums text-muted">
-          Étape {step + 1} / 3
+          {t('diagram.step', { index: step + 1, total: 3 })}
         </span>
         <code className="font-mono text-[13px] text-text">{current.command}</code>
       </div>
@@ -136,7 +139,7 @@ function SnapshotDiagram() {
             </Label>
             {zone.files.length === 0 && (
               <Label x={zone.x + 85} y={122} color="var(--muted)" size={10}>
-                {step === 0 ? 'vide' : '—'}
+                {step === 0 ? t('diagram.empty') : '—'}
               </Label>
             )}
             {zone.files.map((file, fileIndex) => (
@@ -149,7 +152,7 @@ function SnapshotDiagram() {
             ))}
             {index === 0 && current.excluded && (
               <Label x={zone.x + 85} y={174} color="var(--warning)" size={9}>
-                non indexé → pas dans la photo
+                {t('diagram.notStaged')}
               </Label>
             )}
             {index < zones.length - 1 && (
@@ -172,7 +175,7 @@ function SnapshotDiagram() {
           className="btn"
           onClick={() => setStep((value) => (value >= steps.length - 1 ? 0 : value + 1))}
         >
-          {step >= steps.length - 1 ? 'Recommencer' : 'Étape suivante'}
+          {step >= steps.length - 1 ? t('demo.restart') : t('demo.nextStep')}
         </button>
       </div>
     </div>

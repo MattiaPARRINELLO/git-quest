@@ -10,6 +10,7 @@ import { findMission } from '../content';
 import { unreferencedHashes } from '../story/display';
 import { downloadSvgAsPng } from '../lib/export-graph';
 import { cn } from '../lib/cn';
+import { useTranslation } from '../i18n/useTranslation';
 
 function stats(nova: RepoState, journal: readonly { kind: string }[]) {
   const commits = Object.values(nova.commits);
@@ -24,8 +25,12 @@ function stats(nova: RepoState, journal: readonly { kind: string }[]) {
 }
 
 function Stars({ count }: { readonly count: number }) {
+  const { t } = useTranslation();
   return (
-    <span className="inline-flex items-center gap-[3px]" aria-label={`${count} étoile(s)`}>
+    <span
+      className="inline-flex items-center gap-[3px]"
+      aria-label={t('nova.starsAria', { count })}
+    >
       {[0, 1, 2].map((index) => (
         <span
           key={index}
@@ -40,6 +45,7 @@ function Stars({ count }: { readonly count: number }) {
 }
 
 export function NovaScreen() {
+  const { t } = useTranslation();
   const story = useProgressStore((store) => store.story);
   const completed = useProgressStore((store) => store.completed);
   const [selected, setSelected] = useState<string | null>(null);
@@ -58,16 +64,13 @@ export function NovaScreen() {
   if (nova === null) {
     return (
       <div className="mx-auto flex h-full max-w-[640px] flex-col justify-center px-5 py-12">
-        <h1 className="display text-[28px] leading-[1.1] text-text sm:text-[32px]">Ton arbre Nova</h1>
-        <p className="mt-4 text-[17px] leading-relaxed text-text">
-          Ton arbre apparaîtra ici une fois ta première mission terminée.
-        </p>
-        <p className="mt-2 text-[15px] leading-relaxed text-muted">
-          Chaque mission laisse un commit : tu pourras relire l’histoire, ouvrir un commit et
-          retrouver la commande qui l’a créé.
-        </p>
+        <h1 className="display text-[28px] leading-[1.1] text-text sm:text-[32px]">
+          {t('nova.title')}
+        </h1>
+        <p className="mt-4 text-[17px] leading-relaxed text-text">{t('nova.emptyText')}</p>
+        <p className="mt-2 text-[15px] leading-relaxed text-muted">{t('nova.emptyHint')}</p>
         <a href={routePaths.home} className="btn btn-accent mt-6 h-11 w-fit px-5 text-[14px]">
-          Retour aux chapitres
+          {t('app.backToChapters')}
         </a>
       </div>
     );
@@ -111,14 +114,14 @@ export function NovaScreen() {
   };
 
   const summary: ReadonlyArray<readonly [string, number]> = [
-    ['Missions', Object.keys(completed).length],
-    ['Commits', numbers.commits],
-    ['Branches', numbers.branches],
-    ['Merges', numbers.merges],
-    ['Étoiles', stars],
-    ['Worktrees créés', numbers.worktreesCreated],
-    ['Worktrees actifs', numbers.worktreesActive],
-    ['Abandonnés', numbers.orphans],
+    [t('nova.missions'), Object.keys(completed).length],
+    [t('nova.commits'), numbers.commits],
+    [t('nova.branches'), numbers.branches],
+    [t('nova.merges'), numbers.merges],
+    [t('nova.stars'), stars],
+    [t('nova.worktreesCreated'), numbers.worktreesCreated],
+    [t('nova.worktreesActive'), numbers.worktreesActive],
+    [t('nova.orphans'), numbers.orphans],
   ];
 
   return (
@@ -126,24 +129,22 @@ export function NovaScreen() {
       <div className="mx-auto max-w-[1180px] px-5 py-10 sm:px-8 sm:py-14">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="display text-[28px] leading-[1.1] sm:text-[32px]">Ton arbre Nova</h1>
-            <p className="mt-2 text-[15px] text-muted">
-              Le dépôt que tu as construit, mission après mission.
-            </p>
+            <h1 className="display text-[28px] leading-[1.1] sm:text-[32px]">{t('nova.title')}</h1>
+            <p className="mt-2 text-[15px] text-muted">{t('nova.subtitle')}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button type="button" className="btn btn-quiet px-3" onClick={exportPng}>
-              Exporter en PNG
+              {t('nova.exportPng')}
             </button>
             <button
               type="button"
               className="btn btn-quiet px-3"
               onClick={() => void copyLog()}
             >
-              {copied ? 'Copié' : 'Copier git log'}
+              {copied ? t('nova.copied') : t('nova.copyLog')}
             </button>
             <a href={routePaths.home} className="btn btn-quiet px-3">
-              Carte
+              {t('nova.map')}
             </a>
           </div>
         </header>
@@ -158,8 +159,8 @@ export function NovaScreen() {
         </p>
 
         {timeline.length > 0 && (
-          <section className="mt-12" aria-label="Fil de l’histoire">
-            <h2 className="display text-[30px] leading-none text-text">Le fil de l’histoire</h2>
+          <section className="mt-12" aria-label={t('nova.storyAria')}>
+            <h2 className="display text-[30px] leading-none text-text">{t('nova.storyTitle')}</h2>
             <ol className="mt-5 space-y-4">
               {timeline.map(({ mission, stars: missionStars, messages }) => (
                 <li key={mission.id}>
@@ -169,7 +170,7 @@ export function NovaScreen() {
                     <Stars count={missionStars} />
                   </div>
                   <p className="mt-1 text-[14px] leading-relaxed text-muted">
-                    {messages.length > 0 ? messages.join(' · ') : 'Aucun message personnel'}
+                    {messages.length > 0 ? messages.join(' · ') : t('nova.noMessage')}
                   </p>
                 </li>
               ))}
@@ -189,7 +190,7 @@ export function NovaScreen() {
           <aside className="bg-panel">
             <div className="px-4 py-4">
               <h2 className="text-[15px] font-medium text-text">
-                {commit ? 'Commit sélectionné' : 'Détail'}
+                {commit ? t('nova.selectedCommit') : t('nova.detail')}
               </h2>
               {commit ? (
                 <div className="mt-3 space-y-2 text-[14px] leading-snug">
@@ -197,32 +198,39 @@ export function NovaScreen() {
                   <p className="font-medium leading-snug text-text">{commit.message}</p>
                   <p className="text-muted">
                     {author === undefined
-                      ? 'Toi · commit de ton parcours'
+                      ? t('nova.you')
                       : `${author.name} · ${author.role}`}
                   </p>
-                  <p className="text-muted">{commit.parents.length} parent(s)</p>
                   <p className="text-muted">
-                    Branche : {commit.branch ?? 'HEAD détaché'}
+                    {t('nova.parents', { count: commit.parents.length })}
                   </p>
                   <p className="text-muted">
-                    {Object.keys(commit.snapshot).length} fichier(s) dans la photo
+                    {t('nova.branch', { branch: commit.branch ?? t('nova.detachedHead') })}
+                  </p>
+                  <p className="text-muted">
+                    {t('nova.filesCount', { count: Object.keys(commit.snapshot).length })}
                   </p>
                   <p className="text-[13px] text-muted">
-                    Orphelin : {unreferencedHashes(nova).includes(commit.hash) ? 'oui' : 'non'}
+                    {t('nova.orphanLabel', {
+                      value: unreferencedHashes(nova).includes(commit.hash)
+                        ? t('nova.yes')
+                        : t('nova.no'),
+                    })}
                   </p>
                   {origin !== undefined && (
                     <p className="text-[13px] text-muted">
-                      Mission d’origine :{' '}
-                      {originMission === undefined
-                        ? origin.missionId
-                        : `${originMission.number} — ${originMission.title}`}
+                      {t('nova.origin', {
+                        mission:
+                          originMission === undefined
+                            ? origin.missionId
+                            : `${originMission.number} · ${originMission.title}`,
+                      })}
                     </p>
                   )}
                 </div>
               ) : (
                 <p className="mt-3 text-[14px] leading-relaxed text-muted">
-                  Clique sur un commit du graphe pour voir son message, son auteur et son
-                  contenu. Les commits abandonnés restent visibles, plus pâles.
+                  {t('nova.detailHint')}
                 </p>
               )}
             </div>

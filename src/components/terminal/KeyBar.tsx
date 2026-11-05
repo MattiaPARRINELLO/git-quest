@@ -1,5 +1,7 @@
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { cn } from '../../lib/cn';
+import type { MessageKey } from '../../i18n';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface KeyBarProps {
   /** Insère un caractère à la position du curseur. */
@@ -15,7 +17,7 @@ interface KeyBarProps {
 interface KeySpec {
   readonly label: string;
   readonly value: string;
-  readonly ariaLabel: string;
+  readonly ariaKey: MessageKey;
 }
 
 /**
@@ -23,13 +25,13 @@ interface KeySpec {
  * les options (`-m`, `-b`), les guillemets des messages, les chemins.
  */
 const TOKENS: readonly KeySpec[] = [
-  { label: '-', value: '-', ariaLabel: 'tiret' },
-  { label: '"', value: '"', ariaLabel: 'guillemet' },
-  { label: '/', value: '/', ariaLabel: 'barre oblique' },
-  { label: '.', value: '.', ariaLabel: 'point' },
-  { label: '_', value: '_', ariaLabel: 'tiret bas' },
-  { label: '~', value: '~', ariaLabel: 'tilde' },
-  { label: '␣', value: ' ', ariaLabel: 'espace' },
+  { label: '-', value: '-', ariaKey: 'keybar.dash' },
+  { label: '"', value: '"', ariaKey: 'keybar.quote' },
+  { label: '/', value: '/', ariaKey: 'keybar.slash' },
+  { label: '.', value: '.', ariaKey: 'keybar.dot' },
+  { label: '_', value: '_', ariaKey: 'keybar.underscore' },
+  { label: '~', value: '~', ariaKey: 'keybar.tilde' },
+  { label: '␣', value: ' ', ariaKey: 'keybar.space' },
 ];
 
 function Key({
@@ -77,30 +79,31 @@ function Key({
  * saisie : chaque touche empêche la prise de focus au pointerdown.
  */
 export function KeyBar({ onInsert, onComplete, onHistory, onSubmit }: KeyBarProps) {
+  const { t } = useTranslation();
   return (
     <div
       role="toolbar"
-      aria-label="Touches rapides du terminal"
+      aria-label={t('keybar.toolbar')}
       className="flex shrink-0 items-center gap-1.5 /70 bg-panel/40 px-2 py-1.5"
     >
       <div className="scrollbar-thin flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
-        <Key ariaLabel="compléter la saisie" onPress={onComplete}>
+        <Key ariaLabel={t('keybar.complete')} onPress={onComplete}>
           Tab
         </Key>
-        <Key ariaLabel="commande précédente" onPress={() => onHistory('up')}>
+        <Key ariaLabel={t('keybar.previous')} onPress={() => onHistory('up')}>
           ↑
         </Key>
-        <Key ariaLabel="commande suivante" onPress={() => onHistory('down')}>
+        <Key ariaLabel={t('keybar.next')} onPress={() => onHistory('down')}>
           ↓
         </Key>
         {TOKENS.map((token) => (
-          <Key key={token.value} ariaLabel={token.ariaLabel} onPress={() => onInsert(token.value)}>
+          <Key key={token.value} ariaLabel={t(token.ariaKey)} onPress={() => onInsert(token.value)}>
             {token.label}
           </Key>
         ))}
       </div>
-      <Key ariaLabel="exécuter la commande" variant="accent" onPress={onSubmit}>
-        Entrée
+      <Key ariaLabel={t('keybar.run')} variant="accent" onPress={onSubmit}>
+        {t('keybar.enter')}
       </Key>
     </div>
   );

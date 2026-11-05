@@ -12,6 +12,7 @@ import { cn } from '../../lib/cn';
 import { layoutGraph, PADDING_X } from './layout';
 import type { BranchLabel, GraphNode } from './layout';
 import { Icon } from '../ui/Icon';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface CommitGraphProps {
   readonly state: RepoState;
@@ -80,6 +81,7 @@ export function CommitGraph({
   preview = false,
   bare = false,
 }: CommitGraphProps) {
+  const { t } = useTranslation();
   const layout = useMemo(() => layoutGraph(state), [state]);
   const delays = useMemo(() => eventDelays(batch.events), [batch]);
   const prefersReducedMotion = useReducedMotion();
@@ -315,9 +317,9 @@ export function CommitGraph({
     >
       {!preview && (
         <div className="pointer-events-none absolute left-4 top-3 z-10 flex items-baseline gap-2">
-          <h2 className="text-[12.5px] font-medium text-text">Graphe</h2>
+          <h2 className="text-[12.5px] font-medium text-text">{t('graph.title')}</h2>
           <span className="mono-meta">
-            {layout.nodes.length} commit{layout.nodes.length > 1 ? 's' : ''}
+            {t('graph.commitCount', { count: layout.nodes.length })}
           </span>
         </div>
       )}
@@ -328,8 +330,8 @@ export function CommitGraph({
             type="button"
             className="btn h-7 w-7 bg-panel/90 px-0"
             onClick={() => zoomBy(1.15)}
-            aria-label="Zoomer"
-            title="Zoomer"
+            aria-label={t('graph.zoom')}
+            title={t('graph.zoom')}
           >
             +
           </button>
@@ -337,8 +339,8 @@ export function CommitGraph({
             type="button"
             className="btn h-7 w-7 bg-panel/90 px-0"
             onClick={() => zoomBy(0.87)}
-            aria-label="Dézoomer"
-            title="Dézoomer"
+            aria-label={t('graph.unzoom')}
+            title={t('graph.unzoom')}
           >
             −
           </button>
@@ -346,7 +348,7 @@ export function CommitGraph({
             type="button"
             className="btn h-7 gap-1 bg-panel/90 px-2"
             onClick={() => centerOn(activeHeadNode)}
-            title="Recentrer sur HEAD"
+            title={t('graph.center')}
           >
             <Icon name="target" size={12} />
             <span className="hidden sm:inline">HEAD</span>
@@ -361,8 +363,7 @@ export function CommitGraph({
           : {
               tabIndex: 0,
               role: 'group',
-              'aria-label':
-                'Graphe des commits — flèches ou glisser pour déplacer, pincer, + et − pour zoomer, 0 pour recentrer',
+              'aria-label': t('graph.aria'),
             })}
         className={cn(
           'relative h-full w-full touch-none',
@@ -384,7 +385,7 @@ export function CommitGraph({
           width="100%"
           height="100%"
           role="img"
-          aria-label="Graphe des commits"
+          aria-label={t('graph.svgAria')}
           className="select-none"
         >
           <defs>
@@ -469,23 +470,28 @@ export function CommitGraph({
               <span className="text-[13px] tabular-nums text-muted">{hovered.shortHash}</span>
               {hovered.orphan && (
                 <span className="rounded bg-warning/12 px-1.5 py-0.5 text-[12px] text-warning">
-                  orphelin
+                  {t('graph.orphan')}
                 </span>
               )}
             </div>
             <p className="mt-1 font-medium text-text">{hovered.message}</p>
             <p className="mt-1 text-[12px] text-muted">
-              parents : {hovered.parents.length === 0 ? 'aucun' : hovered.parents.map((parent) => parent.slice(0, 7)).join(', ')}
+              {t('graph.parents', {
+                list:
+                  hovered.parents.length === 0
+                    ? t('graph.none')
+                    : hovered.parents.map((parent) => parent.slice(0, 7)).join(', '),
+              })}
             </p>
             <div className="mt-1.5 /70 pt-1.5 text-[12px] text-muted">
               {hovered.files.length === 0
-                ? 'snapshot vide'
+                ? t('graph.emptySnapshot')
                 : hovered.files.slice(0, 6).join(' · ') +
                   (hovered.files.length > 6 ? ` +${hovered.files.length - 6}` : '')}
             </div>
             {hovered.orphan && (
               <p className="mt-1.5 text-[12px] text-warning/90">
-                Commit orphelin : aucune branche ne pointe ici.
+                {t('graph.orphanNote')}
               </p>
             )}
           </div>
@@ -494,9 +500,9 @@ export function CommitGraph({
         {layout.nodes.length === 0 && !preview && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
             <div className="w-full max-w-[24rem] bg-panel px-5 py-4">
-              <p className="text-[13px] font-medium text-text">Ton dépôt n’a encore aucun commit</p>
+              <p className="text-[13px] font-medium text-text">{t('graph.emptyTitle')}</p>
               <p className="mt-1 text-[12px] leading-relaxed text-muted">
-                Trois commandes suffisent pour créer la première photo.
+                {t('graph.emptyText')}
               </p>
               <ol className="mt-3 space-y-1.5">
                 {[
@@ -519,8 +525,8 @@ export function CommitGraph({
         {!preview && (
           <>
             <div className="pointer-events-none absolute bottom-2.5 left-4 text-[12px] text-muted/70">
-              <span className="sm:hidden">pincer = zoom · glisser = déplacer</span>
-              <span className="hidden sm:inline">molette = zoom · glisser = déplacer</span>
+              <span className="sm:hidden">{t('graph.pinchHint')}</span>
+              <span className="hidden sm:inline">{t('graph.wheelHint')}</span>
             </div>
             <label className="absolute bottom-2.5 right-4 flex items-center gap-1.5 text-[12px] text-muted">
               <input
@@ -529,7 +535,7 @@ export function CommitGraph({
                 onChange={(event) => setReducedMotion(event.target.checked)}
                 className="h-3 w-3 accent-[var(--accent)]"
               />
-              sans animation
+              {t('graph.reducedMotion')}
             </label>
           </>
         )}
@@ -553,6 +559,7 @@ function CommitNodeView({
   readonly onHover: (node: GraphNode | null) => void;
   readonly onSelect?: (hash: string) => void;
 }) {
+  const { t } = useTranslation();
   const color = node.branch === undefined ? 'var(--border-strong)' : branchColor(node.branch);
   const isMerge = node.parents.length > 1;
 
@@ -578,7 +585,11 @@ function CommitNodeView({
       }
       role={onSelect === undefined ? undefined : 'button'}
       tabIndex={onSelect === undefined ? undefined : 0}
-      aria-label={onSelect === undefined ? undefined : `Sélectionner le commit ${node.shortHash}`}
+      aria-label={
+        onSelect === undefined
+          ? undefined
+          : t('graph.selectCommit', { hash: node.shortHash })
+      }
       onKeyDown={
         onSelect === undefined
           ? undefined
@@ -593,7 +604,10 @@ function CommitNodeView({
     >
       {node.head && (
         <title>
-          {`HEAD · ${node.headPaths.join(', ')}${node.detachedHead ? ' (détaché)' : ''}`}
+          {t('graph.head', {
+            paths: node.headPaths.join(', '),
+            detached: node.detachedHead ? t('graph.detached') : '',
+          })}
         </title>
       )}
       {node.head && (
@@ -643,7 +657,7 @@ function CommitNodeView({
           className="fill-[var(--muted)]"
           fontSize={11}
         >
-          racine
+          {t('graph.root')}
         </text>
       )}
     </motion.g>
@@ -661,6 +675,7 @@ function BranchLabelView({
   readonly duration: number;
   readonly onSelect?: (name: string) => void;
 }) {
+  const { t } = useTranslation();
   const MAX_LABEL_WIDTH = 118;
   const fullWidth = nodeLabelWidth(label.name);
   const width = Math.min(MAX_LABEL_WIDTH, fullWidth);
@@ -685,7 +700,11 @@ function BranchLabelView({
       }
       role={onSelect === undefined ? undefined : 'button'}
       tabIndex={onSelect === undefined ? undefined : 0}
-      aria-label={onSelect === undefined ? undefined : `Sélectionner la branche ${label.name}`}
+      aria-label={
+        onSelect === undefined
+          ? undefined
+          : t('graph.selectBranch', { name: label.name })
+      }
       onKeyDown={
         onSelect === undefined
           ? undefined
@@ -698,7 +717,11 @@ function BranchLabelView({
       }
       style={{ cursor: onSelect === undefined ? 'default' : 'pointer' }}
     >
-      <title>{label.current ? `Branche ${label.name} (HEAD)` : `Branche ${label.name}`}</title>
+      <title>
+        {label.current
+          ? t('graph.branchTitleHead', { name: label.name })
+          : t('graph.branchTitle', { name: label.name })}
+      </title>
       <rect
         x={0}
         y={0}

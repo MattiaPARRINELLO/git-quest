@@ -3,6 +3,7 @@ import { useDialogKeyboard } from '../../hooks/useDialogKeyboard';
 import { useProgressStore } from '../../store/useProgressStore';
 import { parseProgress, serializeProgress } from '../../store/progress-file';
 import { isNative } from '../../native/platform';
+import { useTranslation } from '../../i18n/useTranslation';
 import { Icon } from '../ui/Icon';
 
 type Mode = 'export' | 'import';
@@ -29,6 +30,7 @@ function fileName(now: Date): string {
  * native où le téléchargement de fichier n'existe pas.
  */
 export function ProgressBackup() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<Mode | null>(null);
   const [value, setValue] = useState('');
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -59,12 +61,9 @@ export function ProgressBackup() {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(value);
-      setFeedback({ tone: 'success', message: 'Sauvegarde copiée. Colle-la où tu veux.' });
+      setFeedback({ tone: 'success', message: t('backup.copySuccess') });
     } catch {
-      setFeedback({
-        tone: 'error',
-        message: 'Copie impossible : sélectionne le texte et copie-le à la main.',
-      });
+      setFeedback({ tone: 'error', message: t('backup.copyError') });
     }
   };
 
@@ -87,7 +86,9 @@ export function ProgressBackup() {
     useProgressStore.getState().restoreProgress(parsed.file);
     setFeedback({
       tone: 'success',
-      message: `Progression restaurée : ${Object.keys(parsed.file.completed).length} mission(s).`,
+      message: t('backup.restored', {
+        count: Object.keys(parsed.file.completed).length,
+      }),
     });
   };
 
@@ -95,10 +96,10 @@ export function ProgressBackup() {
     <>
       <span className="flex items-center gap-3">
         <button type="button" className="hover:text-text" onClick={() => open('export')}>
-          Sauvegarder
+          {t('backup.save')}
         </button>
         <button type="button" className="hover:text-text" onClick={() => open('import')}>
-          Restaurer
+          {t('backup.restore')}
         </button>
       </span>
 
@@ -109,24 +110,27 @@ export function ProgressBackup() {
             tabIndex={-1}
             role="dialog"
             aria-modal="true"
-            aria-label={mode === 'export' ? 'Sauvegarder ma progression' : 'Restaurer ma progression'}
+            aria-label={mode === 'export' ? t('backup.saveTitle') : t('backup.restoreTitle')}
             className="w-full max-w-lg bg-panel outline-none"
           >
             <header className="flex items-center justify-between gap-3  px-5 py-3">
               <span className="flex items-center gap-2 text-[12.5px] text-text">
                 <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
-                {mode === 'export' ? 'Sauvegarder ma progression' : 'Restaurer ma progression'}
+                {mode === 'export' ? t('backup.saveTitle') : t('backup.restoreTitle')}
               </span>
-              <button type="button" className="btn h-7 w-7 px-0" onClick={close} aria-label="Fermer">
+              <button
+                type="button"
+                className="btn h-7 w-7 px-0"
+                onClick={close}
+                aria-label={t('backup.close')}
+              >
                 <Icon name="close" size={12} />
               </button>
             </header>
 
             <div className="space-y-3 px-5 py-4">
               <p className="text-[12px] leading-5 text-muted">
-                {mode === 'export'
-                  ? 'Copie ce texte et garde-le : il contient tes étoiles, tes slides de cours et ton arbre Nova.'
-                  : "Colle une sauvegarde GitQuest. Elle remplace la progression actuelle de cet appareil."}
+                {mode === 'export' ? t('backup.saveText') : t('backup.restoreText')}
               </p>
 
               <textarea
@@ -134,7 +138,9 @@ export function ProgressBackup() {
                 onChange={(event) => setValue(event.target.value)}
                 readOnly={mode === 'export'}
                 spellCheck={false}
-                aria-label={mode === 'export' ? 'Contenu de la sauvegarde' : 'Sauvegarde à restaurer'}
+                aria-label={
+                  mode === 'export' ? t('backup.contentAria') : t('backup.restoreInputAria')
+                }
                 style={JSON_TEXT_STYLE}
                 className="scrollbar-thin h-44 w-full resize-none bg-bg px-3 py-2 text-[13px] leading-5 text-muted outline-none"
                 placeholder={mode === 'import' ? '{"format":"gitquest-progress", …}' : undefined}
@@ -160,11 +166,11 @@ export function ProgressBackup() {
                 <>
                   {!isNative() && (
                     <button type="button" className="btn" onClick={download}>
-                      Télécharger un fichier
+                      {t('backup.download')}
                     </button>
                   )}
                   <button type="button" className="btn btn-accent" onClick={() => void copy()}>
-                    Copier
+                    {t('backup.copy')}
                   </button>
                 </>
               ) : (
@@ -174,7 +180,7 @@ export function ProgressBackup() {
                   onClick={restore}
                   disabled={value.trim() === ''}
                 >
-                  Restaurer la sauvegarde
+                  {t('backup.restoreButton')}
                 </button>
               )}
             </footer>

@@ -251,7 +251,8 @@ composant.
 ```bash
 npm ci
 npm run dev          # développement local
-npm test             # 436 tests
+npm test             # toute la suite Vitest
+npm run check        # typecheck + invariants du contenu + parité i18n
 npm run build        # build PWA
 npm run android:apk  # APK Android de développement
 npm run android:aab  # AAB + APK signés, pour le Play Store
@@ -268,8 +269,14 @@ Documentation technique : [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 — et, côté Android : [`docs/ANDROID-VERIFY.md`](docs/ANDROID-VERIFY.md) (recette sur
 appareil) et [`docs/RELEASE.md`](docs/RELEASE.md) (signature et Play Store).
 
-Envie de contribuer ? Les conventions et les guides « ajouter une commande / une
-mission » sont dans [`AGENTS.md`](AGENTS.md) et dans l'architecture.
+Envie de contribuer ? Le guide de démarrage, les conventions et les commandes
+d'outillage sont dans [`CONTRIBUTING.md`](CONTRIBUTING.md). Pour écrire une mission :
+[`docs/CONTENT.md`](docs/CONTENT.md). Pour traduire l'interface ou un chapitre :
+[`docs/I18N.md`](docs/I18N.md).
+
+L'interface est disponible en français et en anglais via le sélecteur `FR` / `EN` de la
+barre supérieure. Le contenu pédagogique reste en français tant que sa traduction n'est
+pas livrée ; l'infrastructure et le guide de traduction sont en place.
 
 ---
 

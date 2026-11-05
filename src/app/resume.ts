@@ -1,5 +1,6 @@
 import { afterMission, chapters, findChapter, findMission, missionSequence } from '../content';
 import type { Chapter } from '../content/types';
+import { t } from '../i18n';
 import { routePaths } from '../router/useHashRoute';
 
 /** Sous-ensemble de la progression nécessaire pour choisir la reprise. */
@@ -47,7 +48,7 @@ function resolveResume(progress: ResumeProgress, activeMission: string | null): 
     const mission = findMission(activeMission);
     if (mission !== undefined && completed[mission.id] === undefined) {
       return {
-        label: `Reprendre la mission ${mission.number}`,
+        label: t('resume.resumeMission', { number: mission.number }),
         route: routePaths.mission(mission.id),
         context: chapterContext(findChapter(mission.chapterId), completed),
       };
@@ -59,22 +60,25 @@ function resolveResume(progress: ResumeProgress, activeMission: string | null): 
   // 5. Tout est terminé.
   if (nextIndex < 0) {
     return {
-      label: 'Revoir ton arbre Nova',
+      label: t('resume.reviewNova'),
       route: routePaths.final,
-      context: `Terminé · ${missionSequence.length}/${missionSequence.length} missions`,
+      context: t('resume.finished', {
+        done: missionSequence.length,
+        total: missionSequence.length,
+      }),
     };
   }
 
   const next = missionSequence[nextIndex];
   if (next === undefined) {
-    return { label: 'Revoir ton arbre Nova', route: routePaths.final, context: '' };
+    return { label: t('resume.reviewNova'), route: routePaths.final, context: '' };
   }
 
   // 4. Aucune progression : on ouvre le cours du premier chapitre.
   if (nextIndex === 0 && Object.keys(lessonSlides).length === 0) {
     const first = chapters[0];
     return {
-      label: 'Commencer avec le chapitre 1',
+      label: t('resume.startChapter1'),
       route: first === undefined ? routePaths.home : routePaths.lesson(first.id),
       context: chapterContext(first, completed),
     };
@@ -88,7 +92,7 @@ function resolveResume(progress: ResumeProgress, activeMission: string | null): 
     const lastSlide = chapter.lesson.slides.length - 1;
     if (saved !== undefined && saved < lastSlide) {
       return {
-        label: `Reprendre le cours : ${chapter.title}`,
+        label: t('resume.resumeLesson', { title: chapter.title }),
         route: routePaths.lesson(chapter.id),
         context: chapterContext(chapter, completed),
       };
@@ -101,7 +105,7 @@ function resolveResume(progress: ResumeProgress, activeMission: string | null): 
     const after = afterMission(previous.id);
     if (after.kind === 'lesson') {
       return {
-        label: `Commencer le cours : ${after.chapter.title}`,
+        label: t('resume.startLesson', { title: after.chapter.title }),
         route: routePaths.lesson(after.chapter.id),
         context: chapterContext(after.chapter, completed),
       };
@@ -109,7 +113,7 @@ function resolveResume(progress: ResumeProgress, activeMission: string | null): 
   }
 
   return {
-    label: `Continuer : mission ${next.number}`,
+    label: t('resume.continueMission', { number: next.number }),
     route: routePaths.mission(next.id),
     context: chapterContext(chapter, completed),
   };
@@ -118,5 +122,10 @@ function resolveResume(progress: ResumeProgress, activeMission: string | null): 
 function chapterContext(chapter: Chapter | undefined, completed: ResumeProgress['completed']): string {
   if (chapter === undefined) return '';
   const done = chapter.missions.filter((mission) => completed[mission.id] !== undefined).length;
-  return `Chapitre ${chapter.number} · ${chapter.title} · ${done}/${chapter.missions.length} missions`;
+  return t('resume.chapterContext', {
+    number: chapter.number,
+    title: chapter.title,
+    done,
+    total: chapter.missions.length,
+  });
 }

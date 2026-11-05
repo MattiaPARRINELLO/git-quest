@@ -23,8 +23,8 @@ describe('fichiers préparés du briefing', () => {
     const files = preparedFiles(state);
     const byPath = Object.fromEntries(files.map((file) => [file.path, file]));
 
-    expect(byPath['a.txt']?.status).toBe('modifié');
-    expect(byPath['nouveau.ts']?.status).toBe('nouveau');
+    expect(byPath['a.txt']?.status).toBe('modified');
+    expect(byPath['nouveau.ts']?.status).toBe('new');
     expect(files.map((file) => file.path)).not.toContain('b.txt');
   });
 

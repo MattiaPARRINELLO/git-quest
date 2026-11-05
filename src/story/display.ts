@@ -2,6 +2,7 @@ import type { RepoState } from '../engine/types';
 import { changeSetOf, matchesSignature } from './slots';
 import { STORY_SPECS } from './specs';
 import type { SlotDefinition } from './types';
+import { t } from '../i18n';
 
 /**
  * Résolution des hashes **affichés**. Aucun texte de contenu ne contient de hash
@@ -59,9 +60,10 @@ export function detachedNotice(state: RepoState, entry: RepoState): string | nul
     .map((commit) => `« ${commit.message} » (${commit.hash.slice(0, 7)})`)
     .join(', ');
   const last = commits[commits.length - 1];
-  return `Plusieurs commits détachés ont été créés : ${list}. Le sauvetage portera sur ${
-    last?.hash.slice(0, 7) ?? ''
-  } (le plus récent) ; les autres restent dans le journal.`;
+  return t('story.detachedNotice', {
+    list,
+    hash: last?.hash.slice(0, 7) ?? '',
+  });
 }
 
 /** Premier hash de commit de l'état, pour les libellés génériques. */

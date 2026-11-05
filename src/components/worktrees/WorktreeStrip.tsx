@@ -3,8 +3,10 @@ import { useRepoStore } from '../../store/useRepoStore';
 import { worktreeStatus } from '../../engine/ops/diff';
 import { headLabel } from '../../lib/prompt';
 import { cn } from '../../lib/cn';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export function WorktreeStrip() {
+  const { t } = useTranslation();
   const state = useRepoStore((store) => store.state);
   const execute = useRepoStore((store) => store.execute);
 
@@ -13,17 +15,15 @@ export function WorktreeStrip() {
 
   return (
     <section
-      aria-label="Worktrees"
+      aria-label={t('worktree.title')}
       className="shrink-0  bg-panel px-3 py-2.5"
     >
       <div className="mb-2 flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-[12px] font-medium text-text">
           <span aria-hidden="true" className="h-3 w-[2px] rounded-full bg-accent" />
-          Worktrees
+          {t('worktree.title')}
         </h2>
-        <span className="text-[12px] text-muted">
-          cliquer = <span className="text-text">cd &lt;chemin&gt;</span>
-        </span>
+        <span className="text-[12px] text-muted">{t('worktree.clickHint')}</span>
       </div>
 
       <div className="scrollbar-thin flex gap-2 overflow-x-auto pb-1">
@@ -44,7 +44,7 @@ export function WorktreeStrip() {
                 transition={{ duration: 0.22 }}
                 onClick={() => execute(`cd ${worktree.path}`)}
                 aria-pressed={active}
-                aria-label={`Aller au worktree ${worktree.path}`}
+                aria-label={t('worktree.goAria', { path: worktree.path })}
                 className={cn(
                   'group flex min-w-[190px] max-w-[260px] flex-col gap-1  border px-3 py-2 text-left transition-colors',
                   active
@@ -60,7 +60,7 @@ export function WorktreeStrip() {
                       active ? 'bg-accent/20 text-accent' : 'bg-panel-3 text-muted',
                     )}
                   >
-                    {active ? 'actif' : 'cd'}
+                    {active ? t('worktree.active') : t('worktree.cd')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
@@ -73,7 +73,9 @@ export function WorktreeStrip() {
                       modified > 0 ? 'text-warning' : 'text-muted/70',
                     )}
                   >
-                    {modified === 0 ? 'propre' : `${modified} modif.`}
+                    {modified === 0
+                      ? t('worktree.clean')
+                      : t('worktree.modified', { count: modified })}
                   </span>
                 </div>
               </motion.button>
