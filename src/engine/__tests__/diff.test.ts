@@ -16,8 +16,33 @@ describe('unified diff', () => {
       '+++ b/README.md',
       '@@ -1 +1 @@',
       '-v1',
+      '\\ No newline at end of file',
+      '+v2',
+      '\\ No newline at end of file',
+    ]);
+  });
+
+  it('signale un fichier sans newline final et ignore un newline final', () => {
+    const withNewline = fileDiff('f.txt', 'v1\n', 'v2\n').map((line) => line.text);
+    expect(withNewline).toEqual([
+      'diff --git a/f.txt b/f.txt',
+      expect.stringMatching(/^index [0-9a-f]{7}\.\.[0-9a-f]{7} 100644$/),
+      '--- a/f.txt',
+      '+++ b/f.txt',
+      '@@ -1 +1 @@',
+      '-v1',
       '+v2',
     ]);
+  });
+
+  it('compare un fichier qui gagne ou perd son newline final', () => {
+    const gained = fileDiff('f.txt', 'v1', 'v1\n').map((line) => line.text);
+    expect(gained).toContain('\\ No newline at end of file');
+    expect(gained).toContain('+v1');
+
+    const lost = fileDiff('f.txt', 'v1\n', 'v1').map((line) => line.text);
+    expect(lost).toContain('\\ No newline at end of file');
+    expect(lost).toContain('-v1');
   });
 
   it('marque un ajout et une suppression de fichier', () => {
@@ -66,9 +91,10 @@ describe('git diff', () => {
     expect(output).toContain('+v2');
   });
 
-  it('ignore les fichiers non suivis', () => {
-    const repo = run(basicRepo(), 'touch notes.txt').newState;
+  it('ignore les fichiers non suivis, même non vides', () => {
+    const repo = run(basicRepo(), 'edit notes.txt "brouillon"').newState;
     expect(texts(repo, 'git diff')).toEqual([]);
+    expect(texts(repo, 'git diff HEAD')).toEqual([]);
   });
 
   it('--staged compare l’index à HEAD', () => {

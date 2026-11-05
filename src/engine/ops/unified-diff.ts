@@ -19,9 +19,24 @@ function blobHash(content: string): string {
   return hash.toString(16).padStart(8, '0').slice(0, 7);
 }
 
+/**
+ * Sentinelle interne : une dernière ligne sans newline final ne doit pas être
+ * considérée comme égale à la même ligne terminée par un newline. Elle est
+ * retirée avant l'affichage.
+ */
+const NO_NEWLINE = '\u0000';
+
 function toLines(content: string | undefined): string[] {
   if (content === undefined || content === '') return [];
-  return content.split('\n');
+  const lines = content.split('\n');
+  // Un newline final termine la dernière ligne, il n'ajoute pas une ligne vide.
+  if (lines[lines.length - 1] === '') lines.pop();
+  else lines[lines.length - 1] = `${lines[lines.length - 1] ?? ''}${NO_NEWLINE}`;
+  return lines;
+}
+
+function missingFinalNewline(content: string | undefined): boolean {
+  return content !== undefined && content !== '' && !content.endsWith('\n');
 }
 
 type Op = { readonly kind: 'context' | 'add' | 'del'; readonly text: string };
@@ -78,7 +93,13 @@ function formatRange(start: number, count: number): string {
   return `${start},${count}`;
 }
 
-function hunks(ops: readonly Op[]): DiffLine[] {
+function hunks(
+  ops: readonly Op[],
+  beforeLines: readonly string[],
+  afterLines: readonly string[],
+  beforeMissingNewline: boolean,
+  afterMissingNewline: boolean,
+): DiffLine[] {
   const changes = ops
     .map((op, index) => (op.kind === 'context' ? -1 : index))
     .filter((index) => index >= 0);
@@ -119,15 +140,29 @@ function hunks(ops: readonly Op[]): DiffLine[] {
       kind: 'meta',
       text: `@@ -${formatRange(oldStart, oldCount)} +${formatRange(newStart, newCount)} @@`,
     });
+
+    let oldPosition = consumedOld;
+    let newPosition = consumedNew;
     for (const op of slice) {
       const prefix = op.kind === 'add' ? '+' : op.kind === 'del' ? '-' : ' ';
-      lines.push({ kind: op.kind, text: `${prefix}${op.text}` });
+      lines.push({ kind: op.kind, text: `${prefix}${op.text.replace(NO_NEWLINE, '')}` });
+
+      let noNewline = false;
+      if (op.kind !== 'add') {
+        if (beforeMissingNewline && oldPosition === beforeLines.length - 1) noNewline = true;
+        oldPosition += 1;
+      }
+      if (op.kind !== 'del') {
+        if (afterMissingNewline && newPosition === afterLines.length - 1) noNewline = true;
+        newPosition += 1;
+      }
+      if (noNewline) {
+        lines.push({ kind: 'meta', text: '\\ No newline at end of file' });
+      }
     }
 
-    for (const op of slice) {
-      if (op.kind !== 'add') consumedOld += 1;
-      if (op.kind !== 'del') consumedNew += 1;
-    }
+    consumedOld = oldPosition;
+    consumedNew = newPosition;
     cursor = range.end;
   }
 
@@ -138,7 +173,13 @@ function hunks(ops: readonly Op[]): DiffLine[] {
 export function fileDiff(path: string, before: string | undefined, after: string | undefined): DiffLine[] {
   const oldSide = toLines(before);
   const newSide = toLines(after);
-  const body = hunks(lineOps(oldSide, newSide));
+  const body = hunks(
+    lineOps(oldSide, newSide),
+    oldSide,
+    newSide,
+    missingFinalNewline(before),
+    missingFinalNewline(after),
+  );
   if (body.length === 0) return [];
 
   const lines: DiffLine[] = [{ kind: 'meta', text: `diff --git a/${path} b/${path}` }];
