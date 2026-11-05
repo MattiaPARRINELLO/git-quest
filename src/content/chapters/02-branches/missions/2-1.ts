@@ -9,6 +9,7 @@ import type { Commit, RepoState } from '../../../../engine/types';
 import { entryState } from '../../../../story/checkpoints';
 import { branchUnchanged, commitDelta, commitsSince } from '../../../../story/preconditions';
 import { changeSetOf } from '../../../../story/slots';
+import { localizedText } from '../../../text';
 import type { Mission } from '../../../types';
 
 const initial = entryState('branche-pointeur');
@@ -110,15 +111,23 @@ export const mission21: Mission = {
         const tip = state.branches.main ?? '';
         return {
           options: [
-            { id: 'main', label: 'Sur la branche main', target: { kind: 'branch', value: 'main' } },
+            {
+              id: 'main',
+              label: localizedText('Sur la branche main', 'On branch main'),
+              target: { kind: 'branch', value: 'main' },
+            },
             {
               id: 'experiment',
-              label: 'Sur la branche experiment',
+              label: localizedText('Sur la branche experiment', 'On branch experiment'),
               target: { kind: 'branch', value: 'experiment' },
             },
             {
               id: 'detached',
-              label: `Détaché sur le commit ${tip.slice(0, 7)}`,
+              label: localizedText(
+                `Détaché sur le commit ${tip.slice(0, 7)}`,
+                'Detached at commit {hash}',
+                { hash: tip.slice(0, 7) },
+              ),
               target: { kind: 'commit', value: tip },
             },
           ],

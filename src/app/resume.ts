@@ -1,6 +1,12 @@
-import { afterMission, chapters, findChapter, findMission, missionSequence } from '../content';
+import {
+  afterMissionIn,
+  contentFor,
+  findChapterIn,
+  findMissionIn,
+  missionSequenceIn,
+} from '../content/localized';
 import type { Chapter } from '../content/types';
-import { t } from '../i18n';
+import { getLocale, t } from '../i18n';
 import { routePaths } from '../router/useHashRoute';
 
 /** Sous-ensemble de la progression nécessaire pour choisir la reprise. */
@@ -42,15 +48,17 @@ export function resumeContext(
 
 function resolveResume(progress: ResumeProgress, activeMission: string | null): ResumePlan {
   const { completed, lessonSlides } = progress;
+  const pack = contentFor(getLocale());
+  const missionSequence = missionSequenceIn(pack);
 
   // 1. Brouillon de mission : on reprend là où le joueur s'est arrêté.
   if (activeMission !== null) {
-    const mission = findMission(activeMission);
+    const mission = findMissionIn(pack, activeMission);
     if (mission !== undefined && completed[mission.id] === undefined) {
       return {
         label: t('resume.resumeMission', { number: mission.number }),
         route: routePaths.mission(mission.id),
-        context: chapterContext(findChapter(mission.chapterId), completed),
+        context: chapterContext(findChapterIn(pack, mission.chapterId), completed),
       };
     }
   }
@@ -76,7 +84,7 @@ function resolveResume(progress: ResumeProgress, activeMission: string | null): 
 
   // 4. Aucune progression : on ouvre le cours du premier chapitre.
   if (nextIndex === 0 && Object.keys(lessonSlides).length === 0) {
-    const first = chapters[0];
+    const first = pack.chapters[0];
     return {
       label: t('resume.startChapter1'),
       route: first === undefined ? routePaths.home : routePaths.lesson(first.id),
@@ -84,7 +92,7 @@ function resolveResume(progress: ResumeProgress, activeMission: string | null): 
     };
   }
 
-  const chapter = findChapter(next.chapterId);
+  const chapter = findChapterIn(pack, next.chapterId);
 
   // 2. Cours commencé mais inachevé dans le chapitre courant.
   if (chapter !== undefined) {
@@ -102,7 +110,7 @@ function resolveResume(progress: ResumeProgress, activeMission: string | null): 
   // 3. Prochaine action linéaire, frontières de chapitre résolues par afterMission.
   const previous = nextIndex > 0 ? missionSequence[nextIndex - 1] : undefined;
   if (previous !== undefined) {
-    const after = afterMission(previous.id);
+    const after = afterMissionIn(pack, previous.id);
     if (after.kind === 'lesson') {
       return {
         label: t('resume.startLesson', { title: after.chapter.title }),

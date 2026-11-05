@@ -2,11 +2,11 @@ import { useMemo, useRef, useState } from 'react';
 import { execute } from '../engine/execute';
 import type { RepoState } from '../engine/types';
 import { CommitGraph } from '../components/graph/CommitGraph';
-import { missionSequence } from '../content';
+import { useContent } from '../content/useContent';
+import { findMissionIn, missionSequenceIn } from '../content/localized';
 import { routePaths } from '../router/useHashRoute';
 import { useProgressStore } from '../store/useProgressStore';
 import { teammateForAuthor } from '../story/actor';
-import { findMission } from '../content';
 import { unreferencedHashes } from '../story/display';
 import { downloadSvgAsPng } from '../lib/export-graph';
 import { cn } from '../lib/cn';
@@ -46,6 +46,7 @@ function Stars({ count }: { readonly count: number }) {
 
 export function NovaScreen() {
   const { t } = useTranslation();
+  const pack = useContent();
   const story = useProgressStore((store) => store.story);
   const completed = useProgressStore((store) => store.completed);
   const [selected, setSelected] = useState<string | null>(null);
@@ -82,9 +83,9 @@ export function NovaScreen() {
     ? undefined
     : Object.values(story.slots).find((record) => record.commitHash === selected);
   const author = commit === undefined ? undefined : teammateForAuthor(commit.author);
-  const originMission = origin === undefined ? undefined : findMission(origin.missionId);
+  const originMission = origin === undefined ? undefined : findMissionIn(pack, origin.missionId);
 
-  const timeline = missionSequence
+  const timeline = missionSequenceIn(pack)
     .filter((mission) => completed[mission.id] !== undefined)
     .map((mission) => ({
       mission,

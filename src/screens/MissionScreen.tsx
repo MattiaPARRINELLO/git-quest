@@ -5,8 +5,9 @@ import { MissionBriefing } from '../components/mission/MissionBriefing';
 import { MissionPanel } from '../components/mission/MissionPanel';
 import { PredictionFeedback, PredictionOverlay } from '../components/mission/PredictionOverlay';
 import { SandboxLayout } from '../components/layout/SandboxLayout';
-import { afterMission, findMission, isMissionUnlocked } from '../content';
-import { briefingFor } from '../content/briefings';
+import { afterMissionIn, findMissionIn } from '../content/localized';
+import { isMissionUnlocked } from '../content';
+import { useContent } from '../content/useContent';
 import type { Mission, Prediction } from '../content/types';
 import type { RepoState } from '../engine/types';
 import type { MissionDraft } from '../story/types';
@@ -79,7 +80,8 @@ function introEntries(
 
 export function MissionScreen({ missionId }: { readonly missionId: string }) {
   const { t } = useTranslation();
-  const mission = findMission(missionId);
+  const pack = useContent();
+  const mission = findMissionIn(pack, missionId);
   const completedMissions = useProgressStore((store) => store.completed);
   const completeMission = useProgressStore((store) => store.completeMission);
   const repoState = useRepoStore((store) => store.state);
@@ -131,7 +133,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
       draftResumable === null &&
         !start.isolated &&
         !start.recalaged &&
-        briefingFor(mission.id) !== undefined,
+        pack.briefings[mission.id] !== undefined,
     );
     setCommandsUsed(draftResumable?.commandsUsed ?? 0);
     setHintsUsed(draftResumable?.hintsUsed ?? 0);
@@ -186,7 +188,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
   }
 
   const isCompleted = completed !== null;
-  const briefing = briefingFor(mission.id);
+  const briefing = pack.briefings[mission.id];
 
   const persistDraft = (usedCommands: number, usedHints: number): void => {
     const draft: MissionDraft = {
@@ -430,7 +432,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
           mission={mission}
           stars={completed.stars}
           commandsUsed={completed.used}
-          after={afterMission(mission.id)}
+          after={afterMissionIn(pack, mission.id)}
           solution={missionText(mission, repoState).solution}
           {...(briefing?.outcome === undefined ? {} : { outcome: briefing.outcome })}
           {...(briefing?.teaser === undefined ? {} : { teaser: briefing.teaser })}
@@ -445,7 +447,7 @@ export function MissionScreen({ missionId }: { readonly missionId: string }) {
         <MissionCompleteBar
           mission={mission}
           stars={completed.stars}
-          after={afterMission(mission.id)}
+          after={afterMissionIn(pack, mission.id)}
           onResume={() => setInspecting(false)}
         />
       )}
