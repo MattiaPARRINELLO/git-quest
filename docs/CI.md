@@ -39,10 +39,13 @@ doit jamais geler une PR sans rapport.
    `package.json` : c'est notre test d'intégrité du lockfile.
 2. `npm run typecheck` — `tsc --noEmit` avec `strict`, `noUncheckedIndexedAccess`,
    `exactOptionalPropertyTypes`, `noUnusedLocals` et `noUnusedParameters`.
-3. `npm test` — les 60 fichiers Vitest (moteur, contenu, layout, composants).
-4. `npm run build` — typecheck + build Vite/PWA, qui génère `dist/sw.js`.
-5. `node ci/check-dist.mjs` — inspection du build (voir ci-dessous).
-6. En Node 22 seulement : upload de `dist/` pour le job `smoke`.
+3. `npm test` : les fichiers Vitest (moteur, contenu, layout, composants).
+4. `npx vitest run src/engine/__tests__/differential.test.ts` : rejoue des scénarios
+   dans un vrai dépôt Git temporaire et compare refs, HEAD, index, working tree, diffs
+   et forme du graphe. L'étape se saute proprement si `git` est absent.
+5. `npm run build` : typecheck + build Vite/PWA, qui génère `dist/sw.js`.
+6. `node ci/check-dist.mjs` : inspection du build (voir ci-dessous).
+7. En Node 22 seulement : upload de `dist/` pour le job `smoke`.
 
 ### `ci/check-dist.mjs`
 

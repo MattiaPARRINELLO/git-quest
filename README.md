@@ -215,7 +215,8 @@ skip the lessons and jump straight into missions.
 
 **Are these real Git commands?**
 Yes: the syntax, outputs and error messages follow Git. The engine is a faithful
-reimplementation in TypeScript, not a skin.
+reimplementation in TypeScript, not a skin, and a differential test suite replays the same
+scenarios against a real `git` binary in CI to prove it.
 
 **How long does it take?**
 About 2 to 3 hours for the whole path, across several sessions. Progress is kept.
@@ -241,6 +242,14 @@ For the curious and the developers: GitQuest is a React + TypeScript PWA, with n
 The Git engine (`src/engine/`) is **pure** (no access to the DOM, storage or the system
 clock), which makes it fully testable and reproducible. The content (lessons, missions,
 predictions) is typed data, never text hard-coded in a component.
+
+Parity with Git is checked, not assumed:
+`src/engine/__tests__/differential.test.ts` replays the same scenarios in a temporary real
+Git repository and in the engine, then compares refs, HEAD, index, working tree,
+`git status --porcelain`, diff output and commit graph shape after every step. It runs in
+CI on Ubuntu, with no network, and skips cleanly when `git` is unavailable. The only
+intentional differences left are commit hashes (the engine uses short deterministic ids),
+file paths, author and date metadata, and the multi-stage index during a conflict.
 
 ```bash
 npm ci

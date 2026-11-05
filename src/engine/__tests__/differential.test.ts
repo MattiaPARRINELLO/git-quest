@@ -29,12 +29,9 @@
  *    que le moteur ne garde que la version « ours ». On compare donc l'index
  *    effectif : étage 0 partout, étage 2 (ours) pour les chemins en conflit.
  * 4. Les en-têtes `index <sha>..<sha>` des diffs sont cosmétiques (le moteur
- *    utilise un hash FNV) : ils sont retirés avant comparaison. Git ajoute
- *    aussi `\ No newline at end of file`, que le moteur n'émet pas ; c'est un
- *    écart observé, asserté explicitement et retiré de la comparaison.
- * 5. `git diff` et `git diff HEAD` du moteur incluent les fichiers non suivis,
- *    contrairement à Git réel. C'est un écart observé, documenté et asserté
- *    explicitement plus bas, pas une normalisation silencieuse.
+ *    utilise un hash FNV) : ils sont retirés avant comparaison. Le reste de la
+ *    sortie est comparé à l'identique, y compris `\ No newline at end of file`
+ *    et l'exclusion des fichiers non suivis.
  *
  * Environnement Git neutralisé : configuration globale et système vides,
  * identité locale, dates fixes, hooks et signature désactivés. Aucun réseau.
@@ -758,39 +755,19 @@ describeDifferential('moteur vs Git réel (différentiel)', () => {
         }
 
         const diffCases = [
-          { git: ['diff', '--staged'], engine: 'git diff --staged', untracked: false },
-          { git: ['diff'], engine: 'git diff', untracked: true },
-          { git: ['diff', 'HEAD'], engine: 'git diff HEAD', untracked: true },
+          { git: ['diff', '--staged'], engine: 'git diff --staged' },
+          { git: ['diff'], engine: 'git diff' },
+          { git: ['diff', 'HEAD'], engine: 'git diff HEAD' },
         ] as const;
 
         for (const diffCase of diffCases) {
-          const realRaw = repo.git(diffCase.git);
-          const engineRaw = execute(state, diffCase.engine)
-            .output.map((line) => line.text)
-            .join('\n');
-
-          // Écart observé : Git signale l'absence de newline final, le moteur
-          // non. Asserté ici pour documenter le comportement actuel.
-          expect(realRaw, diffCase.engine).toContain('\\ No newline at end of file');
-          expect(engineRaw, diffCase.engine).not.toContain('\\ No newline at end of file');
-
-          const real = normalizeDiff(realRaw);
-          const engine = normalizeDiff(engineRaw);
-
-          if (!diffCase.untracked) {
-            expect(engine, diffCase.engine).toEqual(real);
-            continue;
-          }
-
-          // Écart observé : Git ignore les fichiers non suivis, le moteur les
-          // ajoute comme des créations. On l'asserte pour qu'une correction
-          // future fasse échouer ce test et force la mise à jour du rapport.
-          expect(real.join('\n'), diffCase.engine).not.toContain('diff --git a/notes.txt');
-          expect(engine.join('\n'), diffCase.engine).toContain('diff --git a/notes.txt');
-          expect(
-            withoutFileDiff(engine, 'notes.txt'),
-            diffCase.engine,
-          ).toEqual(withoutFileDiff(real, 'notes.txt'));
+          const real = normalizeDiff(repo.git(diffCase.git));
+          const engine = normalizeDiff(
+            execute(state, diffCase.engine)
+              .output.map((line) => line.text)
+              .join('\n'),
+          );
+          expect(engine, diffCase.engine).toEqual(real);
         }
       } finally {
         repo.cleanup();
@@ -849,25 +826,7 @@ describeDifferential('moteur vs Git réel (différentiel)', () => {
 });
 
 function normalizeDiff(text: string): string[] {
-  const lines = text
-    .split('\n')
-    .filter((line) => !line.startsWith('index ') && line !== '\\ No newline at end of file');
+  const lines = text.split('\n').filter((line) => !line.startsWith('index '));
   while (lines.length > 0 && lines[lines.length - 1] === '') lines.pop();
   return lines;
-}
-
-/** Retire le bloc `diff --git` d'un chemin, pour isoler un écart connu. */
-function withoutFileDiff(lines: readonly string[], path: string): string[] {
-  const header = `diff --git a/${path} b/${path}`;
-  const result: string[] = [];
-  let skipping = false;
-  for (const line of lines) {
-    if (line === header) {
-      skipping = true;
-      continue;
-    }
-    if (line.startsWith('diff --git ')) skipping = false;
-    if (!skipping) result.push(line);
-  }
-  return result;
 }

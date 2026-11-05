@@ -63,6 +63,12 @@ interface RepoState {
   indexée. Le **working dir** est un `FileTree` du contenu disque.
 - Les hashes sont déterministes (`abc1234`-like) et non cryptographiques : c'est un
   écart assumé avec Git, nécessaire pour des tests et des missions stables.
+- La parité avec Git est vérifiée par une suite différentielle
+  (`src/engine/__tests__/differential.test.ts`) : les mêmes scénarios sont rejoués dans
+  un dépôt Git réel temporaire et dans le moteur, puis refs, HEAD, index, working tree,
+  statut et forme du graphe sont comparés après chaque étape. Les seuls écarts assumés
+  restent les hashes, les chemins, les métadonnées auteur/date et l'index multi-étages
+  pendant un conflit.
 
 `init` crée le worktree principal et attache HEAD à `main`, mais ne crée pas encore la
 référence `main` : elle naît au premier commit (comportement Git réel).

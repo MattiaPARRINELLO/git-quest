@@ -295,6 +295,20 @@ branche `feature` survit dans les deux cas.
 
 ---
 
+## Comparaison différentielle au vrai Git
+
+La suite `src/engine/__tests__/differential.test.ts` rejoue les mêmes scénarios dans un
+dépôt Git temporaire et dans le moteur, puis compare à chaque étape les refs, HEAD, les
+parents, les messages, les arbres (hashes de blob réels), l'index effectif, le working
+tree et `git status --porcelain`. Les sorties de `git diff`, `git diff --staged` et
+`git diff HEAD` sont comparées à l'identique, hors en-têtes `index` cosmétiques, y compris
+`\ No newline at end of file` et l'exclusion des fichiers non suivis.
+
+Elle tourne dans la CI Ubuntu, sans réseau, et se saute proprement si `git` est absent.
+Les seuls écarts restants sont listés ci-dessous.
+
+---
+
 ## Écarts attendus pendant la comparaison
 
 | Point | Git réel | GitQuest |
@@ -303,7 +317,7 @@ branche `feature` survit dans les deux cas.
 | Chemins | absolus | `~/gitquest`, `~/gitquest-…` |
 | Auteur / date | config utilisateur, horloge réelle | auteur fixe, horloge logique |
 | `git log --graph` | art ASCII multi-lanes | lignes `*` simples + graphe SVG (Phase 2) |
-| Conflits | résolus à la main | refus explicite (hors MVP) |
+| Index en conflit | trois étages (1, 2, 3) | index unique, versions conservées dans `MergeState` |
 | `git worktree remove` du worktree courant | message dépend de la plateforme | `fatal: '…' is the working tree you are in` |
 | `git init` sur dépôt existant | réinitialise les réglages | succès sans changement |
 
