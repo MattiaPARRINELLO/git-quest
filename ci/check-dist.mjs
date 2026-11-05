@@ -106,7 +106,7 @@ if (!distFiles.some((file) => /^workbox-[0-9a-f]+\.js$/.test(file))) {
 }
 
 // ---------------------------------------------------------------------------
-// 2. index.html: shell markers, French locale, hashed bundles.
+// 2. index.html: shell markers, supported document language, hashed bundles.
 // ---------------------------------------------------------------------------
 const html = readIfPresent('index.html');
 if (html === null) {
@@ -114,7 +114,6 @@ if (html === null) {
 } else {
   const expectations = [
     ['<div id="root"></div>', 'React mount point'],
-    ['lang="fr"', 'French document language'],
     [`<link rel="manifest" href="${BASE}manifest.webmanifest">`, 'web manifest link'],
     ['registerSW.js', 'service worker registration'],
     ['viewport-fit=cover', 'safe-area viewport meta'],
@@ -123,6 +122,8 @@ if (html === null) {
     if (html.includes(needle)) ok(`index.html: ${label}`);
     else fail(`index.html is missing ${label} (expected "${needle}")`);
   }
+  if (/lang="(fr|en)"/.test(html)) ok('index.html: supported document language');
+  else fail('index.html is missing a supported document language (fr or en)');
 
   const scriptMatch = html.match(/<script type="module"[^>]+src="([^"]*\/assets\/[^"]+\.js)"/);
   if (scriptMatch) {
@@ -166,7 +167,7 @@ if (manifestRaw !== null) {
       start_url: (v) => typeof v === 'string' && v.length > 0,
       scope: (v) => typeof v === 'string' && v.length > 0,
       display: (v) => v === 'standalone',
-      lang: (v) => v === 'fr',
+      lang: (v) => v === 'fr' || v === 'en',
       theme_color: (v) => /^#[0-9a-f]{6}$/i.test(v ?? ''),
       background_color: (v) => /^#[0-9a-f]{6}$/i.test(v ?? ''),
       icons: (v) => Array.isArray(v) && v.length >= 3,
