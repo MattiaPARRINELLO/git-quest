@@ -32,14 +32,15 @@ export const mission11: Mission = {
       done: (state) => headFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.',
     },
     {
-      label: 'Laisser b.txt modifié hors du commit',
+      label: 'Garder la modification de b.txt non commitée',
       done: (state) =>
         headFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.' &&
         workingFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF, partage de notes.' &&
         headFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF.',
     },
   ],
-  takeaway: 'Le commit ne prend que l’index : b.txt reste hors de la photo tant qu’il n’est pas indexé.',
+  takeaway:
+    'Le commit ne photographie que l’index : seules les modifications indexées entrent dans le nouveau snapshot, celles de b.txt restent non commitées.',
   difficulty: 1,
   par: 2,
   initialState: initial,
@@ -49,7 +50,7 @@ export const mission11: Mission = {
       check(headBranch(state) === 'main', 'HEAD doit rester sur main.'),
       check(commitDelta(state, entry) === 1, 'Un seul nouveau commit est attendu.'),
       check(headFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.', 'Le commit doit contenir la version mise à jour de a.txt.'),
-      check(headFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF.', 'Le commit ne doit pas contenir b.txt modifié.'),
+      check(headFile(state, 'b.txt') === 'Nova — idées : mode sombre, export PDF.', 'Le commit doit conserver l’ancienne version de b.txt.'),
       check(
         workingFile(state, 'a.txt') === 'Nova — notes de conception : synchronisation locale + cache hors-ligne.',
         'a.txt doit être à jour dans le working dir.',
@@ -62,7 +63,7 @@ export const mission11: Mission = {
   },
   hints: [
     'Un commit photographie l’index, pas tout le working dir. Il faut choisir quoi indexer.',
-    'Ajoute seulement a.txt à l’index, puis commit : b.txt restera modifié sur le disque.',
+    'Ajoute seulement a.txt à l’index, puis commit : la modification de b.txt restera non commitée sur le disque.',
     'git add a.txt, puis git commit -m "fix: a.txt".',
   ],
   solution: ['git add a.txt', 'git commit -m "fix: a.txt"'],
@@ -77,7 +78,7 @@ export const mission11: Mission = {
       ],
       correctOptionId: 'a',
       explanation:
-        'Le commit ne lit que l’index. b.txt reste modifié dans le working dir sans entrer dans la photo.',
+        'Le commit ne lit que l’index : sa nouvelle version de b.txt n’entre pas dans le snapshot, la modification reste non commitée.',
     },
   ],
   suggestedCommands: ['cat a.txt', 'git status', 'git add a.txt', 'git commit -m "fix: a.txt"'],
