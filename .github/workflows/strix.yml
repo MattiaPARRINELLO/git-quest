@@ -1,34 +1,45 @@
 name: Strix
 
-# Scan de sécurité diff-scoped sur chaque pull request.
-# Seuls les fichiers modifiés par la PR sont analysés (mode quick),
-# et le job échoue si un finding high ou critical est validé.
+# Strix ne tourne pas sur chaque PR : c'est un agent, un run prend une dizaine
+# de minutes. Il est déclenché à la demande, ou une fois par semaine sur main.
 on:
-  pull_request:
-    types: [opened, reopened, ready_for_review, synchronize]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Profondeur du scan
+        type: choice
+        options: [quick, standard, deep]
+        default: standard
+      max_budget:
+        description: Budget maximum en USD
+        type: string
+        default: "8"
+      instruction:
+        description: Instruction ciblée, par exemple "Focus on IDOR et XSS" (optionnel)
+        type: string
+        default: ""
+  schedule:
+    # tous les lundis à 04:00 UTC
+    - cron: "0 4 * * 1"
 
 permissions:
   contents: read
   security-events: write
 
+# un seul scan à la fois : les runs périodiques ne doivent pas se chevaucher
 concurrency:
-  group: strix-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  group: strix-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   strix:
     name: Strix security scan
-    # pas de brouillon, pas de re-scan sur titre [skip strix]
-    if: >-
-      github.event.pull_request.draft == false &&
-      !contains(github.event.pull_request.title, '[skip strix]')
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # required for diff-scope resolution
           fetch-depth: 0
 
       - name: Install Strix
@@ -36,7 +47,7 @@ jobs:
           curl -sSL https://strix.ai/install | bash
           echo "$HOME/.strix/bin" >> "$GITHUB_PATH"
 
-      - name: Scan changed files
+      - name: Scan
         env:
           STRIX_LLM: openai/deepseek-v4.1-flash
           STRIX_API_TYPE: chat_completions
@@ -44,36 +55,49 @@ jobs:
           OPENAI_BASE_URL: https://opencode.ai/inference/go/openai/v1
           OPENAI_API_KEY: ${{ secrets.STRIX_API_KEY }}
           LLM_EXTRA_HEADERS: '{"User-Agent":"opencode/1.18.31","x-opencode-client":"cli","x-opencode-session":"00000000-0000-4000-8000-000000000000"}'
+          MODE: ${{ github.event.inputs.mode || 'standard' }}
+          MAX_BUDGET: ${{ github.event.inputs.max_budget || '8' }}
+          INSTRUCTION: ${{ github.event.inputs.instruction }}
         run: |
           set -o pipefail
-          git fetch --no-tags origin "${{ github.base_ref }}"
+          extra=()
+          if [ -n "$INSTRUCTION" ]; then
+            extra+=(--instruction "$INSTRUCTION")
+          fi
           strix -n -t ./ \
-            --scan-mode quick \
-            --scope-mode diff \
-            --diff-base "origin/${{ github.base_ref }}" \
+            --scan-mode "$MODE" \
+            --scope-mode full \
             --fail-on high \
-            --max-budget 3 \
-            --max-turns 20
+            --max-budget "$MAX_BUDGET" \
+            --max-turns 120 \
+            "${extra[@]}"
 
-      # A run cut off at the hard budget stop exits 0 but leaves run.json
-      # status "stopped": enforce completion explicitly so the gate never fails open.
+      # Un run coupé au budget sort en 0 mais laisse run.json à "stopped".
       - name: Fail unless the scan completed
         if: always()
         run: |
           run_json=$(ls -t strix_runs/*/run.json 2>/dev/null | head -1)
           if [ -z "$run_json" ]; then
-            echo "::error title=Strix::No run.json produced, the scan did not run"
+            echo "::error title=Strix::Aucun run.json produit, le scan n'a pas tourné"
             exit 1
           fi
           status=$(jq -r .status "$run_json")
           if [ "$status" != "completed" ]; then
-            echo "::error title=Strix::Run status is '$status', the scan did not complete (raise --max-budget)"
+            echo "::error title=Strix::Statut '$status', le scan n'est pas allé au bout (augmente le budget)"
             exit 1
           fi
 
+      - name: Upload findings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strix-findings
+          path: strix_runs
+          if-no-files-found: warn
+
       - name: Upload SARIF
         if: always()
-        continue-on-error: true # code scanning may be unavailable on private repos
+        continue-on-error: true # code scanning peut être indisponible sur un repo privé
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: strix_runs
