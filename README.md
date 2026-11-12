@@ -286,3 +286,5 @@ and the translation guide are in place.
 <p align="center">
   <sub>GitQuest: learn Git by seeing it. Progress stored only on your device.</sub>
 </p>
+
+<!-- test des checks de sécurité -->
