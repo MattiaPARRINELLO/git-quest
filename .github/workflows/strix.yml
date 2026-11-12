@@ -1,7 +1,8 @@
 name: Strix
 
-# Strix ne tourne pas sur chaque PR : c'est un agent, un run prend une dizaine
-# de minutes. Il est déclenché à la demande, ou une fois par semaine sur main.
+# Strix est un agent : un run prend une dizaine de minutes. Il ne tourne donc
+# pas sur chaque PR, mais une fois toutes les deux semaines sur la branche par
+# défaut, et à la demande.
 on:
   workflow_dispatch:
     inputs:
@@ -19,14 +20,14 @@ on:
         type: string
         default: ""
   schedule:
-    # tous les lundis à 04:00 UTC
-    - cron: "0 4 * * 1"
+    # tous les dimanches 19:00 UTC (20:00 ou 21:00 heure de Paris) ;
+    # le job ne tourne qu'une semaine sur deux, voir l'étape "Biweekly gate"
+    - cron: "0 19 * * 0"
 
 permissions:
   contents: read
   security-events: write
 
-# un seul scan à la fois : les runs périodiques ne doivent pas se chevaucher
 concurrency:
   group: strix-${{ github.ref }}
   cancel-in-progress: false
@@ -37,17 +38,37 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
+      - name: Biweekly gate
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # numéro de semaine ISO : on ne scanne que les semaines paires
+          week=$(date -u +%V)
+          if [ $((10#$week % 2)) -eq 0 ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Semaine $week : scan bihebdomadaire."
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Semaine $week impaire : pas de scan cette semaine."
+          fi
+
       - name: Checkout
+        if: steps.gate.outputs.run == 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Install Strix
+        if: steps.gate.outputs.run == 'true'
         run: |
           curl -sSL https://strix.ai/install | bash
           echo "$HOME/.strix/bin" >> "$GITHUB_PATH"
 
       - name: Scan
+        if: steps.gate.outputs.run == 'true'
         env:
           STRIX_LLM: openai/deepseek-v4.1-flash
           STRIX_API_TYPE: chat_completions
@@ -74,7 +95,7 @@ jobs:
 
       # Un run coupé au budget sort en 0 mais laisse run.json à "stopped".
       - name: Fail unless the scan completed
-        if: always()
+        if: always() && steps.gate.outputs.run == 'true'
         run: |
           run_json=$(ls -t strix_runs/*/run.json 2>/dev/null | head -1)
           if [ -z "$run_json" ]; then
@@ -88,7 +109,7 @@ jobs:
           fi
 
       - name: Upload findings
-        if: always()
+        if: always() && steps.gate.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: strix-findings
@@ -96,7 +117,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload SARIF
-        if: always()
+        if: always() && steps.gate.outputs.run == 'true'
         continue-on-error: true # code scanning peut être indisponible sur un repo privé
         uses: github/codeql-action/upload-sarif@v3
         with:
