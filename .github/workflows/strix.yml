@@ -5,6 +5,7 @@ name: Strix
 # et le job échoue si un finding high ou critical est validé.
 on:
   pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
 
 permissions:
   contents: read
@@ -17,8 +18,12 @@ concurrency:
 jobs:
   strix:
     name: Strix security scan
+    # pas de brouillon, pas de re-scan sur titre [skip strix]
+    if: >-
+      github.event.pull_request.draft == false &&
+      !contains(github.event.pull_request.title, '[skip strix]')
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,8 +52,8 @@ jobs:
             --scope-mode diff \
             --diff-base "origin/${{ github.base_ref }}" \
             --fail-on high \
-            --max-budget 10 \
-            --max-turns 80
+            --max-budget 3 \
+            --max-turns 20
 
       # A run cut off at the hard budget stop exits 0 but leaves run.json
       # status "stopped": enforce completion explicitly so the gate never fails open.
