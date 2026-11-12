@@ -1,0 +1,75 @@
+name: Strix
+
+# Scan de sécurité diff-scoped sur chaque pull request.
+# Seuls les fichiers modifiés par la PR sont analysés (mode quick),
+# et le job échoue si un finding high ou critical est validé.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: strix-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  strix:
+    name: Strix security scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # required for diff-scope resolution
+          fetch-depth: 0
+
+      - name: Install Strix
+        run: |
+          curl -sSL https://strix.ai/install | bash
+          echo "$HOME/.strix/bin" >> "$GITHUB_PATH"
+
+      - name: Scan changed files
+        env:
+          STRIX_LLM: openai/deepseek-v4.1-flash
+          STRIX_API_TYPE: chat_completions
+          STRIX_CACHE_BLOCK_TOKENS: "64"
+          OPENAI_BASE_URL: https://opencode.ai/inference/go/openai/v1
+          OPENAI_API_KEY: ${{ secrets.STRIX_API_KEY }}
+          LLM_EXTRA_HEADERS: '{"User-Agent":"opencode/1.18.31","x-opencode-client":"cli","x-opencode-session":"00000000-0000-4000-8000-000000000000"}'
+        run: |
+          set -o pipefail
+          git fetch --no-tags origin "${{ github.base_ref }}"
+          strix -n -t ./ \
+            --scan-mode quick \
+            --scope-mode diff \
+            --diff-base "origin/${{ github.base_ref }}" \
+            --fail-on high \
+            --max-budget 10 \
+            --max-turns 80
+
+      # A run cut off at the hard budget stop exits 0 but leaves run.json
+      # status "stopped": enforce completion explicitly so the gate never fails open.
+      - name: Fail unless the scan completed
+        if: always()
+        run: |
+          run_json=$(ls -t strix_runs/*/run.json 2>/dev/null | head -1)
+          if [ -z "$run_json" ]; then
+            echo "::error title=Strix::No run.json produced, the scan did not run"
+            exit 1
+          fi
+          status=$(jq -r .status "$run_json")
+          if [ "$status" != "completed" ]; then
+            echo "::error title=Strix::Run status is '$status', the scan did not complete (raise --max-budget)"
+            exit 1
+          fi
+
+      - name: Upload SARIF
+        if: always()
+        continue-on-error: true # code scanning may be unavailable on private repos
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: strix_runs
+          category: strix
