@@ -1,8 +1,8 @@
 name: Strix
 
-# Strix est un agent : un run prend une dizaine de minutes. Il ne tourne donc
-# pas sur chaque PR, mais une fois toutes les deux semaines sur la branche par
-# défaut, et à la demande.
+# Strix est un agent : un run prend une dizaine de minutes. Il ne tourne pas
+# sur chaque PR et plus automatiquement : lancement uniquement à la demande
+# (workflow_dispatch).
 on:
   workflow_dispatch:
     inputs:
@@ -19,11 +19,6 @@ on:
         description: Instruction ciblée, par exemple "Focus on IDOR et XSS" (optionnel)
         type: string
         default: ""
-  schedule:
-    # tous les dimanches 19:00 UTC (20:00 ou 21:00 heure de Paris) ;
-    # le job ne tourne qu'une semaine sur deux, voir l'étape "Biweekly gate"
-    - cron: "0 19 * * 0"
-
 permissions:
   contents: read
   security-events: write
